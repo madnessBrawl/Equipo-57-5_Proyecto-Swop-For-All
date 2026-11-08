@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+/* =========================================================
+   VARIABLES GLOBALES DE DISEÑO - SWOP-FOR-ALL
+   ========================================================= */
+:root {
+  --color-cabecera: #f4722b; /* Color del header definido en los requisitos */
+  --color-fondo-principal: #f5e5c1; /* Color de fondo general */
+  --color-boton-accion: #b46032; /* Color de los botones interactivos */
+  --color-texto-blanco: #ffffff; /* Contraste para textos sobre botones/header */
+  --color-texto-oscuro: #333333; /* Color de texto para lectura sobre el fondo claro */
+}
+
+/* Aplicación del fondo a todo el proyecto */
+body {
+  background-color: var(--color-fondo-principal);
+  color: var(--color-texto-oscuro);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fuente clara y adaptable */
+  margin: 0;
+  padding: 0;
+}

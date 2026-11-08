@@ -1,0 +1,28 @@
+<!-- Contenedor principal de autenticación -->
+<div id="contenedor-autenticacion" class="pantalla-centrada">
+  <div class="tarjeta-auth">
+    <div id="encabezado-auth" class="auth-cabecera">
+      <img src="assets/logo.png" alt="Logo Swop-For-All" class="logo-mediano">
+      <h2>¡Te damos la bienvenida a Swop-For-All!</h2>
+    </div>
+
+    <!-- Pestañas de navegación -->
+    <div class="pestañas-auth">
+      <button id="boton-login" class="boton-pestaña activo">Iniciar Sesión</button>
+      <button id="boton-registro" class="boton-pestaña">Registrarse</button>
+    </div>
+
+    <!-- Formulario Orientado a Objetos (Angular se enlaza vía ngModel o ReactiveForms) -->
+    <form id="formulario-auth" class="formulario-datos">
+      <div class="grupo-entrada">
+        <label for="entrada-correo">Correo Electrónico</label>
+        <input type="email" id="entrada-correo" class="campo-texto" placeholder="Escribe tu correo">
+      </div>
+      <div class="grupo-entrada">
+        <label for="entrada-clave">Contraseña</label>
+        <input type="password" id="entrada-clave" class="campo-texto" placeholder="Escribe tu contraseña">
+      </div>
+      <button type="submit" id="boton-ingresar" class="boton-primario">Ingresar</button>
+    </form>
+  </div>
+</div>

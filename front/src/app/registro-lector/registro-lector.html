@@ -1,0 +1,31 @@
+<!-- Se asume que el header de la Interfaz 2 ya está renderizado arriba (App Shell) -->
+<main id="contenido-registro" class="area-trabajo">
+  <div class="tarjeta-formulario">
+    <h2>Completa tu Perfil de Lector</h2>
+    <p>Para intercambiar, verifica tus datos. Servicio exclusivo en Venezuela.</p>
+
+    <form id="formulario-perfil" class="formulario-datos">
+      <div class="grupo-entrada">
+        <label for="entrada-nombres">Nombres Completos</label>
+        <input type="text" id="entrada-nombres" class="campo-texto">
+      </div>
+      
+      <div class="grupo-entrada">
+        <label for="selector-estado">Estado (Venezuela)</label>
+        <select id="selector-estado" class="campo-texto">
+          <option value="Distrito Capital">Distrito Capital</option>
+          <option value="Miranda">Miranda</option>
+          <option value="Zulia">Zulia</option>
+          <!-- Resto de estados... -->
+        </select>
+      </div>
+
+      <div class="grupo-entrada">
+        <label for="entrada-gustos">Géneros Literarios Favoritos</label>
+        <input type="text" id="entrada-gustos" class="campo-texto" placeholder="Ej: Ciencia Ficción, Terror">
+      </div>
+
+      <button type="submit" id="boton-guardar-perfil" class="boton-primario">Guardar Perfil</button>
+    </form>
+  </div>
+</main>
