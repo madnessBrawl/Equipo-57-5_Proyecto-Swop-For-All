@@ -1,0 +1,42 @@
+<header id="cabecera-principal" class="cabecera-naranja">
+  <div class="contenedor-izquierdo">
+    <!-- Mantenemos el logo que sí carga correctamente -->
+    <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-pequeño">
+    <h1 id="titulo-sistema" class="titulo-blanco">Swop-For-All</h1>
+  </div>
+  
+  <!-- Traemos los botones funcionales -->
+  @if (mostrarMenu) {
+    <nav id="navegacion-principal" class="contenedor-derecho">
+      <button id="btn-deseados" class="boton-icono">
+        <img src="/imagenes/lista-libros-deseados-logo.png" alt="Deseados" class="icono-nav">
+        <span class="texto-icono">Libros deseados</span>
+      </button>
+      
+      <button id="btn-inventario" class="boton-icono">
+        <img src="/imagenes/Inventario-logo.png" alt="Inventario" class="icono-nav">
+        <span class="texto-icono">Inventario</span>
+      </button>
+      
+      <button id="btn-comunidad" class="boton-icono">
+        <img src="/imagenes/comunidad-logo.png" alt="Comunidad" class="icono-nav">
+        <span class="texto-icono">Comunidad</span>
+      </button>
+      
+      <button id="btn-intercambio" class="boton-icono">
+        <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
+        <span class="texto-icono">Intercambiar</span>
+      </button>
+      
+      <button id="btn-perfil" class="boton-icono">
+        <img src="/imagenes/Perfil-logo.png" alt="Perfil" class="icono-nav">
+        <span class="texto-icono">Perfil</span>
+      </button>
+      
+      <button id="btn-cerrar-sesion" class="boton-icono">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar Sesión" class="icono-nav">
+        <span class="texto-icono">Cerrar sesión</span>
+      </button>
+    </nav>
+  }
+</header>

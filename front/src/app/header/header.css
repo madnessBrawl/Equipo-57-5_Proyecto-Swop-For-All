@@ -1,0 +1,94 @@
+.barra-superior {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logo {
+  height: 60px; /* Ajusta este valor según el tamaño real de tu logo */
+  width: auto;
+}
+
+/* Cabecera naranja según requisitos */
+.cabecera-naranja {
+  background-color: var(--color-cabecera);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Alineación de logo y título */
+.contenedor-izquierdo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.titulo-blanco {
+  color: var(--color-texto-blanco);
+  margin: 0;
+  font-size: 24px;
+}
+
+/* Agrupación de la botonera derecha */
+.contenedor-derecho {
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilo de los botones del menú usando la paleta */
+.boton-cabecera {
+  background-color: var(--color-boton-accion);
+  color: var(--color-texto-blanco);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.boton-cabecera:hover {
+  opacity: 0.8;
+}
+
+/* Contenedor del botón: elimina el cuadro gris y alinea en columna */
+.boton-icono {
+  background-color: transparent; /* Quita el fondo gris/blanco */
+  border: none;                  /* Quita el borde del cuadro */
+  outline: none;                 
+  cursor: pointer;
+  padding: 5px 10px;
+  
+  /* Flexbox para poner la imagen arriba y el texto abajo */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; /* Espacio entre el icono y el texto */
+}
+
+/* Imagen del icono: aumentada de tamaño */
+.icono-nav {
+  height: 55px; /* Aumentamos de 40px a 55px */
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+.boton-icono:hover .icono-nav {
+  transform: scale(1.1);
+}
+
+/* Estilo del texto debajo del icono */
+.texto-icono {
+  color: white; /* Color blanco para contrastar con la cabecera naranja */
+  font-size: 14px;
+  font-family: sans-serif;
+  font-weight: 500;
+}
