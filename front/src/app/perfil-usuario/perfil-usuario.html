@@ -1,55 +1,76 @@
 
-<div id="bloque-registro" class="contenedor-perfil">
-  
-  <h2 id="titulo-seccion-perfil">Crear Cuenta en Swop-For-All</h2>
-  <p class="descripcion-seccion">Regístrate para empezar a intercambiar tus libros con la comunidad.</p>
+<div class="contenedor-principal">
+  <!-- Títulos de bienvenida -->
+  <div class="encabezado-bienvenida">
+    <h1 class="titulo-grande">¡Bienvenido a Swop For All!</h1>
+    <h2 class="subtitulo-medio">Tu página de intercambios</h2>
+  </div>
 
-  
-  <form id="formulario-registro-usuario" (ngSubmit)="procesarRegistroNuevo()">
+  <!-- Card principal con bordes redondeados -->
+  <div class="tarjeta-auth">
     
-    <div class="grupo-entrada">
-      <label for="campo-usuario-login">Nombre de Usuario (Alias):</label>
-      <input type="text" id="campo-usuario-login" name="nombreUsuario" [(ngModel)]="datosRegistro.usuario" required placeholder="Ej: gabriel_lector">
+    <!-- Sistema de Pestañas (Tabs) -->
+    <div class="tabs">
+      <button class="tab-btn" [class.activo]="modoActivo === 'login'" (click)="cambiarModo('login')">
+        Iniciar Sesión
+      </button>
+      <button class="tab-btn" [class.activo]="modoActivo === 'registro'" (click)="cambiarModo('registro')">
+        Crear perfil
+      </button>
     </div>
 
-    <div class="grupo-entrada">
-      <label for="campo-nombre">Nombre:</label>
-      <input type="text" id="campo-nombre" name="primerNombre" [(ngModel)]="datosRegistro.nombre" required placeholder="Ej: Gabriel">
-    </div>
+    <!-- Formulario: Iniciar Sesión -->
+    <form *ngIf="modoActivo === 'login'" class="formulario" (ngSubmit)="iniciarSesion()">
+      <div class="grupo-entrada">
+        <label>USUARIO</label>
+        <input type="text" name="usuarioLogin" [(ngModel)]="datosLogin.usuario" placeholder="Escribe tu nombre de usuario">
+      </div>
+      <div class="grupo-entrada">
+        <label>CONTRASEÑA</label>
+        <input type="password" name="claveLogin" [(ngModel)]="datosLogin.clave" placeholder="Escribe tu contraseña">
+      </div>
+      <button type="submit" class="boton-confirmacion">Ingresar</button>
+    </form>
 
-    <div class="grupo-entrada">
-      <label for="campo-apellido">Apellido:</label>
-      <input type="text" id="campo-apellido" name="primerApellido" [(ngModel)]="datosRegistro.apellido" required placeholder="Ej: Alfonso">
-    </div>
-
-    <div class="grupo-entrada">
-      <label for="campo-genero-biologico">Género:</label>
-      <select id="campo-genero-biologico" name="generoBiologico" [(ngModel)]="datosRegistro.genero" required>
-        <option value="" disabled selected>Selecciona tu género</option>
-        <option value="Hombre">Hombre</option>
-        <option value="Mujer">Mujer</option>
-      </select>
-    </div>
-
-    <div class="grupo-entrada">
-      <label for="campo-correo-ins">Correo Electrónico:</label>
-      <input type="email" id="campo-correo-ins" name="correoElectronico" [(ngModel)]="datosRegistro.correo" required placeholder="tu@correo.com">
-    </div>
-
-    <div class="grupo-entrada">
-      <label for="campo-clave-ins">Contraseña:</label>
-      <input type="password" id="campo-clave-ins" name="contrasenia" [(ngModel)]="datosRegistro.clave" required placeholder="Mínimo 6 caracteres">
-    </div>
-
-    <div class="grupo-entrada">
-      <label for="campo-generos-favoritos">Géneros Literarios Favoritos:</label>
-      <input type="text" id="campo-generos-favoritos" name="generosFavoritos" [(ngModel)]="datosRegistro.generosFavoritos" placeholder="Ej: Novela, Ciencia Ficción, Terror">
-    </div>
-
-    <div id="seccion-acciones-registro" class="botones-alineados">
-      <button type="submit" id="boton-registrar-usuario" class="boton-guardar">Registrar mi Cuenta</button>
-    </div>
-
-  </form>
-
+    <!-- Formulario: Crear perfil -->
+    <form *ngIf="modoActivo === 'registro'" class="formulario" (ngSubmit)="procesarRegistroNuevo()">
+      <div class="grupo-entrada">
+        <label>NOMBRE DE USUARIO</label>
+        <input type="text" name="usuarioReg" [(ngModel)]="datosRegistro.usuario" placeholder="Ej: gabriel_lector">
+      </div>
+      <div class="grupo-entrada">
+        <label>NOMBRE</label>
+        <input type="text" name="nombreReg" [(ngModel)]="datosRegistro.nombre" placeholder="Ej: Gabriel">
+      </div>
+      <div class="grupo-entrada">
+        <label>APELLIDO</label>
+        <input type="text" name="apellidoReg" [(ngModel)]="datosRegistro.apellido" placeholder="Ej: Alfonso">
+      </div>
+      <div class="grupo-entrada">
+        <label>CORREO ELECTRÓNICO</label>
+        <input type="email" name="correoReg" [(ngModel)]="datosRegistro.correo" placeholder="tu@gmail.com">
+      </div>
+      <div class="grupo-entrada">
+        <label>CONTRASEÑA</label>
+        <input type="password" name="claveReg" [(ngModel)]="datosRegistro.clave" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="grupo-entrada">
+        <label>GÉNERO</label>
+        <div class="radio-grupo">
+          <label class="radio-label">
+            <input type="radio" name="generoReg" value="Hombre" [(ngModel)]="datosRegistro.genero"> Hombre
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="generoReg" value="Mujer" [(ngModel)]="datosRegistro.genero"> Mujer
+          </label>
+        </div>
+      </div>
+      <div class="grupo-entrada">
+        <label>GÉNEROS FAVORITOS</label>
+        <input type="text" name="generosReg" [(ngModel)]="datosRegistro.generosFavoritos" placeholder="Ej: Novela, Ciencia Ficción, Terror">
+      </div>
+      
+      <button type="submit" class="boton-confirmacion">Crear</button>
+    </form>
+  </div>
 </div>

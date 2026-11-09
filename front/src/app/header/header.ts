@@ -18,5 +18,10 @@ export class HeaderComponent{
         this.mostrarMenu = event.url !== '/';
       }
     });
+  
+  }
+  cerrarSesion(): void {
+    localStorage.removeItem('usuarioLogueado'); 
+    this.router.navigate(['/']); 
   }
 }
