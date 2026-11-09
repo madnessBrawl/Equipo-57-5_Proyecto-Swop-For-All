@@ -1,0 +1,82 @@
+.contenedor-perfil {
+  background-color: #ffffff !important; 
+  max-width: 550px; 
+  margin: 40px auto; 
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px #00000026; 
+}
+
+#titulo-seccion-perfil {
+  color: #2b2b2b !important; 
+  margin-top: 0;
+  border-bottom: 2px solid #f4722b; 
+  padding-bottom: 10px;
+}
+
+.descripcion-seccion {
+  font-size: 0.95rem;
+  color: #07b3c3 !important; 
+}
+
+.bloque-info {
+  background-color: #f5e5c1 !important; 
+  color: #2b2b2b !important;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.etiqueta-reputacion {
+  font-weight: bold;
+}
+
+.reputacion-estrellas {
+  color: #b46032 !important; 
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Parte del formulario */
+.grupo-entrada {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.grupo-entrada label {
+  color: #2b2b2b !important; 
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.grupo-entrada input {
+  padding: 10px 14px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #2b2b2b !important; 
+  background-color: #ffffff !important; 
+}
+
+/* Boton de envio */
+.boton-guardar {
+  background-color: #b46032 !important; 
+  color: #ffffff !important; 
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%; 
+  transition: background-color 0.2s;
+}
+
+.boton-guardar:hover {
+  background-color: #944d25 !important; 
+}
