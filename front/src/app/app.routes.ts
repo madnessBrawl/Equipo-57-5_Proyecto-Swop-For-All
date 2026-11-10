@@ -6,9 +6,10 @@ import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputa
 import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion'; // HU Calificar lector o intercambio
 import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
 import { CrearComunidadComponent } from './comunidad/crear-comunidad';  // Importa el componente
+import { ModificarOfertaComponent } from './modificar-oferta/modificar-oferta.component';
 
 // 1. Agregamos la importación que faltaba
-import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
+//import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
 
 export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
@@ -16,7 +17,11 @@ export const routes: Routes = [
   
   // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
-  { path: 'espacio-comunidad', component: EspacioComunidadComponent },
+ // { path: 'espacio-comunidad', component: EspacioComunidadComponent },
+  { 
+    path: 'modificar-oferta', 
+    component: ModificarOfertaComponent 
+  },
 
   // Módulo Reputación
   { 

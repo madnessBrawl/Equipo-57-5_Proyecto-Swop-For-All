@@ -1,0 +1,26 @@
+<div style="padding: 20px; font-family: Arial, sans-serif;">
+  <h2>Modificar Oferta de Intercambio</h2>
+  <p>Libros ofrecidos actualmente:</p>
+  <ul>
+    @for (lib of ofertaActiva.librosOfrecidos; track lib.id) {
+      <li style="margin-bottom: 8px;">
+        <strong>{{ lib.titulo }}</strong> - <i>{{ lib.autor }}</i>
+        <button (click)="retirarLibroPropio(lib.id)" style="margin-left: 10px; background-color: #ff4d4d; color: white; border: none; padding: 3px 8px; cursor: pointer;">Retirar</button>
+      </li>
+    }
+  </ul>
+
+  <hr style="margin: 20px 0;">
+
+  <h3>Tu Inventario Disponible:</h3>
+  <ul>
+    @for (lib of inventarioPersonal; track lib.id) {
+      <li style="margin-bottom: 8px;">
+        {{ lib.titulo }} 
+        <button (click)="agregarLibroPropio(lib)" style="margin-left: 10px; background-color: #4CAF50; color: white; border: none; padding: 3px 8px; cursor: pointer;">Agregar a la oferta</button>
+      </li>
+    }
+  </ul>
+
+  <button (click)="guardarModificacionOferta()" style="margin-top: 20px; padding: 10px 20px; background-color: #008CBA; color: white; border: none; font-weight: bold; cursor: pointer;">Guardar Cambios</button>
+</div>
