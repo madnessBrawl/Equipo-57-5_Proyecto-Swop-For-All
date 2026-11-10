@@ -57,28 +57,36 @@ test('Confidencialidad: las reseñas no exponen datos privados', () => {
   const { bd, ctrl } = preparar();
   ctrl.calificar(datos(), 'ana');
   bd.tablas.Calificaciones[0].clave = 'secreto'; // Aunque el registro tuviera un campo extra...
-  const { resenas } = ctrl.consultarResenas('beto');
+  const { resenas } = ctrl.consultarResenas('beto', 'todas', 'beto');
   assert.strictEqual(resenas.length, 1);
   assert.strictEqual('clave' in resenas[0], false); // ...la consulta no lo devuelve
 });
 
+test('Confidencialidad: un usuario no puede consultar las reseñas de otro', () => {
+  const { ctrl } = preparar();
+  ctrl.calificar(datos(), 'ana');
+  assert.throws(() => ctrl.consultarResenas('beto', 'todas', 'ana'), /Solo puede consultar/);
+  assert.throws(() => ctrl.consultarResenasEnviadas('ana', 'todas', 'beto'), /Solo puede consultar/);
+  assert.throws(() => ctrl.consultarResenas('beto', 'todas', null), /iniciar sesión/);
+});
+
 test('Consultar reseñas: promedio, filtro y caso sin reseñas', () => {
   const { ctrl } = preparar();
-  assert.strictEqual(ctrl.consultarResenas('beto').promedio, null);
-  assert.strictEqual(ctrl.consultarResenas('beto').total, 0);
+  assert.strictEqual(ctrl.consultarResenas('beto', 'todas', 'beto').promedio, null);
+  assert.strictEqual(ctrl.consultarResenas('beto', 'todas', 'beto').total, 0);
   ctrl.calificar(datos({ puntuacion: 4 }), 'ana');
   ctrl.calificar(datos({ tipo: 'intercambio', puntuacion: 2 }), 'ana');
-  assert.strictEqual(ctrl.consultarResenas('beto').total, 2);
-  assert.strictEqual(ctrl.consultarResenas('beto', 'lector').total, 1);
-  assert.strictEqual(ctrl.consultarResenas('beto').promedio, 4); // Solo cuenta el tipo 'lector'
+  assert.strictEqual(ctrl.consultarResenas('beto', 'todas', 'beto').total, 2);
+  assert.strictEqual(ctrl.consultarResenas('beto', 'lector', 'beto').total, 1);
+  assert.strictEqual(ctrl.consultarResenas('beto', 'todas', 'beto').promedio, 4); // Solo cuenta el tipo 'lector'
 });
 
 test('Reseñas enviadas: se separan de las recibidas', () => {
   const { ctrl } = preparar();
   ctrl.calificar(datos(), 'ana');
-  assert.strictEqual(ctrl.consultarResenasEnviadas('ana').total, 1);
-  assert.strictEqual(ctrl.consultarResenasEnviadas('beto').total, 0);
-  assert.strictEqual(ctrl.consultarResenas('ana').total, 0);
+  assert.strictEqual(ctrl.consultarResenasEnviadas('ana', 'todas', 'ana').total, 1);
+  assert.strictEqual(ctrl.consultarResenasEnviadas('beto', 'todas', 'beto').total, 0);
+  assert.strictEqual(ctrl.consultarResenas('ana', 'todas', 'ana').total, 0);
 });
 
 test('Operabilidad: todo rechazo trae un mensaje claro', () => {

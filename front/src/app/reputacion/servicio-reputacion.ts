@@ -153,13 +153,6 @@ export class ServicioReputacion {
     return Math.round(promedio * 10) / 10;
   }
 
-  // Lista los lectores que se pueden consultar (registrados + los que ya recibieron reseñas)
-  public listarLectores(): string[] {
-    const registrados = this.leerLista<{ usuario: string }>(this.CLAVE_USUARIOS).map(u => u.usuario);
-    const calificados = this.leerCalificaciones().map(c => c.evaluado);
-    return Array.from(new Set([...registrados, ...calificados])).sort();
-  }
-
   /* =========================================================
      6. MÉTODOS PRIVADOS DE ALMACENAMIENTO (Fiabilidad)
      ========================================================= */

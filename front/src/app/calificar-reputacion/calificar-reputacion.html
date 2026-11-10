@@ -42,12 +42,12 @@
 
         <!-- ---------- Lista de intercambios finalizados ---------- -->
         <div class="grupo-entrada">
-          <label for="lista-intercambios">Intercambio finalizado</label>
+          <label for="lista-intercambios">{{ tituloLista }}</label>
           <select id="lista-intercambios" class="campo-texto" name="intercambio"
                   [ngModel]="idIntercambioSeleccionado" (ngModelChange)="alCambiarIntercambio($event)">
-            <option value="">-- Seleccione un intercambio --</option>
+            <option value="">{{ tipoSeleccionado === 'lector' ? '-- Seleccione un lector --' : '-- Seleccione un intercambio --' }}</option>
             @for (i of intercambios; track i.id) {
-              <option [value]="i.id">{{ i.libroOfrecido }} ⇄ {{ i.libroSolicitado }}</option>
+              <option [value]="i.id">{{ etiquetaOpcion(i) }}</option>
             }
           </select>
         </div>
@@ -64,12 +64,12 @@
           @if (paso === 'formulario') {
             <div class="grupo-entrada">
               <label>Puntuación</label>
-              <div id="selector-estrellas" class="selector-estrellas" (mouseleave)="puntuacionHover = 0">
+              <div id="selector-estrellas" class="selector-estrellas">
                 @for (n of estrellasDisponibles; track n) {
                   <button type="button" class="boton-estrella" [attr.aria-label]="'Puntuar ' + n + ' de 5'"
-                          (click)="asignarPuntuacion(n)" (mouseenter)="puntuacionHover = n">
+                          (click)="asignarPuntuacion(n)" (mouseenter)="asignarPuntuacion(n)">
                     <img class="imagen-estrella" alt=""
-                         [src]="n <= (puntuacionHover || puntuacion) ? rutaEstrellaLlena : rutaEstrellaVacia">
+                         [src]="n <= puntuacion ? rutaEstrellaLlena : rutaEstrellaVacia">
                   </button>
                 }
               </div>

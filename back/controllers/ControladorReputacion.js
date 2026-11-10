@@ -60,7 +60,10 @@ class ControladorReputacion {
 
   /* ---------- HU: Consultar reseñas ---------- */
   // filtro: 'todas' | 'lector' | 'intercambio'
-  consultarResenas(lector, filtro = 'todas') {
+  // usuarioSesion: usuario autenticado; solo puede consultar SUS propias reseñas recibidas
+  consultarResenas(lector, filtro = 'todas', usuarioSesion) {
+    if (!usuarioSesion) throw new Error('Debe iniciar sesión para consultar reseñas.');
+    if (usuarioSesion !== lector) throw new Error('Solo puede consultar las reseñas que usted ha recibido.');
     const resenas = this.bd
       .buscar('Calificaciones', c => c.evaluado === lector && (filtro === 'todas' || c.tipo === filtro))
       .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha))
@@ -73,7 +76,9 @@ class ControladorReputacion {
   }
 
   // Reseñas ENVIADAS por un usuario (las que él calificó), más recientes primero
-  consultarResenasEnviadas(evaluador, filtro = 'todas') {
+  consultarResenasEnviadas(evaluador, filtro = 'todas', usuarioSesion) {
+    if (!usuarioSesion) throw new Error('Debe iniciar sesión para consultar reseñas.');
+    if (usuarioSesion !== evaluador) throw new Error('Solo puede consultar las reseñas que usted ha enviado.');
     const resenas = this.bd
       .buscar('Calificaciones', c => c.evaluador === evaluador && (filtro === 'todas' || c.tipo === filtro))
       .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha))

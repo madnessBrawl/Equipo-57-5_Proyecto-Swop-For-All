@@ -7,19 +7,8 @@
       {{ modo === 'recibidas' ? 'Reseñas recibidas' : 'Reseñas enviadas' }}
     </h2>
 
-    <!-- ---------- Selectores: lector (solo recibidas) y tipo de reseña ---------- -->
+    <!-- ---------- Filtro por tipo de reseña (siempre del usuario logueado) ---------- -->
     <div id="barra-filtros" class="barra-filtros">
-      @if (modo === 'recibidas') {
-        <div class="grupo-entrada">
-          <label for="lista-lectores">Lector</label>
-          <select id="lista-lectores" class="campo-texto" name="lector"
-                  [ngModel]="lectorSeleccionado" (ngModelChange)="alCambiarLector($event)">
-            @for (l of lectores; track l) {
-              <option [value]="l">{{ l }}{{ l === usuarioActual ? ' (yo)' : '' }}</option>
-            }
-          </select>
-        </div>
-      }
       <div class="grupo-entrada">
         <label for="lista-filtro">Tipo de reseña</label>
         <select id="lista-filtro" class="campo-texto" name="filtro"
@@ -45,9 +34,7 @@
           </div>
           <span class="texto-total">Reputación como lector</span>
         } @else {
-          <span id="texto-sin-reputacion" class="texto-total">
-            {{ esMiPerfil ? 'Aún no ha recibido calificaciones como lector.' : 'Este lector aún no tiene calificaciones.' }}
-          </span>
+          <span id="texto-sin-reputacion" class="texto-total">Aún no ha recibido calificaciones como lector.</span>
         }
       } @else {
         <!-- Enviadas: cuántas reseñas ha dejado el usuario -->

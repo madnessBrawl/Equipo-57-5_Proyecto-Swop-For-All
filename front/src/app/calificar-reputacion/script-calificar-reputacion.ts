@@ -44,7 +44,6 @@ export class CalificarReputacionComponent implements OnInit {
   idIntercambioSeleccionado: string = '';              // Intercambio elegido en la lista
   yaCalificado: boolean = false;                       // true si ya calificó lo elegido
   puntuacion: number = 0;                              // Estrellas elegidas (0 = ninguna)
-  puntuacionHover: number = 0;                         // Estrellas resaltadas al pasar el mouse
   textoComentario: string = '';                        // Texto del comentario (opcional)
   paso: 'formulario' | 'confirmacion' = 'formulario';  // Paso actual del proceso
   completada: boolean = false;                         // true cuando la calificación ya se guardó
@@ -113,6 +112,19 @@ export class CalificarReputacionComponent implements OnInit {
     return this.intercambios.find(i => i.id === this.idIntercambioSeleccionado);
   }
 
+  // Título del campo de selección según lo que se califica
+  get tituloLista(): string {
+    return this.tipoSeleccionado === 'lector' ? 'Lector a calificar' : 'Intercambio a calificar';
+  }
+
+  // Texto de cada opción: en "lector" va primero el usuario y entre paréntesis el intercambio;
+  // en "intercambio" va primero el intercambio y entre paréntesis el usuario
+  etiquetaOpcion(i: Intercambio): string {
+    const lector = i.contraparteDe(this.usuarioActual!) ?? '';
+    const libros = `${i.libroOfrecido} ⇄ ${i.libroSolicitado}`;
+    return this.tipoSeleccionado === 'lector' ? `${lector} (${libros})` : `${libros} (${lector})`;
+  }
+
   // Lector que será calificado (la otra persona del intercambio)
   get lectorEvaluado(): string {
     return this.intercambioActual?.contraparteDe(this.usuarioActual!) ?? '';
@@ -121,7 +133,8 @@ export class CalificarReputacionComponent implements OnInit {
   /* =========================================================
      5. FORMULARIO: puntuación y comentario
      ========================================================= */
-  // Registra las estrellas elegidas
+  // Registra las estrellas: se llama al pasar el mouse por una estrella (mouseenter) y al hacer clic.
+  // La puntuación siempre es la de la ÚLTIMA estrella sobre la que estuvo el mouse (se puede subir y bajar).
   asignarPuntuacion(estrellas: number): void {
     this.puntuacion = estrellas;
   }
