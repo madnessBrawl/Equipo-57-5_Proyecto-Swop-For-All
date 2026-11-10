@@ -18,15 +18,14 @@
         <span class="texto-icono">Inventario</span>
       </button>
       
-      <!-- Contenedor relativo para posicionar el menú desplegable -->
+      <!-- Contenedor de Comunidad (Independiente) -->
       <div class="contenedor-dropdown" style="position: relative; display: inline-block;">
-        
         <button id="btn-comunidad" class="boton-icono" (click)="toggleMenuComunidad()">
           <img src="/imagenes/comunidad-logo.png" alt="Comunidad" class="icono-nav">
           <span class="texto-icono">Comunidad</span>
         </button>
 
-        <!-- Menú desplegable (Dropdown) -->
+        <!-- Menú desplegable (Dropdown) de Comunidad -->
         @if (mostrarMenuComunidad) {
           <div class="dropdown-menu">
             <button class="dropdown-item" (click)="navegarA('/ver-comunidades')">Ver comunidades</button>
@@ -35,13 +34,20 @@
           </div>
         }
       </div>
+
+      <!-- Botón de Catálogo con la misma estructura de diseño (boton-icono) -->
+      <button routerLink="/catalogo" id="btn-catalogo" class="boton-icono">
+        <div class="icono-nav" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">📚</div>
+        <span class="texto-icono">Catálogo</span>
+      </button>
       
-      <button id="btn-intercambio" class="boton-icono">
+      <!-- Botón de Intercambiar vinculado directamente a tu ruta de modificar oferta -->
+      <button routerLink="/modificar-oferta" id="btn-intercambio" class="boton-icono">
         <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
         <span class="texto-icono">Intercambiar</span>
       </button>
       
-      <!-- Reputación: abre el panel con calificar, reseñas recibidas y reseñas enviadas -->
+      <!-- Reputación -->
       <button id="btn-reputacion" class="boton-icono" (click)="irAReputacion()">
         <img src="/imagenes/calificacion-estrella-llena.png" alt="Reputación" class="icono-nav">
         <span class="texto-icono">Reputación</span>

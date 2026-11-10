@@ -7,9 +7,10 @@ import { CalificarReputacionComponent } from './calificar-reputacion/script-cali
 import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
 import { CrearComunidadComponent } from './comunidad/crear-comunidad';  // Importa el componente
 import { ModificarOfertaComponent } from './modificar-oferta/modificar-oferta.component';
+import { CatalogoLibrosComponent } from './catalogo-libros/catalogo-libros.component';
 
 // 1. Agregamos la importación que faltaba
-//import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
+import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
 
 export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
@@ -17,8 +18,10 @@ export const routes: Routes = [
   
   // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
- // { path: 'espacio-comunidad', component: EspacioComunidadComponent },
-  { 
+ { path: 'espacio-comunidad', component: EspacioComunidadComponent },
+  { path: 'catalogo', 
+    component: CatalogoLibrosComponent },
+ { 
     path: 'modificar-oferta', 
     component: ModificarOfertaComponent 
   },
