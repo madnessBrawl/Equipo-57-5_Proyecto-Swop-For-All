@@ -5,15 +5,10 @@ import { DashboardComponent } from './dashboard/script-dashboard'; // Verifica e
 import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputacion'; // Contenedor del módulo Reputación
 import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion'; // HU Calificar lector o intercambio
 import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
-<<<<<<< HEAD
 import { CrearComunidadComponent } from './comunidad/crear-comunidad';  // Importa el componente
 
 // 1. Agregamos la importación que faltaba
 import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
-=======
-import { EnviarOfertaComponent } from './enviar-oferta/script-enviar-oferta';
-import { ExplorarCatalogoComponent } from './explorar-catalogo/script-explorar-catalogo';
->>>>>>> b99bfba72a9dad85da0ba43d7373840ad8ac1cdc
 
 export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
@@ -37,13 +32,5 @@ export const routes: Routes = [
   
   // Rutas anteriores (redirects)
   { path: 'calificar', redirectTo: 'reputacion/calificar', pathMatch: 'full' },
-<<<<<<< HEAD
   { path: 'resenas', redirectTo: 'reputacion/recibidas', pathMatch: 'full' }
-=======
-  { path: 'resenas', redirectTo: 'reputacion/recibidas', pathMatch: 'full' },
-
-  // { path: 'registro', component: RegistroLectorComponent } // Lo activaremos luego
-  { path: 'enviar-oferta', component: EnviarOfertaComponent },
-  { path: 'catalogo', component: ExplorarCatalogoComponent }
->>>>>>> b99bfba72a9dad85da0ba43d7373840ad8ac1cdc
 ];
