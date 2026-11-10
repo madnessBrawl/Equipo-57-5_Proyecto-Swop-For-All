@@ -18,10 +18,23 @@
         <span class="texto-icono">Inventario</span>
       </button>
       
-      <button id="btn-comunidad" class="boton-icono">
-        <img src="/imagenes/comunidad-logo.png" alt="Comunidad" class="icono-nav">
-        <span class="texto-icono">Comunidad</span>
-      </button>
+      <!-- Contenedor relativo para posicionar el menú desplegable -->
+      <div class="contenedor-dropdown" style="position: relative; display: inline-block;">
+        
+        <button id="btn-comunidad" class="boton-icono" (click)="toggleMenuComunidad()">
+          <img src="/imagenes/comunidad-logo.png" alt="Comunidad" class="icono-nav">
+          <span class="texto-icono">Comunidad</span>
+        </button>
+
+        <!-- Menú desplegable (Dropdown) -->
+        @if (mostrarMenuComunidad) {
+          <div class="dropdown-menu">
+            <button class="dropdown-item" (click)="navegarA('/ver-comunidades')">Ver comunidades</button>
+            <button class="dropdown-item" (click)="navegarA('/mi-comunidad')">Mi comunidad</button>
+            <button class="dropdown-item" (click)="verificarLimiteYCrear()">Crear nueva comunidad</button>
+          </div>
+        }
+      </div>
       
       <button id="btn-intercambio" class="boton-icono">
         <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">

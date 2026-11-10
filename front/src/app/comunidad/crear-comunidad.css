@@ -1,0 +1,117 @@
+/* Centrado absoluto en el espacio restante debajo del header */
+.pantalla-centrada {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 80px); /* Ajusta según el alto de tu header */
+  padding: 20px;
+  background-color: #fcebd5; /* Fondo beige de tu app */
+  font-family: inherit; /* Hereda la fuente del resto de la página */
+}
+
+/* Diseño de la Tarjeta (Card) */
+.card-formulario {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid #e3cdae;
+}
+
+.card-formulario h2 {
+  text-align: center;
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 1.8rem;
+}
+
+/* Organización de los inputs (Flexbox en columna) */
+.grupo-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.grupo-form label,
+.label-principal {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #4a4a4a;
+  font-size: 0.95rem;
+}
+
+/* Estilos de campos de texto y selección */
+.grupo-form input[type="text"],
+.grupo-form textarea,
+.grupo-form select {
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+  background-color: #fcfcfc;
+  transition: border-color 0.2s;
+}
+
+.grupo-form input[type="text"]:focus,
+.grupo-form textarea:focus,
+.grupo-form select:focus {
+  border-color: #f4722b; /* Borde naranja al seleccionar */
+  background-color: #fff;
+}
+
+.grupo-form textarea {
+  resize: vertical; /* Permite estirar solo hacia abajo */
+}
+
+/* Botones de Privacidad (Radio) */
+.grupo-form-radio {
+  margin-bottom: 20px;
+}
+
+.opciones-radio {
+  display: flex;
+  gap: 25px;
+  margin-top: 5px;
+}
+
+.opciones-radio label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  cursor: pointer;
+  color: #333;
+}
+
+.opciones-radio input[type="radio"] {
+  transform: scale(1.2);
+  accent-color: #f4722b; /* Color naranja nativo para el radio */
+}
+
+/* Botón principal */
+.btn-confirmar {
+  width: 100%;
+  padding: 14px;
+  background-color: #f4722b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 10px;
+}
+
+.btn-confirmar:hover {
+  background-color: #d95a1a;
+}
+
+.btn-confirmar:active {
+  transform: scale(0.98); /* Pequeño efecto al hacer clic */
+}

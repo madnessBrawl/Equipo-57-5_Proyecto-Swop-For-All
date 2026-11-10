@@ -1,0 +1,31 @@
+<div class="espacio-comunidad-contenedor">
+  <!-- Header exclusivo de la comunidad -->
+  <header id="cabecera-principal" class="cabecera-naranja header-comunidad">
+    <div class="contenedor-izquierdo" style="display: flex; align-items: center; gap: 15px;">
+      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo" class="logo-pequeño" style="height: 50px;">
+      <h1 id="titulo-sistema" class="titulo-blanco" style="margin: 0; font-size: 1.5rem;">Swop-For-All</h1>
+    </div>
+    
+    <nav class="contenedor-derecho">
+      <button id="btn-volver" class="boton-icono boton-transparente" (click)="volverDashboard()">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Exit" class="icono-nav" style="height: 40px;">
+        <span class="texto-icono" style="color: white; font-weight: bold;">Volver</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Cuerpo de la comunidad -->
+  <main class="cuerpo-comunidad">
+    <p class="contador-miembros">Miembros: 1/20 <span class="badge-admin">(Tú - Admin)</span></p>
+    
+    <div class="caja-chat">
+      <div class="mensajes-area">
+        <!-- Aquí irán los mensajes en el futuro -->
+      </div>
+      
+      <div class="input-area">
+        <input type="text" placeholder="Escribe..." class="input-chat">
+      </div>
+    </div>
+  </main>
+</div>

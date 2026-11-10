@@ -5,25 +5,32 @@ import { DashboardComponent } from './dashboard/script-dashboard'; // Verifica e
 import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputacion'; // Contenedor del módulo Reputación
 import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion'; // HU Calificar lector o intercambio
 import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
+import { CrearComunidadComponent } from './comunidad/crear-comunidad';  // Importa el componente
+
+// 1. Agregamos la importación que faltaba
+import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
 
 export const routes: Routes = [
-    { path: '', component: PerfilUsuarioComponent}, // Ruta por defecto (Inicio de sesión)
-  { path: 'dashboard', component: DashboardComponent }, // Interfaz 2
+  { path: '', component: PerfilUsuarioComponent }, 
+  { path: 'dashboard', component: DashboardComponent }, 
+  
+  // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
+  { path: 'crear-comunidad', component: CrearComunidadComponent },
+  { path: 'espacio-comunidad', component: EspacioComunidadComponent },
 
-  // Módulo Reputación: panel con 3 apartados (rutas hijas dentro de /reputacion)
-  {
+  // Módulo Reputación
+  { 
     path: 'reputacion',
     component: PanelReputacionComponent,
     children: [
-      { path: '', redirectTo: 'calificar', pathMatch: 'full' }, // Apartado por defecto
-      { path: 'calificar', component: CalificarReputacionComponent }, // Calificar lector o intercambio
-      { path: 'recibidas', component: ConsultarResenasComponent, data: { modo: 'recibidas' } }, // Reseñas recibidas
-      { path: 'enviadas', component: ConsultarResenasComponent, data: { modo: 'enviadas' } }    // Reseñas enviadas
+      { path: '', redirectTo: 'calificar', pathMatch: 'full' },
+      { path: 'calificar', component: CalificarReputacionComponent },
+      { path: 'recibidas', component: ConsultarResenasComponent, data: { modo: 'recibidas' } },
+      { path: 'enviadas', component: ConsultarResenasComponent, data: { modo: 'enviadas' } }
     ]
   },
-  // Rutas anteriores: se redirigen al nuevo panel para no romper enlaces viejos
+  
+  // Rutas anteriores (redirects)
   { path: 'calificar', redirectTo: 'reputacion/calificar', pathMatch: 'full' },
-  { path: 'resenas', redirectTo: 'reputacion/recibidas', pathMatch: 'full' },
-
-  // { path: 'registro', component: RegistroLectorComponent } // Lo activaremos luego
+  { path: 'resenas', redirectTo: 'reputacion/recibidas', pathMatch: 'full' }
 ];

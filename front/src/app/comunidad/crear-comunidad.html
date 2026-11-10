@@ -1,0 +1,49 @@
+<div class="pantalla-centrada">
+  <div class="card-formulario">
+    <h2>Crear Nueva Comunidad</h2>
+    
+    <form (ngSubmit)="confirmarCreacion()">
+      <!-- Nombre -->
+      <div class="grupo-form">
+        <label>Nombre de la comunidad:</label>
+        <input type="text" [(ngModel)]="comunidad.nombre" name="nombre" placeholder="Ej: Lectores de Fantasía">
+      </div>
+
+      <!-- Descripción corta -->
+      <div class="grupo-form">
+        <label>Descripción corta (máx 1000 palabras):</label>
+        <textarea [(ngModel)]="comunidad.descripcion" name="descripcion" rows="4"></textarea>
+      </div>
+
+      <!-- Opciones: Privado o Público -->
+      <div class="grupo-form-radio">
+        <label class="label-principal">Privacidad:</label>
+        <div class="opciones-radio">
+          <label><input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="publico"> Público</label>
+          <label><input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="privado"> Privado</label>
+        </div>
+      </div>
+
+      <!-- Opciones: Géneros literarios -->
+      <div class="grupo-form">
+        <label>Género literario:</label>
+        <select [(ngModel)]="comunidad.genero" name="genero">
+          <option value="" disabled selected>Seleccione tu género</option>
+          <option value="terror">Terror</option>
+          <option value="drama">Drama</option>
+          <option value="comedia">Comedia</option>
+          <option value="misterio">Misterio</option>
+          <option value="horror">Horror</option>
+          <option value="fantasia">Fantasía</option>
+          <option value="ciencia-ficcion">Ciencia-ficción</option>
+          <option value="accion">Acción</option>
+          <option value="aventura">Aventura</option>
+          <option value="romance">Romance</option>
+        </select>
+      </div>
+
+      <!-- Botón Confirmar -->
+      <button type="submit" class="btn-confirmar">Confirmar</button>
+    </form>
+  </div>
+</div>

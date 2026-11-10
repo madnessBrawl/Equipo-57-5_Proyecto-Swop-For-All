@@ -1,0 +1,89 @@
+.espacio-comunidad-contenedor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #fcebd5; /* Fondo beige claro similar a la imagen */
+}
+
+/* Ajustes del header */
+.header-comunidad {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px; /* Menos alto, más ancho */
+  background-color: #f4722b; /* Naranja */
+  height: 80px; /* Forzamos el mismo alto del dashboard */
+  box-sizing: border-box;
+}
+
+/* Elimina el fondo gris y el borde del botón */
+.boton-transparente {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 15px;
+}
+
+.boton-transparente:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.cuerpo-comunidad {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.contador-miembros {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.badge-admin {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-left: 10px;
+}
+
+.caja-chat {
+  flex: 1;
+  background-color: #e3cdae;
+  border: 4px solid #cc7a53;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mensajes-area {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.input-area {
+  background-color: #a89481;
+  padding: 10px;
+  display: flex;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.input-chat {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  background-color: #ccc;
+  font-size: 1rem;
+  outline: none;
+}
