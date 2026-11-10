@@ -38,11 +38,23 @@ export class EnviarOfertaComponent {
     { id: 'lib_propio_2', titulo: 'Doña Bárbara', autor: 'Rómulo Gallegos' }
   ];
 
-  public libroSolicitado: any = { 
-    id: 'lib_global_55', 
-    titulo: 'La Vorágine', 
-    propietario: 'carlos_lector' 
-  };
+  public libroSolicitado: any = this.obtenerLibroSeleccionado();
+
+  private obtenerLibroSeleccionado(): any {
+    const libroGuardado = sessionStorage.getItem('libroSolicitado');
+
+    if (libroGuardado) {
+      const libroParseado = JSON.parse(libroGuardado);
+      return libroParseado;
+    }
+    // Valor por defecto por si entran directamente por la URL
+    return { 
+      id: 'lib_global_55', 
+      titulo: 'La Vorágine', 
+      autor: 'José Eustasio Rivera', 
+      propietario: 'carlos_lector' 
+    };
+  }
 
   public libroOfrecidoId: string = '';
   public ofertaEnviada: boolean = false;
