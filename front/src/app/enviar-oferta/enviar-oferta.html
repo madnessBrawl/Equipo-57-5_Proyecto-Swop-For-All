@@ -1,0 +1,67 @@
+<!-- ============ INTERFAZ: Enviar oferta de intercambio (Épica Intercambio) ============ -->
+<main id="contenido-enviar-oferta" class="area-trabajo">
+  <section id="tarjeta-oferta" class="tarjeta-oferta">
+
+    <!-- ---------- Título y descripción ---------- -->
+    <h2 id="titulo-enviar-oferta" class="titulo-seccion">Enviar oferta de intercambio</h2>
+    <p class="texto-ayuda">
+      Elija uno de sus libros disponibles para ofrecérselo a
+      <strong>{{ libroSolicitado.propietario }}</strong> a cambio de
+      <strong>{{ libroSolicitado.titulo }}</strong>.
+    </p>
+
+    <!-- ---------- Mensaje de estado (éxito o error) ---------- -->
+    @if (mensajeTipo) {
+      <div id="mensaje-estado" role="alert" [class]="'mensaje mensaje-' + mensajeTipo">
+        <p class="texto-mensaje">{{ mensajeTexto }}</p>
+        <!-- Acciones del actor después de enviar la oferta -->
+        @if (ofertaEnviada) {
+          <div class="acciones-mensaje">
+            <button type="button" id="boton-ver-intercambios" class="boton-accion" (click)="irAIntercambios()">Ver mis intercambios</button>
+            <button type="button" id="boton-volver" class="boton-secundario" (click)="cancelar()">Volver</button>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!ofertaEnviada) {
+
+      <!-- ---------- Resumen del libro solicitado ---------- -->
+      <div id="resumen-libro-solicitado" class="resumen-libro">
+        <span class="etiqueta-resumen">Libro que usted desea</span>
+        <p class="titulo-libro"><strong>{{ libroSolicitado.titulo }}</strong></p>
+        <p class="texto-secundario">Autor: {{ libroSolicitado.autor }}</p>
+        <p class="texto-secundario">Propietario: {{ libroSolicitado.propietario }}</p>
+      </div>
+
+      <!-- ---------- Selector del libro ofrecido ---------- -->
+      <div class="grupo-entrada">
+        <label for="lista-mis-libros">Seleccione el libro que ofrece a cambio</label>
+        <select id="lista-mis-libros" class="campo-texto" name="libroOfrecido"
+                [(ngModel)]="libroOfrecidoId">
+          <option value="">-- Seleccione un libro de su inventario --</option>
+          @for (libro of misLibrosDisponibles; track libro.id) {
+            <option [value]="libro.id">{{ libro.titulo }} — {{ libro.autor }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- ---------- Resumen de la oferta antes de enviar ---------- -->
+      @if (libroOfrecido) {
+        <div id="resumen-oferta" class="panel-confirmacion">
+          <p class="texto-confirmacion">Resumen de la oferta</p>
+          <p><strong>Usted ofrece:</strong> {{ libroOfrecido.titulo }} — {{ libroOfrecido.autor }}</p>
+          <p><strong>A cambio de:</strong> {{ libroSolicitado.titulo }}</p>
+          <p><strong>Receptor:</strong> {{ libroSolicitado.propietario }}</p>
+        </div>
+      }
+
+      <!-- ---------- Acciones del formulario ---------- -->
+      <div class="acciones-formulario">
+        <button type="button" id="boton-enviar-oferta" class="boton-accion" (click)="enviarOferta()">Enviar oferta</button>
+        <button type="button" id="boton-cancelar" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+      </div>
+    }
+
+  </section>
+</main>
