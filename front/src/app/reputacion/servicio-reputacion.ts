@@ -11,8 +11,8 @@
         -> ServicioReputacion.registrarCalificacion() (reglas de negocio + guardado ÚNICO)
         -> localStorage 'swop_calificaciones'         (simula el Backend/BD por ahora)
         -> ServicioReputacion.actualizarReputacionLector() (recalcula promedio del evaluado)
-   [Consultar] Pantalla (ConsultarResenasComponent)
-        -> ServicioReputacion.obtenerResenas() / calcularPromedio()
+   [Consultar] Pantalla (ConsultarResenasComponent, modo recibidas o enviadas)
+        -> ServicioReputacion.obtenerResenas() / obtenerResenasEnviadas() / calcularPromedio()
         -> localStorage 'swop_calificaciones'
    Cuando exista el Backend: este servicio pasa a llamar por HTTP a
    ControladorReputacion (back/controllers) y los componentes no cambian.
@@ -135,6 +135,13 @@ export class ServicioReputacion {
   public obtenerResenas(lector: string, filtro: FiltroResenas = 'todas'): Calificacion[] {
     return this.leerCalificaciones()
       .filter(c => c.evaluado === lector && (filtro === 'todas' || c.tipo === filtro))
+      .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha));
+  }
+
+  // Lista las reseñas que el lector ENVIÓ a otros (más recientes primero), con filtro opcional
+  public obtenerResenasEnviadas(evaluador: string, filtro: FiltroResenas = 'todas'): Calificacion[] {
+    return this.leerCalificaciones()
+      .filter(c => c.evaluador === evaluador && (filtro === 'todas' || c.tipo === filtro))
       .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha));
   }
 

@@ -20,6 +20,11 @@ export class HeaderComponent{
     });
   
   }
+  // Navega al panel de Reputación (calificar, reseñas recibidas y enviadas)
+  irAReputacion(): void {
+    this.router.navigate(['/reputacion']);
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem('usuarioLogueado'); 
     this.router.navigate(['/']); 

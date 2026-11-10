@@ -58,6 +58,13 @@ describe('ServicioReputacion', () => {
     expect(perfil.reputacion).toBe(3);
   });
 
+  it('Reseñas enviadas: lista lo que el usuario calificó, separado de lo recibido', () => {
+    servicio.registrarCalificacion(crear());
+    expect(servicio.obtenerResenasEnviadas('ana').length).toBe(1);   // Ana envió una
+    expect(servicio.obtenerResenasEnviadas('beto').length).toBe(0);  // Beto no envió ninguna
+    expect(servicio.obtenerResenas('ana').length).toBe(0);           // Ana no recibió ninguna
+  });
+
   it('Operabilidad: todo rechazo devuelve un mensaje claro', () => {
     const resultado = servicio.registrarCalificacion(crear({ puntuacion: 0 }));
     expect(resultado.mensaje.length).toBeGreaterThan(5);

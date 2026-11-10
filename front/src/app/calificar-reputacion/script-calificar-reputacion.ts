@@ -16,7 +16,7 @@
    3. Existe el objeto Comentario (dentro de Calificacion).
    4. Se VALIDA primero y se guarda UNA sola vez (puntuación y comentario juntos).
    5. Antes de registrar se SOLICITA CONFIRMACIÓN al usuario.
-   6. El mensaje de éxito ofrece acciones al actor ("Calificar otro" / "Ver reseñas").
+   6. El mensaje de éxito ofrece acciones al actor ("Calificar otro" / "Ver mis reseñas enviadas").
    7. Los mensajes son texto simple (mensajeTexto), no objetos.
 */
 import { Component, OnInit } from '@angular/core';

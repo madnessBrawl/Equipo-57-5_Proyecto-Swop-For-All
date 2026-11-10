@@ -73,6 +73,14 @@ test('Consultar reseñas: promedio, filtro y caso sin reseñas', () => {
   assert.strictEqual(ctrl.consultarResenas('beto').promedio, 4); // Solo cuenta el tipo 'lector'
 });
 
+test('Reseñas enviadas: se separan de las recibidas', () => {
+  const { ctrl } = preparar();
+  ctrl.calificar(datos(), 'ana');
+  assert.strictEqual(ctrl.consultarResenasEnviadas('ana').total, 1);
+  assert.strictEqual(ctrl.consultarResenasEnviadas('beto').total, 0);
+  assert.strictEqual(ctrl.consultarResenas('ana').total, 0);
+});
+
 test('Operabilidad: todo rechazo trae un mensaje claro', () => {
   const { ctrl } = preparar();
   const casos = [

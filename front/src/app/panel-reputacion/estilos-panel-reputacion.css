@@ -1,0 +1,31 @@
+/* ---------- <section id="panel-reputacion"> : contenedor general ---------- */
+.panel-reputacion {
+  padding-top: 20px;         /* Aire entre el header y las pestañas */
+}
+
+/* ---------- <nav id="pestanas-reputacion"> : barra de pestañas ---------- */
+.pestanas-reputacion {
+  display: flex;             /* Pestañas en fila */
+  justify-content: center;   /* Centradas horizontalmente */
+  gap: 12px;                 /* Espacio entre pestañas */
+  flex-wrap: wrap;           /* Se apilan en pantallas pequeñas */
+  padding: 0 20px;           /* Margen lateral */
+}
+
+/* ---------- <a> : cada pestaña ---------- */
+.pestana-reputacion {
+  background-color: transparent;                /* Sin relleno cuando está inactiva */
+  color: var(--color-boton-accion);             /* Texto del color de botones */
+  border: 2px solid var(--color-boton-accion);  /* Borde del color de botones */
+  padding: 10px 20px;                           /* Tamaño de la pestaña */
+  border-radius: 6px;                           /* Esquinas redondeadas */
+  font-weight: bold;                            /* Texto destacado */
+  text-decoration: none;                        /* Sin subrayado de enlace */
+  cursor: pointer;                              /* Indica que es clicable */
+}
+
+/* ---------- <a class="activa"> : pestaña seleccionada ---------- */
+.pestana-reputacion.activa {
+  background-color: var(--color-boton-accion);  /* Relleno del color de botones */
+  color: var(--color-texto-blanco);             /* Texto blanco para contraste */
+}

@@ -3,11 +3,9 @@
   Función: Orquesta la navegación hacia los distintos módulos (epic) del sistema.
 */
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router'; // Permite los enlaces [routerLink] del módulo Reputación
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink], // Enlaces hacia Calificar y Consultar reseñas
   templateUrl: './dashboard.html',
   styleUrls: ['./estilos-dashboard.css']
 })

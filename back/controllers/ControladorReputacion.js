@@ -72,6 +72,18 @@ class ControladorReputacion {
     return { lector, promedio: this.calcularPromedio(lector), total: resenas.length, resenas };
   }
 
+  // Reseñas ENVIADAS por un usuario (las que él calificó), más recientes primero
+  consultarResenasEnviadas(evaluador, filtro = 'todas') {
+    const resenas = this.bd
+      .buscar('Calificaciones', c => c.evaluador === evaluador && (filtro === 'todas' || c.tipo === filtro))
+      .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha))
+      .map(c => ({
+        id: c.id, tipo: c.tipo, evaluador: c.evaluador, evaluado: c.evaluado,
+        puntuacion: c.puntuacion, comentario: c.comentario
+      }));
+    return { evaluador, total: resenas.length, resenas };
+  }
+
   // Promedio de reputación como lector (1 decimal); null si aún no tiene calificaciones
   calcularPromedio(lector) {
     const notas = this.bd.buscar('Calificaciones', c => c.evaluado === lector && c.tipo === 'lector')

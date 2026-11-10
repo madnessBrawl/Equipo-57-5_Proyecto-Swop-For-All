@@ -3,31 +3,3 @@
   padding: 40px;
   text-align: center;
 }
-/* ---------- <section id="seccion-reputacion"> : bloque de accesos del módulo Reputación ---------- */
-.seccion-reputacion {
-  max-width: 600px;          /* Ancho máximo del bloque */
-  margin: 0 auto;            /* Centrado horizontal */
-}
-
-/* ---------- <h2> : título del módulo ---------- */
-.titulo-modulo {
-  color: var(--color-boton-accion); /* Color de acento del proyecto */
-}
-
-/* ---------- <div> : contenedor de los accesos ---------- */
-.accesos-modulo {
-  display: flex;             /* Accesos en fila */
-  gap: 15px;                 /* Espacio entre accesos */
-  justify-content: center;   /* Centrados horizontalmente */
-  flex-wrap: wrap;           /* Se apilan en pantallas pequeñas */
-}
-
-/* ---------- <a> : cada acceso ---------- */
-.acceso-modulo {
-  background-color: var(--color-boton-accion); /* Color de botones del proyecto */
-  color: var(--color-texto-blanco);            /* Texto blanco */
-  padding: 14px 22px;                          /* Tamaño del botón */
-  border-radius: 6px;                          /* Esquinas redondeadas */
-  font-weight: bold;                           /* Texto destacado */
-  text-decoration: none;                       /* Sin subrayado de enlace */
-}

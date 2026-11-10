@@ -1,0 +1,13 @@
+<!-- ============ PANEL DE REPUTACIÓN: pestañas + contenido del apartado ============ -->
+<section id="panel-reputacion" class="panel-reputacion">
+
+  <!-- ---------- Pestañas de los 3 apartados ---------- -->
+  <nav id="pestanas-reputacion" class="pestanas-reputacion">
+    <a id="pestana-calificar" class="pestana-reputacion" routerLink="/reputacion/calificar" routerLinkActive="activa">Calificar lector o intercambio</a>
+    <a id="pestana-recibidas" class="pestana-reputacion" routerLink="/reputacion/recibidas" routerLinkActive="activa">Reseñas recibidas</a>
+    <a id="pestana-enviadas" class="pestana-reputacion" routerLink="/reputacion/enviadas" routerLinkActive="activa">Reseñas enviadas</a>
+  </nav>
+
+  <!-- ---------- Aquí se dibuja el apartado elegido ---------- -->
+  <router-outlet></router-outlet>
+</section>
