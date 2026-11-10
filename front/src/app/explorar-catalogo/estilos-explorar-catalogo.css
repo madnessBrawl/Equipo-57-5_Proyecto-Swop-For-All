@@ -1,0 +1,109 @@
+/* ---------- <main id="contenido-explorar-catalogo"> : espacio de trabajo bajo el header ---------- */
+.area-trabajo {
+  padding: 30px 20px;
+}
+
+/* ---------- <section> : tarjeta principal del catálogo ---------- */
+.tarjeta-oferta {
+  background-color: var(--color-texto-blanco);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 30px;
+  border-radius: var(--radio-tarjeta);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------- <h2> : título de la sección ---------- */
+.titulo-seccion {
+  color: var(--color-boton-accion);
+  border-bottom: 2px solid var(--color-cabecera);
+  padding-bottom: 10px;
+  margin: 0 0 10px;
+}
+
+/* ---------- <p> : texto de ayuda ---------- */
+.texto-ayuda {
+  color: var(--color-texto-oscuro);
+  margin: 0 0 20px;
+}
+
+/* ---------- <div> : grupo etiqueta + campo ---------- */
+.grupo-entrada {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.grupo-entrada label {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.campo-texto {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+/* ---------- <div> : ítems de la lista del catálogo ---------- */
+.resumen-libro {
+  background-color: var(--color-fondo-principal);
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 18px;
+}
+
+.etiqueta-resumen {
+  display: inline-block;
+  background-color: var(--color-cabecera);
+  color: var(--color-texto-blanco);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.titulo-libro {
+  margin: 10px 0 4px;
+  font-size: 1.1rem;
+}
+
+.texto-secundario {
+  margin: 0 0 4px;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* ---------- <div> : botones y mensajes de estado ---------- */
+.acciones-formulario {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.boton-accion {
+  background-color: var(--color-boton-accion);
+  color: var(--color-texto-blanco);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mensaje {
+  border-radius: 6px;
+  padding: 12px 15px;
+  margin-bottom: 18px;
+}
+
+.mensaje-error { 
+  background-color: var(--color-error-fondo); 
+  border-left: 5px solid var(--color-error); 
+}
+
+.texto-mensaje {
+  margin: 0;
+}

@@ -5,6 +5,8 @@ import { DashboardComponent } from './dashboard/script-dashboard'; // Verifica e
 import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputacion'; // Contenedor del módulo Reputación
 import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion'; // HU Calificar lector o intercambio
 import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
+import { EnviarOfertaComponent } from './enviar-oferta/script-enviar-oferta';
+import { ExplorarCatalogoComponent } from './explorar-catalogo/script-explorar-catalogo';
 
 export const routes: Routes = [
     { path: '', component: PerfilUsuarioComponent}, // Ruta por defecto (Inicio de sesión)
@@ -26,4 +28,6 @@ export const routes: Routes = [
   { path: 'resenas', redirectTo: 'reputacion/recibidas', pathMatch: 'full' },
 
   // { path: 'registro', component: RegistroLectorComponent } // Lo activaremos luego
+  { path: 'enviar-oferta', component: EnviarOfertaComponent },
+  { path: 'catalogo', component: ExplorarCatalogoComponent }
 ];

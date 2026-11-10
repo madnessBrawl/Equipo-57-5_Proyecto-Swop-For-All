@@ -1,0 +1,45 @@
+<!-- ============ INTERFAZ: Explorar catálogo de intercambio (Épica Intercambio) ============ -->
+<main id="contenido-explorar-catalogo" class="area-trabajo">
+  <section id="tarjeta-catalogo" class="tarjeta-oferta">
+
+    <!-- ---------- Título y descripción ---------- -->
+    <h2 id="titulo-explorar-catalogo" class="titulo-seccion">Explorar catálogo de intercambio</h2>
+    <p class="texto-ayuda">
+      Explore los libros disponibles publicados por otros miembros de la comunidad y solicite un intercambio.
+    </p>
+
+    <!-- ---------- Campo de búsqueda ---------- -->
+    <div class="grupo-entrada">
+      <label for="buscar-libro">Buscar por título o autor</label>
+      <input type="text" id="buscar-libro" class="campo-texto"
+             placeholder="Ej. La Vorágine o Rómulo Gallegos..."
+             [(ngModel)]="filtroBusqueda">
+    </div>
+
+    <!-- ---------- Lista de libros disponibles ---------- -->
+    <div class="lista-catalogo">
+      @for (libro of librosFiltrados; track libro.id) {
+        <div class="resumen-libro item-catalogo">
+          <span class="etiqueta-resumen">Disponible para intercambio</span>
+          <p class="titulo-libro"><strong>{{ libro.titulo }}</strong></p>
+          <p class="texto-secundario">Autor: {{ libro.autor }}</p>
+          <p class="texto-secundario">Propietario: {{ libro.propietario }}</p>
+          
+          <div class="acciones-formulario">
+            <button type="button" class="boton-accion" (click)="solicitarIntercambio(libro)">
+              Solicitar intercambio
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- ---------- Mensaje si no hay resultados ---------- -->
+    @if (librosFiltrados.length === 0) {
+      <div class="mensaje mensaje-error">
+        <p class="texto-mensaje">No se encontraron libros que coincidan con la búsqueda.</p>
+      </div>
+    }
+
+  </section>
+</main>
