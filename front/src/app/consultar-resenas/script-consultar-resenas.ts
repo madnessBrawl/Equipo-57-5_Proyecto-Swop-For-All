@@ -1,19 +1,7 @@
 /*
-  Archivo: script-consultar-resenas.ts   (FRONTEND: front/src/app/consultar-resenas/)
+  Archivo: script-consultar-resenas.ts
   Clase: ConsultarResenasComponent
   HU: "Consultar reseñas" (Épica Reputación) - 1er Sprint
-
-  Función: Un MISMO componente con DOS modos, definidos por la ruta (data.modo):
-            - 'recibidas' (/reputacion/recibidas): reseñas que recibió el usuario logueado + su promedio.
-                           Solo se muestran las propias: no se pueden consultar otros lectores.
-            - 'enviadas'  (/reputacion/enviadas): reseñas que el usuario logueado calificó a otros.
-           Solo LEE datos; la lógica de consulta vive en ServicioReputacion.
-
-  CAMINO DE PROCESO DE DATOS:
-   Ruta (data.modo) -> ConsultarResenasComponent -> ServicioReputacion.obtenerResenas()        (recibidas)
-                                                 -> ServicioReputacion.obtenerResenasEnviadas() (enviadas)
-        -> almacenamiento (futuro: ControladorReputacion.consultarResenas / consultarResenasEnviadas)
-        -> HTML (lista + promedio)
 */
 import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';

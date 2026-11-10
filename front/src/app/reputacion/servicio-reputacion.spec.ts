@@ -1,8 +1,7 @@
 /*
   Archivo: servicio-reputacion.spec.ts   (FRONTEND: front/src/app/reputacion/)
   Función: Pruebas automáticas (ng test) que verifican Fiabilidad, Confidencialidad y Operabilidad
-           del módulo de Reputación, respondiendo a la observación de la profesora sobre los
-           requisitos no funcionales "no verificables".
+           del módulo de Reputación.
 */
 import { ServicioReputacion } from './servicio-reputacion';
 import { Calificacion, Comentario } from './modelo-reputacion';

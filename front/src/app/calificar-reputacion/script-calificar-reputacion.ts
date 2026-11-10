@@ -1,23 +1,7 @@
 /*
-  Archivo: script-calificar-reputacion.ts   (FRONTEND: front/src/app/calificar-reputacion/)
-  Clase: CalificarReputacionComponent
   HU: "Calificar lector o intercambio" (Épica Reputación) - 1er Sprint
 
   Función: Controla la PANTALLA. Recoge los datos del usuario y se los pasa al servicio.
-           NO contiene reglas de negocio ni guarda datos (eso lo hace ServicioReputacion).
-
-  CAMINO DE PROCESO DE DATOS:
-   HTML (formulario) -> CalificarReputacionComponent -> new Calificacion(new Comentario(...))
-        -> ServicioReputacion.registrarCalificacion() -> almacenamiento (futuro: ControladorReputacion)
-
-  CORRECCIONES DE LA PROFESORA APLICADAS EN EL FLUJO:
-   1. Se verifica la sesión y se usa el usuario logueado (no se "autentica" otra vez).
-   2. Si el intercambio YA fue calificado, se muestra una ADVERTENCIA antes del formulario.
-   3. Existe el objeto Comentario (dentro de Calificacion).
-   4. Se VALIDA primero y se guarda UNA sola vez (puntuación y comentario juntos).
-   5. Antes de registrar se SOLICITA CONFIRMACIÓN al usuario.
-   6. El mensaje de éxito ofrece acciones al actor ("Calificar otro" / "Ver mis reseñas enviadas").
-   7. Los mensajes son texto simple (mensajeTexto), no objetos.
 */
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -35,9 +19,7 @@ import type { TipoCalificacion } from '../reputacion/modelo-reputacion'; // Solo
 })
 export class CalificarReputacionComponent implements OnInit {
 
-  /* =========================================================
-     1. ESTADO DE LA PANTALLA (variables)
-     ========================================================= */
+  /* 1. ESTADO DE LA PANTALLA (variables)*/
   usuarioActual: string | null = null;                 // Usuario con sesión iniciada
   tipoSeleccionado: TipoCalificacion = 'lector';       // Qué se califica: lector o intercambio
   intercambios: Intercambio[] = [];                    // Intercambios finalizados del usuario
@@ -50,9 +32,7 @@ export class CalificarReputacionComponent implements OnInit {
   mensajeTipo: 'exito' | 'error' | 'advertencia' | '' = ''; // Tipo del mensaje mostrado
   mensajeTexto: string = '';                           // Texto del mensaje (simple string)
 
-  /* =========================================================
-     2. CONSTANTES USADAS POR LA PLANTILLA
-     ========================================================= */
+  /* 2. CONSTANTES USADAS POR LA PLANTILLA*/
   readonly estrellasDisponibles: number[] = [1, 2, 3, 4, 5];                       // Botones de estrella
   readonly rutaEstrellaLlena = '/imagenes/calificacion-estrella-llena.png';        // Imagen estrella llena
   readonly rutaEstrellaVacia = '/imagenes/calificacion-estrella-vacia.png';        // Imagen estrella vacía
@@ -61,9 +41,7 @@ export class CalificarReputacionComponent implements OnInit {
   // Inyección de dependencias (POO): el servicio hace la lógica, el router solo navega
   constructor(private servicio: ServicioReputacion, private router: Router) {}
 
-  /* =========================================================
-     3. CICLO DE VIDA: carga inicial
-     ========================================================= */
+  /* 3. CICLO DE VIDA: carga inicial*/
   ngOnInit(): void {
     this.usuarioActual = this.servicio.obtenerUsuarioActual(); // Precondición: usuario logueado
     if (!this.usuarioActual) {
@@ -73,9 +51,7 @@ export class CalificarReputacionComponent implements OnInit {
     this.cargarIntercambios();
   }
 
-  /* =========================================================
-     4. SELECCIÓN: tipo de calificación e intercambio
-     ========================================================= */
+  /* 4. SELECCIÓN: tipo de calificación e intercambio*/
   // Carga los intercambios finalizados donde participó el usuario
   cargarIntercambios(): void {
     this.intercambios = this.servicio.obtenerIntercambiosFinalizados(this.usuarioActual!);
@@ -130,9 +106,7 @@ export class CalificarReputacionComponent implements OnInit {
     return this.intercambioActual?.contraparteDe(this.usuarioActual!) ?? '';
   }
 
-  /* =========================================================
-     5. FORMULARIO: puntuación y comentario
-     ========================================================= */
+  /*5. FORMULARIO: puntuación y comentario*/
   // Registra las estrellas: se llama al pasar el mouse por una estrella (mouseenter) y al hacer clic.
   // La puntuación siempre es la de la ÚLTIMA estrella sobre la que estuvo el mouse (se puede subir y bajar).
   asignarPuntuacion(estrellas: number): void {
@@ -152,9 +126,7 @@ export class CalificarReputacionComponent implements OnInit {
     );
   }
 
-  /* =========================================================
-     6. PROCESO: validar -> confirmar -> guardar
-     ========================================================= */
+  /* 6. PROCESO: validar -> confirmar -> guardar */
   // Paso A: valida y, si todo es correcto, pide confirmación (todavía NO guarda nada)
   solicitarConfirmacion(): void {
     this.limpiarMensaje();
@@ -190,9 +162,7 @@ export class CalificarReputacionComponent implements OnInit {
     this.alCambiarIntercambio('');
   }
 
-  /* =========================================================
-     7. UTILIDADES DE MENSAJES
-     ========================================================= */
+  /*7. UTILIDADES DE MENSAJES*/
   private mostrarMensaje(tipo: 'exito' | 'error' | 'advertencia', texto: string): void {
     this.mensajeTipo = tipo;
     this.mensajeTexto = texto;

@@ -1,21 +1,5 @@
 /*
-  Archivo: servicio-reputacion.ts   (FRONTEND: front/src/app/reputacion/)
-  Clase: ServicioReputacion
   Función: ÚNICA clase que maneja la lógica y el almacenamiento de la Gestión de Reputación.
-  Los componentes (pantallas) NO guardan ni calculan nada: le piden todo a este servicio.
-
-  CAMINO DE PROCESO DE DATOS (quién maneja la lógica):
-   [Calificar] Pantalla (CalificarReputacionComponent)
-        -> ServicioReputacion.yaFueCalificado()      (advierte si ya calificó)
-        -> Calificacion.validar()                     (objeto valida sus propios datos)
-        -> ServicioReputacion.registrarCalificacion() (reglas de negocio + guardado ÚNICO)
-        -> localStorage 'swop_calificaciones'         (simula el Backend/BD por ahora)
-        -> ServicioReputacion.actualizarReputacionLector() (recalcula promedio del evaluado)
-   [Consultar] Pantalla (ConsultarResenasComponent, modo recibidas o enviadas)
-        -> ServicioReputacion.obtenerResenas() / obtenerResenasEnviadas() / calcularPromedio()
-        -> localStorage 'swop_calificaciones'
-   Cuando exista el Backend: este servicio pasa a llamar por HTTP a
-   ControladorReputacion (back/controllers) y los componentes no cambian.
 */
 import { Injectable } from '@angular/core';
 import { Calificacion, Intercambio } from './modelo-reputacion'; // Clases (objetos de dominio)
@@ -26,17 +10,13 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class ServicioReputacion {
 
-  /* =========================================================
-     1. CONSTANTES: claves del almacenamiento local simulado
-     ========================================================= */
+  /* 1. CONSTANTES: claves del almacenamiento local simulado*/
   private readonly CLAVE_CALIFICACIONES = 'swop_calificaciones'; // Calificaciones guardadas
   private readonly CLAVE_INTERCAMBIOS = 'swop_intercambios';     // Intercambios (módulo futuro)
   private readonly CLAVE_USUARIOS = 'swop_usuarios';             // Usuarios registrados (ya existente)
   private readonly CLAVE_SESION = 'usuarioLogueado';             // Sesión activa (ya existente)
 
-  /* =========================================================
-     2. SESIÓN: solo se expone el nombre de usuario (Confidencialidad)
-     ========================================================= */
+  /* 2. SESIÓN: solo se expone el nombre de usuario (Confidencialidad)*/
   public obtenerUsuarioActual(): string | null {
     try {
       const crudo = localStorage.getItem(this.CLAVE_SESION); // Lee la sesión guardada
@@ -48,9 +28,7 @@ export class ServicioReputacion {
     }
   }
 
-  /* =========================================================
-     3. INTERCAMBIOS DISPONIBLES PARA CALIFICAR
-     ========================================================= */
+  /* 3. INTERCAMBIOS DISPONIBLES PARA CALIFICAR*/
   // Devuelve los intercambios FINALIZADOS en los que participó el usuario
   public obtenerIntercambiosFinalizados(usuario: string): Intercambio[] {
     return this.leerLista<IntercambioPlano>(this.CLAVE_INTERCAMBIOS)
@@ -72,9 +50,7 @@ export class ServicioReputacion {
     return demo.length;
   }
 
-  /* =========================================================
-     4. CALIFICAR LECTOR O INTERCAMBIO
-     ========================================================= */
+  /* 4. CALIFICAR LECTOR O INTERCAMBIO*/
   // Verifica si el evaluador ya calificó ese intercambio (para advertir ANTES de mostrar el formulario)
   public yaFueCalificado(evaluador: string, idIntercambio: string, tipo: 'lector' | 'intercambio'): boolean {
     const claveBuscada = `${evaluador}|${idIntercambio}|${tipo}`;
@@ -128,9 +104,7 @@ export class ServicioReputacion {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
 
-  /* =========================================================
-     5. CONSULTAR RESEÑAS
-     ========================================================= */
+  /* 5. CONSULTAR RESEÑAS*/
   // Lista las reseñas recibidas por un lector (más recientes primero), con filtro opcional
   public obtenerResenas(lector: string, filtro: FiltroResenas = 'todas'): Calificacion[] {
     return this.leerCalificaciones()
@@ -153,9 +127,7 @@ export class ServicioReputacion {
     return Math.round(promedio * 10) / 10;
   }
 
-  /* =========================================================
-     6. MÉTODOS PRIVADOS DE ALMACENAMIENTO (Fiabilidad)
-     ========================================================= */
+  /* 6. MÉTODOS PRIVADOS DE ALMACENAMIENTO (Fiabilidad)*/
   // Actualiza el campo "reputacion" del perfil del lector (el que creó perfil-usuario)
   private actualizarReputacionLector(lector: string): void {
     const promedio = this.calcularPromedio(lector);

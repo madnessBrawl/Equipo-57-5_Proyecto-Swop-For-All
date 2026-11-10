@@ -1,18 +1,9 @@
 /*
-  Archivo: modelo-reputacion.ts   (FRONTEND: front/src/app/reputacion/)
   Función: Define los OBJETOS de dominio de la Gestión de Reputación (POO).
-  Contiene únicamente lógica de negocio pura (sin Angular, sin almacenamiento),
-  por eso se puede reutilizar y probar de forma aislada.
-
-  Correcciones de la profesora aplicadas (HU "Calificar lector o intercambio"):
-   - Se crea el objeto Comentario (antes faltaba) y forma parte de la Calificacion.
-   - La puntuación y el comentario viajan en UN solo objeto: se valida primero y se guarda una sola vez.
-   - Los mensajes al usuario son simples textos (string); no son objetos asociados a nada.
+  Contiene únicamente lógica de negocio pura (sin Angular, sin almacenamiento)
 */
 
-/* =========================================================
-   1. TIPOS AUXILIARES
-   ========================================================= */
+/*1. TIPOS AUXILIARES*/
 export type TipoCalificacion = 'lector' | 'intercambio'; // Qué se está calificando
 export type FiltroResenas = 'todas' | TipoCalificacion;  // Filtro de la consulta de reseñas
 export type EstadoIntercambio = 'Pendiente' | 'Finalizado' | 'Cancelado'; // Estados posibles
@@ -23,7 +14,7 @@ export interface ResultadoOperacion {
   mensaje: string;  // Texto que se le muestra al usuario
 }
 
-// Forma "plana" (JSON) de una calificación guardada en el almacenamiento
+// Forma "plana" (JSON) de una calificación guardada 
 export interface CalificacionPlana {
   id: string;
   idIntercambio: string;
@@ -45,9 +36,7 @@ export interface IntercambioPlano {
   fecha: string;
 }
 
-/* =========================================================
-   2. OBJETO COMENTARIO
-   ========================================================= */
+/* 2. OBJETO COMENTARIO*/
 export class Comentario {
   static readonly LONGITUD_MAXIMA = 300; // Límite de caracteres permitido
 
@@ -69,9 +58,7 @@ export class Comentario {
   }
 }
 
-/* =========================================================
-   3. OBJETO CALIFICACION (puntuación + comentario)
-   ========================================================= */
+/* 3. OBJETO CALIFICACION (puntuación + comentario)*/
 export class Calificacion {
   static readonly PUNTUACION_MINIMA = 1; // Mínimo de estrellas
   static readonly PUNTUACION_MAXIMA = 5; // Máximo de estrellas
@@ -135,9 +122,7 @@ export class Calificacion {
   }
 }
 
-/* =========================================================
-   4. OBJETO INTERCAMBIO (referencia mínima para calificar)
-   ========================================================= */
+/* 4. OBJETO INTERCAMBIO (referencia mínima para calificar) */
 export class Intercambio {
   constructor(
     public id: string,                  // Identificador del intercambio
