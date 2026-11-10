@@ -1,26 +1,107 @@
-<div style="padding: 20px; font-family: Arial, sans-serif;">
-  <h2>Modificar Oferta de Intercambio</h2>
-  <p>Libros ofrecidos actualmente:</p>
-  <ul>
-    @for (lib of ofertaActiva.librosOfrecidos; track lib.id) {
-      <li style="margin-bottom: 8px;">
-        <strong>{{ lib.titulo }}</strong> - <i>{{ lib.autor }}</i>
-        <button (click)="retirarLibroPropio(lib.id)" style="margin-left: 10px; background-color: #ff4d4d; color: white; border: none; padding: 3px 8px; cursor: pointer;">Retirar</button>
-      </li>
-    }
-  </ul>
+<div style="padding: 20px; font-family: Arial, sans-serif; max-width: 950px; margin: auto;">
+  <h2>🔄 Intercambio y Chat de Negociación</h2>
+  <p>Estado de la Oferta: <strong>{{ ofertaActiva.estado }}</strong></p>
 
-  <hr style="margin: 20px 0;">
+  <!-- Gestión de Libros -->
+  <div style="display: flex; gap: 20px; margin-bottom: 25px; flex-wrap: wrap;">
+    
+    <!-- Columna Izquierda: Libros Propios y su Inventario -->
+    <div style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #fafafa; min-width: 300px;">
+      <h4>📦 Tus Libros Ofrecidos</h4>
+      <ul>
+        @for (lib of ofertaActiva.librosOfrecidos; track lib.id) {
+          <li style="margin-bottom: 5px;">
+            {{ lib.titulo }} 
+            <button (click)="retirarLibroPropio(lib.id)" style="color:white; background:#dc3545; border:none; padding:2px 6px; border-radius:4px; cursor:pointer;">Retirar</button>
+          </li>
+        }
+      </ul>
+      <h5 style="margin-top: 15px;">Tu Inventario Disponible:</h5>
+      <ul>
+        @for (lib of inventarioPersonal; track lib.id) {
+          <li style="margin-bottom: 5px;">
+            {{ lib.titulo }} 
+            <button (click)="agregarLibroPropio(lib)" style="color:white; background:#28a745; border:none; padding:2px 6px; border-radius:4px; cursor:pointer;">Agregar</button>
+          </li>
+        }
+      </ul>
+    </div>
 
-  <h3>Tu Inventario Disponible:</h3>
-  <ul>
-    @for (lib of inventarioPersonal; track lib.id) {
-      <li style="margin-bottom: 8px;">
-        {{ lib.titulo }} 
-        <button (click)="agregarLibroPropio(lib)" style="margin-left: 10px; background-color: #4CAF50; color: white; border: none; padding: 3px 8px; cursor: pointer;">Agregar a la oferta</button>
-      </li>
-    }
-  </ul>
+    <!-- Columna Derecha: Libros solicitados al otro e Inventario del Otro Usuario -->
+    <div style="flex: 1; border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: #fafafa; min-width: 300px;">
+      <h4>📚 Libros Solicitados al Otro Usuario</h4>
+      <ul>
+        @for (lib of ofertaActiva.librosSolicitados; track lib.id) {
+          <li style="margin-bottom: 5px;">
+            {{ lib.titulo }} 
+            <button (click)="solicitarRetirarLibroAjeno(lib.id)" style="color:white; background:#dc3545; border:none; padding:2px 6px; border-radius:4px; cursor:pointer;">Solicitar Retirar</button>
+          </li>
+        }
+      </ul>
+      <h5 style="margin-top: 15px;">Inventario del Otro Usuario:</h5>
+      <ul>
+        @for (lib of inventarioDelOtroUsuario; track lib.id) {
+          <li style="margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+            <span>{{ lib.titulo }}</span>
+            
+            <!-- Verificamos si el libro ya fue solicitado -->
+            @if (ofertaActiva.librosSolicitados.some(l => l.id === lib.id)) {
+              <span style="color: #6c757d; background: #e2e6ea; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">Agregado ✓</span>
+            } @else {
+              <button (click)="solicitarAgregarLibroAjeno(lib)" style="color:black; background:#ffc107; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-weight:bold;">Solicitar Agregar</button>
+            }
+          </li>
+        }
+      </ul>
+    </div>
 
-  <button (click)="guardarModificacionOferta()" style="margin-top: 20px; padding: 10px 20px; background-color: #008CBA; color: white; border: none; font-weight: bold; cursor: pointer;">Guardar Cambios</button>
+  </div>
+
+  <button (click)="guardarModificacionOferta()" style="background: #007bff; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 25px;">Guardar Cambios de Oferta</button>
+
+  <!-- Ventana del chat -->
+  <div style="border: 1px solid #bbb; border-radius: 8px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+    
+    <div style="background: #343a40; color: white; padding: 12px 15px; font-weight: bold;">
+      💬 Chat Directo con el Intercambiador
+    </div>
+
+    <div #scrollChat style="height: 250px; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fdfdfd;">
+      
+      @for (msg of historialMensajes; track $index) {
+        <div [style.align-self]="msg.remitente === usuarioActual ? 'flex-end' : 'flex-start'"
+             [ngStyle]="{'background-color': msg.remitente === usuarioActual ? '#dcf8c6' : '#f1f0f0'}"
+             style="max-width: 70%; padding: 10px 14px; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word;">
+          
+          <div style="font-size: 11px; color: #555; margin-bottom: 3px; font-weight: bold;">
+            {{ msg.remitente === usuarioActual ? 'Tú' : msg.remitente }}
+          </div>
+          
+          <div style="font-size: 14px; color: #333;">{{ msg.texto }}</div>
+          
+          <div style="font-size: 10px; color: #888; text-align: right; margin-top: 4px;">
+            {{ msg.hora }}
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <div style="display: flex; border-top: 1px solid #ddd; padding: 10px; background: #f9f9f9; align-items: center;">
+      <input type="text" 
+             [(ngModel)]="mensajeInput" 
+             [maxlength]="maxLengthMensaje"
+             (keyup.enter)="enviarMensaje()"
+             placeholder="Escribe tu mensaje (máx. 250 caracteres)..." 
+             style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; outline: none; font-size: 14px;">
+      
+      <span style="font-size: 11px; color: #666; margin: 0 10px;">{{ mensajeInput.length }}/{{ maxLengthMensaje }}</span>
+      
+      <button (click)="enviarMensaje()" 
+              style="background: #28a745; color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px;">
+        Enviar
+      </button>
+    </div>
+
+  </div>
 </div>

@@ -21,22 +21,16 @@ export class CatalogoLibrosComponent {
   constructor(private router: Router) {}
 
   // Iniciar solicitud de intercambio desde el catálogo
-  public solicitarIntercambio(item: { libro: Libro; propietario: string }): void {
-    const nuevaOferta = new OfertaIntercambio(
-      `INT-${Date.now()}`,
-      "MiUsuario", // Usuario actual
-      item.propietario,
-      [], // Libros propios a ofrecer (se añadirán al modificar)
-      [item.libro], // Libro solicitado
-      "Pendiente"
-    );
+public solicitarIntercambio(item: { libro: Libro; propietario: string }): void {
+  const nuevaOferta = new OfertaIntercambio(
+    "INT-2026-01",
+    "UsuarioA",
+    item.propietario,
+    [], // Se llenará con los del inventario
+    [item.libro], // El libro que el usuario seleccionó del catálogo ajeno
+    "Pendiente"
+  );
 
-    // Guardamos la oferta inicial creada en localStorage para persistencia
-    localStorage.setItem(`oferta_${nuevaOferta.idIntercambio}`, JSON.stringify(nuevaOferta));
-    
-    alert(`¡Solicitud enviada a ${item.propietario} por el libro "${item.libro.titulo}"! Ahora serás redirigido a gestionar tu oferta.`);
-    
-    // Redirigimos a la pantalla de Modificar Oferta para elegir qué ofrecer a cambio
-    this.router.navigate(['/modificar-oferta']);
-  }
-}
+  localStorage.setItem(`oferta_INT-2026-01`, JSON.stringify(nuevaOferta));
+  this.router.navigate(['/modificar-oferta']);
+}}
