@@ -1,0 +1,184 @@
+/* ---------- <main id="contenido-calificar"> : espacio de trabajo bajo el header ---------- */
+.area-trabajo {
+  padding: 30px 20px; /* Aire alrededor de la tarjeta */
+}
+
+/* ---------- <section> : tarjeta principal del formulario ---------- */
+.tarjeta-reputacion {
+  background-color: var(--color-texto-blanco);  /* Fondo blanco para contraste de lectura */
+  max-width: 600px;                             /* Ancho máximo cómodo */
+  margin: 0 auto;                               /* Centrado horizontal */
+  padding: 30px;                                /* Espacio interno */
+  border-radius: var(--radio-tarjeta);          /* Esquinas redondeadas globales */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);     /* Sombra suave */
+}
+
+/* ---------- <h2> : título de la sección ---------- */
+.titulo-seccion {
+  color: var(--color-boton-accion);                 /* Color de acento del proyecto */
+  border-bottom: 2px solid var(--color-cabecera);   /* Línea decorativa naranja */
+  padding-bottom: 10px;                             /* Separación del subrayado */
+  margin: 0 0 10px;                                 /* Sin margen superior */
+}
+
+/* ---------- <p> : texto de ayuda ---------- */
+.texto-ayuda {
+  color: var(--color-texto-oscuro); /* Texto legible sobre blanco */
+  margin: 0 0 20px;                 /* Separación del contenido */
+}
+
+/* ---------- <div> : contenedor de las pestañas de tipo ---------- */
+.pestanas-tipo {
+  display: flex;                         /* Pestañas en fila */
+  border-bottom: 2px solid #e0e0e0;      /* Línea base gris */
+  margin-bottom: 20px;                   /* Separación inferior */
+}
+
+/* ---------- <button> : cada pestaña ---------- */
+.pestana {
+  flex: 1;                   /* Reparto equitativo del ancho */
+  padding: 12px;             /* Área de clic cómoda */
+  border: none;              /* Sin borde nativo */
+  background: none;          /* Sin fondo nativo */
+  font-weight: bold;         /* Texto destacado */
+  color: #777;               /* Gris para pestaña inactiva */
+  cursor: pointer;           /* Indica que es clicable */
+}
+
+/* ---------- <button class="activa"> : pestaña seleccionada ---------- */
+.pestana.activa {
+  color: var(--color-cabecera);                  /* Naranja para la activa */
+  border-bottom: 3px solid var(--color-cabecera); /* Subrayado de la activa */
+}
+
+/* ---------- <div> : grupo etiqueta + campo ---------- */
+.grupo-entrada {
+  display: flex;             /* Apila etiqueta y campo */
+  flex-direction: column;    /* Orientación vertical */
+  margin-bottom: 18px;       /* Separación entre grupos */
+}
+
+/* ---------- <label> : etiquetas de los campos ---------- */
+.grupo-entrada label {
+  font-weight: 700;          /* Etiqueta en negrita */
+  margin-bottom: 6px;        /* Separación del campo */
+}
+
+/* ---------- <select> y <textarea> : campos de entrada ---------- */
+.campo-texto {
+  padding: 10px;             /* Espacio interno */
+  border: 1px solid #ccc;    /* Borde gris suave */
+  border-radius: 6px;        /* Esquinas redondeadas */
+  font-size: 1rem;           /* Tamaño legible */
+  font-family: inherit;      /* Misma tipografía de la página */
+  resize: vertical;          /* Solo se puede estirar hacia abajo */
+}
+
+/* ---------- <span> : contador de caracteres ---------- */
+.contador-caracteres {
+  align-self: flex-end;      /* Alineado a la derecha */
+  font-size: 0.8rem;         /* Texto pequeño */
+  color: #777;               /* Gris discreto */
+  margin-top: 4px;           /* Separación del textarea */
+}
+
+/* ---------- <div> : resumen del intercambio ---------- */
+.resumen-intercambio {
+  background-color: var(--color-fondo-principal); /* Fondo crema del proyecto */
+  border-radius: 6px;                             /* Esquinas redondeadas */
+  padding: 10px 15px;                             /* Espacio interno */
+  margin-bottom: 18px;                            /* Separación inferior */
+}
+
+/* ---------- <div> : fila de estrellas ---------- */
+.selector-estrellas {
+  display: flex;             /* Estrellas en fila */
+  gap: 6px;                  /* Espacio entre estrellas */
+}
+
+/* ---------- <button> : botón de una estrella ---------- */
+.boton-estrella {
+  background: none;          /* Sin fondo */
+  border: none;              /* Sin borde */
+  padding: 0;                /* Sin relleno */
+  cursor: pointer;           /* Indica que es clicable */
+}
+
+/* ---------- <img> : imagen de la estrella ---------- */
+.imagen-estrella {
+  width: 40px;               /* Ancho de la estrella */
+  height: 40px;              /* Alto de la estrella */
+  transition: transform 0.15s; /* Animación al pasar el mouse */
+}
+
+/* ---------- <img> :hover : efecto de zoom ---------- */
+.boton-estrella:hover .imagen-estrella {
+  transform: scale(1.15);    /* Agranda ligeramente la estrella */
+}
+
+/* ---------- <button> : botón principal de acción ---------- */
+.boton-accion {
+  background-color: var(--color-boton-accion); /* Color de botones del proyecto */
+  color: var(--color-texto-blanco);            /* Texto blanco */
+  border: none;                                /* Sin borde */
+  padding: 12px 20px;                          /* Tamaño del botón */
+  border-radius: 6px;                          /* Esquinas redondeadas */
+  font-weight: bold;                           /* Texto destacado */
+  cursor: pointer;                             /* Indica que es clicable */
+}
+
+/* ---------- <button>/<a> : botón secundario ---------- */
+.boton-secundario {
+  background-color: transparent;                       /* Sin relleno */
+  color: var(--color-boton-accion);                    /* Texto del color de acento */
+  border: 2px solid var(--color-boton-accion);         /* Borde del color de acento */
+  padding: 10px 18px;                                  /* Tamaño del botón */
+  border-radius: 6px;                                  /* Esquinas redondeadas */
+  font-weight: bold;                                   /* Texto destacado */
+  text-decoration: none;                               /* Quita subrayado en el enlace */
+  cursor: pointer;                                     /* Indica que es clicable */
+}
+
+/* ---------- <div> : mensajes de estado ---------- */
+.mensaje {
+  border-radius: 6px;        /* Esquinas redondeadas */
+  padding: 12px 15px;        /* Espacio interno */
+  margin-bottom: 18px;       /* Separación inferior */
+}
+
+.mensaje-exito { background-color: var(--color-exito-fondo); border-left: 5px solid var(--color-exito); }             /* Verde: operación exitosa */
+.mensaje-error { background-color: var(--color-error-fondo); border-left: 5px solid var(--color-error); }             /* Rojo: dato inválido */
+.mensaje-advertencia { background-color: var(--color-advertencia-fondo); border-left: 5px solid var(--color-advertencia); } /* Amarillo: aviso previo */
+
+/* ---------- <p> : texto dentro del mensaje ---------- */
+.texto-mensaje {
+  margin: 0;                 /* Sin márgenes extra */
+}
+
+/* ---------- <div> : fila de botones de acción ---------- */
+.acciones-mensaje {
+  display: flex;             /* Botones en fila */
+  gap: 10px;                 /* Separación entre botones */
+  margin-top: 12px;          /* Separación del texto */
+}
+
+/* ---------- <div> : panel de confirmación ---------- */
+.panel-confirmacion {
+  border: 2px dashed var(--color-cabecera); /* Borde destacado */
+  border-radius: 6px;                       /* Esquinas redondeadas */
+  padding: 15px;                            /* Espacio interno */
+}
+
+/* ---------- <p> : pregunta de confirmación ---------- */
+.texto-confirmacion {
+  font-weight: bold;         /* Pregunta resaltada */
+  margin-top: 0;             /* Sin margen superior */
+}
+
+/* ---------- <div> : aviso cuando no hay intercambios ---------- */
+.aviso-vacio {
+  text-align: center;        /* Contenido centrado */
+  padding: 20px;             /* Espacio interno */
+  background-color: var(--color-fondo-principal); /* Fondo crema */
+  border-radius: 6px;        /* Esquinas redondeadas */
+}

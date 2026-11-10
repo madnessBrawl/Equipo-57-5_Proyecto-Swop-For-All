@@ -1,0 +1,149 @@
+/* ---------- <main id="contenido-resenas"> : espacio de trabajo bajo el header ---------- */
+.area-trabajo {
+  padding: 30px 20px; /* Aire alrededor de la tarjeta */
+}
+
+/* ---------- <section> : tarjeta principal ---------- */
+.tarjeta-reputacion {
+  background-color: var(--color-texto-blanco);  /* Fondo blanco para contraste de lectura */
+  max-width: 700px;                             /* Ancho máximo cómodo */
+  margin: 0 auto;                               /* Centrado horizontal */
+  padding: 30px;                                /* Espacio interno */
+  border-radius: var(--radio-tarjeta);          /* Esquinas redondeadas globales */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);     /* Sombra suave */
+}
+
+/* ---------- <h2> : título de la sección ---------- */
+.titulo-seccion {
+  color: var(--color-boton-accion);                 /* Color de acento del proyecto */
+  border-bottom: 2px solid var(--color-cabecera);   /* Línea decorativa naranja */
+  padding-bottom: 10px;                             /* Separación del subrayado */
+  margin: 0 0 20px;                                 /* Separación del contenido */
+}
+
+/* ---------- <div> : barra con los dos selectores ---------- */
+.barra-filtros {
+  display: flex;             /* Selectores en fila */
+  gap: 15px;                 /* Espacio entre selectores */
+  flex-wrap: wrap;           /* Se apilan en pantallas pequeñas */
+}
+
+/* ---------- <div> : grupo etiqueta + campo ---------- */
+.grupo-entrada {
+  display: flex;             /* Apila etiqueta y campo */
+  flex-direction: column;    /* Orientación vertical */
+  flex: 1;                   /* Cada grupo ocupa el mismo ancho */
+  min-width: 200px;          /* Ancho mínimo antes de apilar */
+  margin-bottom: 18px;       /* Separación inferior */
+}
+
+/* ---------- <label> : etiquetas de los campos ---------- */
+.grupo-entrada label {
+  font-weight: 700;          /* Etiqueta en negrita */
+  margin-bottom: 6px;        /* Separación del campo */
+}
+
+/* ---------- <select> : campos de selección ---------- */
+.campo-texto {
+  padding: 10px;             /* Espacio interno */
+  border: 1px solid #ccc;    /* Borde gris suave */
+  border-radius: 6px;        /* Esquinas redondeadas */
+  font-size: 1rem;           /* Tamaño legible */
+  font-family: inherit;      /* Misma tipografía de la página */
+}
+
+/* ---------- <div> : resumen de reputación ---------- */
+.resumen-reputacion {
+  display: flex;                                   /* Elementos en fila */
+  align-items: center;                             /* Centrado vertical */
+  gap: 12px;                                       /* Espacio entre elementos */
+  flex-wrap: wrap;                                 /* Se ajusta en pantallas pequeñas */
+  background-color: var(--color-fondo-principal);  /* Fondo crema del proyecto */
+  border-radius: 6px;                              /* Esquinas redondeadas */
+  padding: 15px;                                   /* Espacio interno */
+  margin-bottom: 20px;                             /* Separación de la lista */
+}
+
+/* ---------- <span> : número del promedio ---------- */
+.valor-promedio {
+  font-size: 2.2rem;                 /* Número grande */
+  font-weight: bold;                 /* Destacado */
+  color: var(--color-boton-accion);  /* Color de acento */
+}
+
+/* ---------- <div> : fila de estrellas ---------- */
+.fila-estrellas {
+  display: flex;             /* Estrellas en fila */
+  gap: 3px;                  /* Espacio entre estrellas */
+}
+
+/* ---------- <img> : estrella del resumen ---------- */
+.imagen-estrella {
+  width: 30px;               /* Ancho de la estrella */
+  height: 30px;              /* Alto de la estrella */
+}
+
+/* ---------- <img> : estrella dentro de cada reseña ---------- */
+.imagen-estrella-pequena {
+  width: 20px;               /* Ancho reducido */
+  height: 20px;              /* Alto reducido */
+}
+
+/* ---------- <span> : textos secundarios del resumen ---------- */
+.texto-total {
+  color: var(--color-texto-oscuro); /* Texto legible sobre crema */
+}
+
+/* ---------- <ul> : lista de reseñas ---------- */
+.lista-resenas {
+  list-style: none;          /* Sin viñetas */
+  padding: 0;                /* Sin relleno nativo */
+  margin: 0;                 /* Sin margen nativo */
+  display: flex;             /* Tarjetas apiladas */
+  flex-direction: column;    /* Orientación vertical */
+  gap: 12px;                 /* Espacio entre reseñas */
+}
+
+/* ---------- <li> : cada reseña ---------- */
+.resena {
+  border: 1px solid #e0e0e0;  /* Borde gris suave */
+  border-radius: 6px;         /* Esquinas redondeadas */
+  padding: 12px 15px;         /* Espacio interno */
+}
+
+/* ---------- <div> : cabecera de la reseña ---------- */
+.cabecera-resena {
+  display: flex;             /* Autor, tipo y fecha en fila */
+  align-items: center;       /* Centrado vertical */
+  gap: 10px;                 /* Espacio entre elementos */
+  margin-bottom: 6px;        /* Separación de las estrellas */
+}
+
+/* ---------- <span> : etiqueta del tipo de reseña ---------- */
+.etiqueta-tipo {
+  background-color: var(--color-cabecera);  /* Naranja del header */
+  color: var(--color-texto-blanco);         /* Texto blanco */
+  font-size: 0.75rem;                       /* Texto pequeño */
+  padding: 2px 8px;                         /* Espacio interno */
+  border-radius: 10px;                      /* Forma de píldora */
+}
+
+/* ---------- <span> : fecha de la reseña ---------- */
+.fecha-resena {
+  margin-left: auto;         /* Se alinea a la derecha */
+  font-size: 0.8rem;         /* Texto pequeño */
+  color: #777;               /* Gris discreto */
+}
+
+/* ---------- <p> : texto del comentario ---------- */
+.texto-resena {
+  margin: 8px 0 0;           /* Separación de las estrellas */
+}
+
+/* ---------- <div> : aviso cuando no hay reseñas ---------- */
+.aviso-vacio {
+  text-align: center;                              /* Contenido centrado */
+  padding: 20px;                                   /* Espacio interno */
+  background-color: var(--color-fondo-principal);  /* Fondo crema */
+  border-radius: 6px;                              /* Esquinas redondeadas */
+}

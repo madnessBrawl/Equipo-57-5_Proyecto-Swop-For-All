@@ -1,0 +1,74 @@
+<!-- ============ INTERFAZ: Consultar reseñas (Épica Reputación) ============ -->
+<main id="contenido-resenas" class="area-trabajo">
+  <section id="tarjeta-resenas" class="tarjeta-reputacion">
+
+    <!-- ---------- Título ---------- -->
+    <h2 id="titulo-resenas" class="titulo-seccion">Consultar reseñas</h2>
+
+    <!-- ---------- Selectores: lector y tipo de reseña ---------- -->
+    <div id="barra-filtros" class="barra-filtros">
+      <div class="grupo-entrada">
+        <label for="lista-lectores">Lector</label>
+        <select id="lista-lectores" class="campo-texto" name="lector"
+                [ngModel]="lectorSeleccionado" (ngModelChange)="alCambiarLector($event)">
+          @for (l of lectores; track l) {
+            <option [value]="l">{{ l }}{{ l === usuarioActual ? ' (yo)' : '' }}</option>
+          }
+        </select>
+      </div>
+      <div class="grupo-entrada">
+        <label for="lista-filtro">Tipo de reseña</label>
+        <select id="lista-filtro" class="campo-texto" name="filtro"
+                [ngModel]="filtro" (ngModelChange)="alCambiarFiltro($event)">
+          <option value="todas">Todas</option>
+          <option value="lector">Como lector</option>
+          <option value="intercambio">Del intercambio</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ---------- Resumen de reputación ---------- -->
+    <div id="resumen-reputacion" class="resumen-reputacion">
+      @if (promedio !== null) {
+        <span id="valor-promedio" class="valor-promedio">{{ promedio }}</span>
+        <div class="fila-estrellas" aria-hidden="true">
+          @for (n of estrellasDisponibles; track n) {
+            <img class="imagen-estrella" alt=""
+                 [src]="n <= estrellasLlenas(promedio) ? rutaEstrellaLlena : rutaEstrellaVacia">
+          }
+        </div>
+        <span class="texto-total">Reputación como lector</span>
+      } @else {
+        <span id="texto-sin-reputacion" class="texto-total">
+          {{ esMiPerfil ? 'Aún no ha recibido calificaciones como lector.' : 'Este lector aún no tiene calificaciones.' }}
+        </span>
+      }
+    </div>
+
+    <!-- ---------- Lista de reseñas ---------- -->
+    @if (resenas.length === 0) {
+      <div id="aviso-sin-resenas" class="aviso-vacio">
+        <p>No hay reseñas para mostrar con los criterios seleccionados.</p>
+      </div>
+    } @else {
+      <ul id="lista-resenas" class="lista-resenas">
+        @for (r of resenas; track r.id) {
+          <li class="resena">
+            <div class="cabecera-resena">
+              <strong class="autor-resena">{{ r.evaluador }}</strong>
+              <span class="etiqueta-tipo">{{ r.tipo === 'lector' ? 'Como lector' : 'Del intercambio' }}</span>
+              <span class="fecha-resena">{{ r.comentario.fecha | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="fila-estrellas" [attr.aria-label]="r.puntuacion + ' de 5 estrellas'">
+              @for (n of estrellasDisponibles; track n) {
+                <img class="imagen-estrella-pequena" alt=""
+                     [src]="n <= r.puntuacion ? rutaEstrellaLlena : rutaEstrellaVacia">
+              }
+            </div>
+            <p class="texto-resena">{{ r.comentario.tieneTexto() ? r.comentario.texto : 'Sin comentario.' }}</p>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</main>

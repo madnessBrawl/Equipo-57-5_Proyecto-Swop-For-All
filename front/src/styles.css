@@ -8,6 +8,13 @@
   --color-boton-accion: #b46032; /* Color de los botones interactivos */
   --color-texto-blanco: #ffffff; /* Contraste para textos sobre botones/header */
   --color-texto-oscuro: #333333; /* Color de texto para lectura sobre el fondo claro */
+  --radio-tarjeta: 12px; /* Redondeo de las tarjetas de contenido */
+  --color-exito: #2e7d32; /* Borde de mensajes de éxito */
+  --color-exito-fondo: #e8f5e9; /* Fondo de mensajes de éxito */
+  --color-error: #c62828; /* Borde de mensajes de error */
+  --color-error-fondo: #ffebee; /* Fondo de mensajes de error */
+  --color-advertencia: #f9a825; /* Borde de mensajes de advertencia */
+  --color-advertencia-fondo: #fff8e1; /* Fondo de mensajes de advertencia */
 }
 
 /* Aplicación del fondo a todo el proyecto */

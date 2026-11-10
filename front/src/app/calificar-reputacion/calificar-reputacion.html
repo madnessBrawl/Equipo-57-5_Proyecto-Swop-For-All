@@ -1,0 +1,105 @@
+<!-- ============ INTERFAZ: Calificar lector o intercambio (Épica Reputación) ============ -->
+<main id="contenido-calificar" class="area-trabajo">
+  <section id="tarjeta-calificar" class="tarjeta-reputacion">
+
+    <!-- ---------- Título y descripción ---------- -->
+    <h2 id="titulo-calificar" class="titulo-seccion">Calificar lector o intercambio</h2>
+    <p class="texto-ayuda">Puntúe de 1 a 5 estrellas su experiencia y, si lo desea, deje un comentario.</p>
+
+    <!-- ---------- Mensaje de estado (éxito, error o advertencia) ---------- -->
+    @if (mensajeTipo) {
+      <div id="mensaje-estado" role="alert" [class]="'mensaje mensaje-' + mensajeTipo">
+        <p class="texto-mensaje">{{ mensajeTexto }}</p>
+        <!-- Acciones del actor después del éxito -->
+        @if (mensajeTipo === 'exito') {
+          <div class="acciones-mensaje">
+            <button type="button" id="boton-calificar-otro" class="boton-accion" (click)="calificarOtro()">Calificar otro</button>
+            <a id="enlace-ver-resenas" class="boton-secundario" routerLink="/resenas">Ver reseñas</a>
+          </div>
+        }
+      </div>
+    }
+
+    @if (!completada) {
+
+      <!-- ---------- Selector: calificar lector o intercambio ---------- -->
+      <div id="selector-tipo" class="pestanas-tipo">
+        <button type="button" id="boton-tipo-lector" class="pestana" [class.activa]="tipoSeleccionado === 'lector'"
+                (click)="seleccionarTipo('lector')">Calificar lector</button>
+        <button type="button" id="boton-tipo-intercambio" class="pestana" [class.activa]="tipoSeleccionado === 'intercambio'"
+                (click)="seleccionarTipo('intercambio')">Calificar intercambio</button>
+      </div>
+
+      <!-- ---------- Sin intercambios finalizados ---------- -->
+      @if (intercambios.length === 0) {
+        <div id="aviso-sin-intercambios" class="aviso-vacio">
+          <p>Aún no tiene intercambios finalizados para calificar.</p>
+          <button type="button" id="boton-datos-prueba" class="boton-secundario" (click)="cargarDatosDePrueba()">
+            Cargar intercambios de prueba (temporal)
+          </button>
+        </div>
+      } @else {
+
+        <!-- ---------- Lista de intercambios finalizados ---------- -->
+        <div class="grupo-entrada">
+          <label for="lista-intercambios">Intercambio finalizado</label>
+          <select id="lista-intercambios" class="campo-texto" name="intercambio"
+                  [ngModel]="idIntercambioSeleccionado" (ngModelChange)="alCambiarIntercambio($event)">
+            <option value="">-- Seleccione un intercambio --</option>
+            @for (i of intercambios; track i.id) {
+              <option [value]="i.id">{{ i.libroOfrecido }} ⇄ {{ i.libroSolicitado }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- ---------- Resumen del intercambio elegido ---------- -->
+        @if (intercambioActual && !yaCalificado) {
+          <div id="resumen-intercambio" class="resumen-intercambio">
+            <p><strong>Lector a calificar:</strong> {{ lectorEvaluado }}</p>
+            <p><strong>Libro ofrecido:</strong> {{ intercambioActual.libroOfrecido }}</p>
+            <p><strong>Libro solicitado:</strong> {{ intercambioActual.libroSolicitado }}</p>
+          </div>
+
+          <!-- ======= PASO 1: formulario de puntuación y comentario ======= -->
+          @if (paso === 'formulario') {
+            <div class="grupo-entrada">
+              <label>Puntuación</label>
+              <div id="selector-estrellas" class="selector-estrellas" (mouseleave)="puntuacionHover = 0">
+                @for (n of estrellasDisponibles; track n) {
+                  <button type="button" class="boton-estrella" [attr.aria-label]="'Puntuar ' + n + ' de 5'"
+                          (click)="asignarPuntuacion(n)" (mouseenter)="puntuacionHover = n">
+                    <img class="imagen-estrella" alt=""
+                         [src]="n <= (puntuacionHover || puntuacion) ? rutaEstrellaLlena : rutaEstrellaVacia">
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="grupo-entrada">
+              <label for="entrada-comentario">Comentario (opcional)</label>
+              <textarea id="entrada-comentario" class="campo-texto" name="comentario" rows="4"
+                        [maxlength]="longitudMaximaComentario" [(ngModel)]="textoComentario"
+                        placeholder="Cuéntenos cómo fue su experiencia"></textarea>
+              <span class="contador-caracteres">{{ textoComentario.length }} / {{ longitudMaximaComentario }}</span>
+            </div>
+
+            <button type="button" id="boton-continuar" class="boton-accion" (click)="solicitarConfirmacion()">Continuar</button>
+          }
+
+          <!-- ======= PASO 2: solicitud de confirmación ======= -->
+          @if (paso === 'confirmacion') {
+            <div id="panel-confirmacion" class="panel-confirmacion">
+              <p class="texto-confirmacion">¿Desea registrar esta calificación? Una vez guardada no podrá modificarla.</p>
+              <p><strong>Estrellas:</strong> {{ puntuacion }} de 5</p>
+              <p><strong>Comentario:</strong> {{ textoComentario.trim() || 'Sin comentario' }}</p>
+              <div class="acciones-mensaje">
+                <button type="button" id="boton-confirmar" class="boton-accion" (click)="confirmarYGuardar()">Confirmar</button>
+                <button type="button" id="boton-volver" class="boton-secundario" (click)="volverAlFormulario()">Volver</button>
+              </div>
+            </div>
+          }
+        }
+      }
+    }
+  </section>
+</main>
