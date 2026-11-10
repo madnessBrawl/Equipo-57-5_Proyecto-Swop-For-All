@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { CommonModule } from '@angular/common'; // <--- Necesario para el @if
+import { Router, NavigationEnd, RouterLink } from '@angular/router'; // <--- ¡Importante RouterLink!
 
 @Component({
   selector: 'app-header',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterLink], // <--- Aquí los agregamos
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class HeaderComponent{
+export class HeaderComponent {
   mostrarMenu: boolean = false;
 
   constructor(private router: Router) {
@@ -18,8 +20,8 @@ export class HeaderComponent{
         this.mostrarMenu = event.url !== '/';
       }
     });
-  
   }
+
   // Navega al panel de Reputación (calificar, reseñas recibidas y enviadas)
   irAReputacion(): void {
     this.router.navigate(['/reputacion']);
@@ -47,7 +49,7 @@ export class HeaderComponent{
 
     // Condición: Límite de 5 comunidades
     if (misComunidades.length >= 5) {
-      alert('Usted ya alcanzó el límite de comunidades permitidas.'); //
+      alert('Usted ya alcanzó el límite de comunidades permitidas.'); 
     } else {
       this.mostrarMenuComunidad = false; // Cerramos el dropdown
       this.router.navigate(['/crear-comunidad']);
