@@ -16,11 +16,12 @@ export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
   { path: 'dashboard', component: DashboardComponent }, 
   
-  // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
+  // Rutas de comunidad (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },
-  { path: 'catalogo', 
-    component: CatalogoLibrosComponent },
+  { path: 'mi-comunidad', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
+  { path: 'ver-comunidades', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
+  { path: 'catalogo', component: CatalogoLibrosComponent },
  { 
     path: 'modificar-oferta', 
     component: ModificarOfertaComponent 
