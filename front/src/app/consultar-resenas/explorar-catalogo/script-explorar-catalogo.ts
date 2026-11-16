@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CifradoService } from '../../servicios/cifrado.service';
 
 @Component({
   selector: 'app-explorar-catalogo',
@@ -20,7 +21,10 @@ export class ExplorarCatalogoComponent {
     { id: 'lib_global_57', titulo: 'Cien Años de Soledad', autor: 'Gabriel García Márquez', propietario: 'ana_lectora' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private cifradoService: CifradoService
+  ) {}
 
   // Getter seguro que filtra libros por título o autor
   get librosFiltrados(): any[] {
@@ -34,8 +38,9 @@ export class ExplorarCatalogoComponent {
     );
   }
 
-  // Redirige al flujo de enviar oferta guardando los datos del libro elegido
+  // Redirige al flujo de enviar oferta guardando los datos del libro elegido de forma cifrada
   public solicitarIntercambio(libro: any): void {
+    this.cifradoService.guardarEnStorageSeguro('libro_solicitado', libro);
     sessionStorage.setItem('libroSolicitado', JSON.stringify(libro));
     this.router.navigate(['/enviar-oferta']);
   }

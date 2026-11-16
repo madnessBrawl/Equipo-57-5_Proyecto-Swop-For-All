@@ -1,9 +1,18 @@
+/*
+  Archivo: google-books.service.ts (FRONTEND: front/src/app/servicios/)
+  Servicio: GoogleBooksService
+  Función: Servicio Angular que consume Google Books API v1 para alimentar
+           el Catálogo Global de Libros y soportar búsquedas, filtros y paginación.
+           Integra caché en memoria para cumplir el requisito de eficiencia (< 15 seg).
+*/
+
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, timeout } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 
+// Interfaz para la estructura de volumen de Google Books API
 export interface GoogleBookItem {
   id: string;
   volumeInfo: {
@@ -16,197 +25,108 @@ export interface GoogleBookItem {
     };
     industryIdentifiers?: Array<{ type: string; identifier: string }>;
     categories?: string[];
+    pageCount?: number;
+    publishedDate?: string;
+    publisher?: string;
   };
 }
 
+// Interfaz para la respuesta cruda de Google Books
 export interface GoogleBooksResponse {
   totalItems: number;
   items?: GoogleBookItem[];
 }
 
-export interface RespuestaAñadirLibro {
-  mensaje: string;
-  libro: LibroPersistido;
-}
-
-interface LibroPersistido {
-  id: string;
-  titulo: string;
-  autores: string[];
-  descripcion?: string;
-  portadaUrl?: string;
-  isbn?: string;
-  categorias?: string[];
-  disponible: boolean;
+// Resultado paginado con metadatos para la vista
+export interface ResultadoCatalogo {
+  libros: Libro[];
+  totalEncontrados: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleBooksService {
-  private readonly baseUrlGoogle = 'https://www.googleapis.com/books/v1/volumes';
-  private readonly apiUrlBackend = 'http://localhost:3000/api/libros';
-  private cacheBusqueda = new Map<string, Libro[]>();
-  private cacheInventarios = new Map<string, Libro[]>();
+  // URL base oficial de la API de Google Books
+  private readonly baseUrl = 'https://www.googleapis.com/books/v1/volumes';
+  // Caché en memoria para optimizar tiempo de respuesta y evitar peticiones repetitivas
+  private cacheBusqueda = new Map<string, ResultadoCatalogo>();
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obtiene el catálogo global desde la Persistencia JSON del Backend (back/Persistencia/libros.json)
-   * Con fallback automático ante caídas de red.
-   */
-  obtenerCatalogoInicial(): Observable<Libro[]> {
-    return this.http.get<any[]>(this.apiUrlBackend).pipe(
-      map(librosJson => {
-        if (!Array.isArray(librosJson) || librosJson.length === 0) {
-          return this.catalogoRespaldo();
-        }
-        return librosJson.map(item => new Libro(
-          item.id,
-          item.titulo,
-          Array.isArray(item.autores) ? item.autores.join(', ') : (item.autores || 'Autor Desconocido'),
-          item.disponible !== false,
-          item.portadaUrl || '',
-          item.descripcion || '',
-          item.isbn || '',
-          Array.isArray(item.categorias) ? item.categorias[0] : (item.categorias || 'General')
-        ));
-      }),
-      catchError(() => {
-        // Fallback local si el servidor backend no estuviera iniciado
-        return of(this.catalogoRespaldo());
-      })
-    );
-  }
+  /*
+    Busca libros en Google Books por término con soporte de paginación.
+  */
+  public buscarLibrosPaginados(
+    termino: string,
+    maxResults: number = 12,
+    startIndex: number = 0
+  ): Observable<ResultadoCatalogo> {
+    const q = termino ? termino.trim() : 'libros clasicos literatura';
+    const claveCache = `${q}_${maxResults}_${startIndex}`;
 
-  obtenerInventarioUsuario(usuario: string): Observable<Libro[]> {
-    const url = `${this.apiUrlBackend}/inventario/${encodeURIComponent(usuario)}`;
-    return this.http.get<LibroPersistido[]>(url).pipe(
-      timeout(8000),
-      map(libros => libros.map(item => this.mapearLibroPersistido(item)))
-    );
-  }
-
-  obtenerInventarioEnCache(usuario: string): Libro[] | null {
-    const inventario = this.cacheInventarios.get(this.claveUsuario(usuario));
-    return inventario ? [...inventario] : null;
-  }
-
-  actualizarInventarioEnCache(usuario: string, libros: Libro[]): void {
-    this.cacheInventarios.set(this.claveUsuario(usuario), [...libros]);
-  }
-
-  /**
-   * Busca libros en Google Books API para sugerencias o registrar nuevo libro
-   */
-  buscarLibros(termino: string, maxResults: number = 12): Observable<Libro[]> {
-    const q = termino ? termino.trim() : '';
-    if (!q) {
-      return of([]);
+    // Si ya está en caché, retornamos inmediatamente (RNF Eficiencia de desempeño)
+    if (this.cacheBusqueda.has(claveCache)) {
+      return of(this.cacheBusqueda.get(claveCache)!);
     }
 
-    if (this.cacheBusqueda.has(q)) {
-      return of(this.cacheBusqueda.get(q)!);
-    }
-
-    const url = `${this.baseUrlGoogle}?q=${encodeURIComponent(q)}&maxResults=${maxResults}&langRestrict=es`;
+    const url = `${this.baseUrl}?q=${encodeURIComponent(q)}&maxResults=${maxResults}&startIndex=${startIndex}&langRestrict=es`;
 
     return this.http.get<GoogleBooksResponse>(url).pipe(
       map(res => {
+        const total = res.totalItems || 0;
         if (!res.items || res.items.length === 0) {
-          return [];
+          const resultadoVacio: ResultadoCatalogo = { libros: [], totalEncontrados: total };
+          this.cacheBusqueda.set(claveCache, resultadoVacio);
+          return resultadoVacio;
         }
+
+        // Mapeo a instancias de la clase Libro (POO)
         const libros = res.items
           .filter(item => item.volumeInfo && item.volumeInfo.title)
           .map(item => this.mapearALibro(item));
 
-        this.cacheBusqueda.set(q, libros);
-        return libros;
+        const resultado: ResultadoCatalogo = { libros, totalEncontrados: total };
+        this.cacheBusqueda.set(claveCache, resultado);
+        return resultado;
       }),
-      catchError(() => of([]))
+      catchError(error => {
+        console.warn('[GoogleBooksService] Error al conectar con Google Books API:', error.message);
+        return of({ libros: [], totalEncontrados: 0 });
+      })
     );
   }
 
-  /**
-   * Flujo del Diagrama UML (Añadir libro | MVC):
-   * Front -> Controllers (POST http://localhost:3000/api/libros)
-   * Persiste en back/Persistencia/libros.json y retorna "mensaje: libro añadido exitosamente"
-   */
-  añadirLibroAInventario(libro: Libro, usuario: string): Observable<RespuestaAñadirLibro> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'x-usuario': usuario
-    });
-
-    const payload = {
-      id: libro.id,
-      titulo: libro.titulo,
-      autores: [libro.autor],
-      descripcion: libro.descripcion,
-      portadaUrl: libro.portadaUrl,
-      isbn: libro.isbn,
-      categorias: [libro.categoria],
-      disponible: true,
-      propietario: usuario
-    };
-
-    return this.http.post<unknown>(this.apiUrlBackend, payload, { headers }).pipe(
-      timeout(10000),
-      map(respuesta => this.normalizarRespuestaAñadirLibro(respuesta))
+  /*
+    Busca libros de forma simple devolviendo solo la lista de Libro
+  */
+  public buscarLibros(termino: string, maxResults: number = 12): Observable<Libro[]> {
+    return this.buscarLibrosPaginados(termino, maxResults, 0).pipe(
+      map(res => res.libros)
     );
   }
 
-  private normalizarRespuestaAñadirLibro(respuesta: unknown): RespuestaAñadirLibro {
-    if (typeof respuesta !== 'object' || respuesta === null) {
-      throw new Error('El backend devolvió una confirmación inválida al guardar el libro.');
+  /*
+    Catálogo inicial por defecto con literatura destacada
+  */
+  public obtenerCatalogoInicial(maxResults: number = 12, startIndex: number = 0): Observable<ResultadoCatalogo> {
+    return this.buscarLibrosPaginados('ficcion clasicos novela hispanoamericana', maxResults, startIndex);
+  }
+
+  /*
+    Busca libros por categoría literaria (Restricción 3.8 del Brief)
+  */
+  public buscarPorCategoria(categoria: string, maxResults: number = 12, startIndex: number = 0): Observable<ResultadoCatalogo> {
+    if (!categoria || categoria === 'Todos') {
+      return this.obtenerCatalogoInicial(maxResults, startIndex);
     }
-
-    const cuerpo = respuesta as Record<string, unknown>;
-    const libro = this.esLibroPersistido(cuerpo['libro'])
-      ? cuerpo['libro']
-      : this.esLibroPersistido(cuerpo)
-        ? cuerpo
-        : null;
-
-    if (!libro) {
-      throw new Error('El backend no confirmó el libro guardado. Recargue el inventario antes de volver a intentarlo.');
-    }
-
-    return {
-      mensaje: typeof cuerpo['mensaje'] === 'string' ? cuerpo['mensaje'] : 'Libro añadido a tu inventario.',
-      libro
-    };
+    const query = `subject:${encodeURIComponent(categoria)}`;
+    return this.buscarLibrosPaginados(query, maxResults, startIndex);
   }
 
-  private esLibroPersistido(valor: unknown): valor is LibroPersistido {
-    if (typeof valor !== 'object' || valor === null) return false;
-    const libro = valor as Record<string, unknown>;
-    return typeof libro['id'] === 'string' &&
-      typeof libro['titulo'] === 'string' &&
-      Array.isArray(libro['autores']) &&
-      typeof libro['disponible'] === 'boolean';
-  }
-
-  private mapearLibroPersistido(item: LibroPersistido): Libro {
-    return new Libro(
-      item.id,
-      item.titulo,
-      Array.isArray(item.autores) ? item.autores.join(', ') : 'Autor Desconocido',
-      item.disponible,
-      item.portadaUrl || '',
-      item.descripcion || '',
-      item.isbn || '',
-      item.categorias?.[0] || 'General'
-    );
-  }
-
-  private claveUsuario(usuario: string): string {
-    return usuario.trim().toLowerCase();
-  }
-
-  /**
-   * Mapea un volumen crudo de Google Books a la clase Libro del dominio
-   */
+  /*
+    Mapea un volumen crudo de Google Books a la clase orientada a objetos Libro
+  */
   private mapearALibro(item: GoogleBookItem): Libro {
     const info = item.volumeInfo;
     const autores = info.authors && info.authors.length > 0
@@ -226,11 +146,11 @@ export class GoogleBooksService {
       item.id,
       info.title || 'Sin Título',
       autores,
-      true,
+      true, // Disponible para intercambio inicialmente
       portada,
-      info.description || 'Sin descripción disponible.',
-      isbnObj ? isbnObj.identifier : '',
-      info.categories?.[0] || 'General'
+      info.description || 'Sin descripción disponible para esta obra.',
+      isbnObj ? isbnObj.identifier : 'S/N',
+      info.categories?.[0] || 'Literatura'
     );
   }
 

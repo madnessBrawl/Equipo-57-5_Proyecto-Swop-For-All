@@ -1,8 +1,37 @@
+<!-- ==========================================================================
+     PLANTILLA: dashboard.html (Menú Principal / Interfaz 2)
+     ========================================================================== -->
+
 <!-- Área de contenido dinámico del menú principal -->
 <main id="contenido-dashboard" class="area-trabajo">
-  <section class="bienvenida-dashboard">
-    <div class="encabezado-bienvenida" style="text-align: center; margin-top: 40px; margin-bottom: 30px;">
+  <section id="seccion-bienvenida-dashboard" class="bienvenida-dashboard">
+    <div id="encabezado-bienvenida" class="encabezado-bienvenida" style="text-align: center; margin-top: 40px; margin-bottom: 30px;">
       <h1 style="font-size: 2.5rem; color: #2b2b2b; margin: 0;">¡Bienvenido a Swop For All!</h1>
+      <p style="color: #666; font-size: 1.1rem; margin-top: 10px;">Plataforma colaborativa de intercambio seguro de libros</p>
+    </div>
+
+    <!-- Accesos directos a los módulos principales del Sprint 1 -->
+    <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 24px;">
+      <!-- Tarjeta de acceso rápido a Explorar Catálogo Global -->
+      <a routerLink="/catalogo" id="tarjeta-acceso-catalogo" style="text-decoration: none; background: #ffffff; border: 2px solid #b46032; border-radius: 8px; padding: 20px; width: 280px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s;">
+        <div style="font-size: 40px; margin-bottom: 8px;">📚</div>
+        <h3 style="color: #b46032; margin: 0 0 6px 0;">Catálogo Global</h3>
+        <p style="color: #555; font-size: 13px; margin: 0;">Explora obras literarias oficiales en tiempo real mediante Google Books API y solicita intercambios.</p>
+      </a>
+
+      <!-- Tarjeta de acceso rápido a Gestión de Intercambios -->
+      <a routerLink="/modificar-oferta" id="tarjeta-acceso-intercambios" style="text-decoration: none; background: #ffffff; border: 2px solid #b46032; border-radius: 8px; padding: 20px; width: 280px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s;">
+        <div style="font-size: 40px; margin-bottom: 8px;">🤝</div>
+        <h3 style="color: #b46032; margin: 0 0 6px 0;">Mis Intercambios</h3>
+        <p style="color: #555; font-size: 13px; margin: 0;">Gestiona tus ofertas activas, modifica libros ofrecidos/solicitados e interactúa en el chat.</p>
+      </a>
+
+      <!-- Tarjeta de acceso rápido a Comunidad -->
+      <a routerLink="/crear-comunidad" id="tarjeta-acceso-comunidad" style="text-decoration: none; background: #ffffff; border: 2px solid #b46032; border-radius: 8px; padding: 20px; width: 280px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s;">
+        <div style="font-size: 40px; margin-bottom: 8px;">👥</div>
+        <h3 style="color: #b46032; margin: 0 0 6px 0;">Comunidades</h3>
+        <p style="color: #555; font-size: 13px; margin: 0;">Participa y crea comunidades temáticas de lectura e intereses literarios compartidos.</p>
+      </a>
     </div>
   </section>
 </main>

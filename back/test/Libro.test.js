@@ -15,6 +15,9 @@ const GoogleBooksService = require('../Service/GoogleBooksService');
 const LibroPersistencia = require('../Persistencia/LibroPersistencia');
 const LibroRepository = require('../Repositorio/LibroRepository');
 const LibroController = require('../controllers/LibroController');
+const CifradoService = require('../Service/CifradoService');
+const OfertaIntercambio = require('../models/intercambioModel');
+const ControladorIntercambio = require('../controllers/intercambioController');
 
 /* ---------------- 1. Pruebas del Modelo Libro ---------------- */
 test('Modelo Libro: Crea instancia válida con atributos y métodos', () => {
@@ -205,3 +208,58 @@ test('LibroController: Impide que un usuario modifique libros ajenos', () => {
     fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
   }
 });
+
+/* ---------------- 5. Pruebas de Cifrado con ncrypt-js (RNF Seguridad / Confidencialidad) ---------------- */
+test('CifradoService: Encripta y desencripta datos usando ncrypt-js', () => {
+  const cifrado = new CifradoService('clave-prueba-123');
+  const datosSensibles = { usuario: 'carlos_lector', libros: ['L100', 'L101'] };
+
+  const textoCifrado = cifrado.cifrar(datosSensibles);
+  assert.strictEqual(typeof textoCifrado, 'string');
+  assert.notStrictEqual(textoCifrado, JSON.stringify(datosSensibles));
+  assert.strictEqual(cifrado.esCifradoValido(textoCifrado), true);
+
+  const datosDescifrados = cifrado.descifrar(textoCifrado);
+  assert.deepStrictEqual(datosDescifrados, datosSensibles);
+});
+
+test('LibroPersistencia: Exporta e importa respaldo cifrado garantizando protección ante fallos', () => {
+  const persistenciaOriginal = new LibroPersistencia();
+  const totalOriginal = persistenciaOriginal.total();
+  assert.strictEqual(totalOriginal > 0, true);
+
+  // Exportar respaldo cifrado
+  const respaldoCifrado = persistenciaOriginal.exportarCifrado();
+  assert.strictEqual(typeof respaldoCifrado, 'string');
+
+  // Restaurar en una persistencia limpia
+  const persistenciaNueva = new LibroPersistencia([]);
+  assert.strictEqual(persistenciaNueva.total(), 0);
+
+  const totalRestaurado = persistenciaNueva.importarCifrado(respaldoCifrado);
+  assert.strictEqual(totalRestaurado, totalOriginal);
+  assert.strictEqual(persistenciaNueva.buscarPorId('lib_100') !== null, true);
+});
+
+/* ---------------- 6. Pruebas de ControladorIntercambio (POO) ---------------- */
+test('ControladorIntercambio: Crea y modifica oferta orientada a objetos', () => {
+  const controlador = new ControladorIntercambio();
+  const oferta = controlador.crearOferta({
+    usuarioReceptor: 'maria_books',
+    librosOfrecidos: ['lib_propio_1'],
+    librosSolicitados: ['lib_100']
+  }, 'carlos_lector');
+
+  assert.strictEqual(oferta.usuarioEmisor, 'carlos_lector');
+  assert.strictEqual(oferta.usuarioReceptor, 'maria_books');
+  assert.strictEqual(oferta.estado, 'Pendiente');
+
+  // Modificar oferta
+  const ofertaModificada = controlador.modificarOferta(oferta.idIntercambio, {
+    librosOfrecidos: ['lib_propio_1', 'lib_propio_2']
+  }, 'carlos_lector');
+
+  assert.strictEqual(ofertaModificada.estado, 'Modificada');
+  assert.strictEqual(ofertaModificada.librosOfrecidos.length, 2);
+});
+

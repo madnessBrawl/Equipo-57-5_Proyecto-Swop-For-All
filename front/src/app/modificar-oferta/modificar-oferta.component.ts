@@ -1,7 +1,21 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+/* ==========================================================================
+   ARCHIVO: modificar-oferta.component.ts (FRONTEND: front/src/app/modificar-oferta/)
+   Componente: ModificarOfertaComponent
+   Función: Permite gestionar y modificar los términos de una oferta de intercambio
+            iniciada exclusivamente desde el Catálogo Global.
+   Reglas de negocio:
+     1. Solo accesible si existe un intercambio iniciado desde el catálogo.
+     2. Inicia con 0 libros ofrecidos (el usuario debe agregarlos activamente).
+     3. Solo se pueden ofrecer libros que el usuario posea en su inventario.
+     4. Debe ofrecer al menos un libro propio para solicitar el intercambio.
+   ========================================================================== */
+
+import { Component, ElementRef, ViewChild, AfterViewChecked, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
+import { CifradoService } from '../servicios/cifrado.service';
 
 interface MensajeChat {
   remitente: string;
@@ -16,147 +30,325 @@ interface MensajeChat {
   templateUrl: './modificar-oferta.component.html',
   styleUrls: ['./modificar-oferta.component.css']
 })
-export class ModificarOfertaComponent implements AfterViewChecked {
-  
+export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
+
   @ViewChild('scrollChat') private scrollChatContainer!: ElementRef;
 
-  public usuarioActual: string = "UsuarioA";
-  public idIntercambio: string = "INT-2026-01";
-  
-  // Inventario real del usuario logueado
+  // Estado que determina si hay una oferta válida iniciada desde el catálogo
+  public tieneOfertaActiva: boolean = false;
+
+  public usuarioActual: string = 'UsuarioA';
+  public usuarioInterlocutor: string = 'carlos_lector';
+  public idIntercambio: string = 'INT-2026-01';
+
+  // Inventario real y propio del usuario logueado
   public inventarioPersonal: Libro[] = [];
-  
-  // Inventario real del otro usuario (para solicitar agregar/retirar sus libros)
+
+  // Inventario disponible del otro usuario para contraofertas
   public inventarioDelOtroUsuario: Libro[] = [];
 
+  // Oferta activa: inicia con 0 libros ofrecidos
   public ofertaActiva: OfertaIntercambio = new OfertaIntercambio(
-    this.idIntercambio, 
-    this.usuarioActual, 
-    "UsuarioB",
-    [], 
-    [], 
-    "Pendiente"
+    this.idIntercambio,
+    this.usuarioActual,
+    this.usuarioInterlocutor,
+    [], // Inicia estrictamente VACÍO en la parte del usuario
+    [], // Llenado con el libro seleccionado desde el catálogo
+    'Pendiente'
   );
 
-  public mensajeInput: string = "";
-  public maxLengthMensaje: number = 250;
+  public mensajeInput: string = '';
+  public readonly maxLengthMensaje: number = 250;
   public historialMensajes: MensajeChat[] = [];
 
-  constructor() {
-    this.cargarDatosReales();
+  constructor(
+    private router: Router,
+    private cifradoService: CifradoService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarDatosIntercambio();
   }
 
   ngAfterViewChecked(): void {
     this.scrollToBottom();
   }
 
-  private cargarDatosReales(): void {
-    // 1. Cargar inventario personal del usuario
+  /*
+    Carga y valida la existencia de una oferta iniciada desde el Catálogo Global.
+  */
+  private cargarDatosIntercambio(): void {
+    // 1. Cargar inventario propio del usuario (libros que posee)
     const inventarioGuardado = localStorage.getItem('inventario_usuario');
     if (inventarioGuardado) {
-      this.inventarioPersonal = JSON.parse(inventarioGuardado);
+      try {
+        const parsed = JSON.parse(inventarioGuardado);
+        this.inventarioPersonal = (Array.isArray(parsed) && parsed.length > 0)
+          ? parsed
+          : this.obtenerInventarioPorDefecto();
+      } catch {
+        this.inventarioPersonal = this.obtenerInventarioPorDefecto();
+      }
     } else {
-      this.inventarioPersonal = [
-        new Libro("L1", "Cien años de soledad", "Gabriel García Márquez", true),
-        new Libro("L2", "Don Quijote de la Mancha", "Miguel de Cervantes", true)
-      ];
+      this.inventarioPersonal = this.obtenerInventarioPorDefecto();
       localStorage.setItem('inventario_usuario', JSON.stringify(this.inventarioPersonal));
     }
 
-    // 2. Cargar inventario del otro usuario
-    const inventarioOtroGuardado = localStorage.getItem('inventario_UsuarioB');
+    // 2. Verificar si se inició una oferta desde el Catálogo Global
+    const libroSolicitadoRaw = sessionStorage.getItem('libroSolicitado');
+    const ofertaActivaRaw = localStorage.getItem('oferta_activa');
+    const ofertaCifrada = this.cifradoService.obtenerDeStorageSeguro<any>('oferta_activa');
+
+    if (!libroSolicitadoRaw && !ofertaActivaRaw && !ofertaCifrada) {
+      this.tieneOfertaActiva = false;
+      return;
+    }
+
+    this.tieneOfertaActiva = true;
+
+    // 3. Determinar los datos del libro solicitado desde el catálogo
+    let libroDelCatalogo: Libro | null = null;
+    let propietarioDestino = 'carlos_lector';
+
+    if (libroSolicitadoRaw) {
+      try {
+        const parsed = JSON.parse(libroSolicitadoRaw);
+        propietarioDestino = parsed.propietario || 'carlos_lector';
+        libroDelCatalogo = new Libro(
+          parsed.id || 'lib_cat_1',
+          parsed.titulo || 'Libro del Catálogo',
+          parsed.autor || 'Autor del Catálogo',
+          true,
+          parsed.portadaUrl || ''
+        );
+      } catch (e) {
+        console.warn('Error al parsear libro solicitado:', e);
+      }
+    }
+
+    this.usuarioInterlocutor = propietarioDestino;
+
+    // 4. Cargar inventario del otro usuario
+    const inventarioOtroGuardado = localStorage.getItem(`inventario_${this.usuarioInterlocutor}`);
     if (inventarioOtroGuardado) {
-      this.inventarioDelOtroUsuario = JSON.parse(inventarioOtroGuardado);
+      try {
+        this.inventarioDelOtroUsuario = JSON.parse(inventarioOtroGuardado);
+      } catch {
+        this.inventarioDelOtroUsuario = this.obtenerInventarioOtroPorDefecto();
+      }
     } else {
-      this.inventarioDelOtroUsuario = [
-        new Libro("L3", "El Principito", "Antoine de Saint-Exupéry", true),
-        new Libro("L4", "1984", "George Orwell", true),
-        new Libro("L5", "Fahrenheit 451", "Ray Bradbury", true)
-      ];
-      localStorage.setItem('inventario_UsuarioB', JSON.stringify(this.inventarioDelOtroUsuario));
+      this.inventarioDelOtroUsuario = this.obtenerInventarioOtroPorDefecto();
+      if (libroDelCatalogo) {
+        if (!this.inventarioDelOtroUsuario.some(l => String(l.id) === String(libroDelCatalogo!.id))) {
+          this.inventarioDelOtroUsuario.unshift(libroDelCatalogo);
+        }
+      }
+      localStorage.setItem(`inventario_${this.usuarioInterlocutor}`, JSON.stringify(this.inventarioDelOtroUsuario));
     }
 
-    // 3. Cargar oferta activa
-    const ofertaGuardada = localStorage.getItem(`oferta_${this.idIntercambio}`);
-    if (ofertaGuardada) {
-      this.ofertaActiva = JSON.parse(ofertaGuardada);
+    // 5. Configurar la oferta activa
+    // REGLA 2: Inicia con 0 libros ofrecidos en la parte del usuario
+    if (ofertaActivaRaw) {
+      try {
+        const parsedOferta = JSON.parse(ofertaActivaRaw);
+        this.idIntercambio = parsedOferta.idIntercambio || `INT-${Date.now().toString(36)}`;
+        this.ofertaActiva = new OfertaIntercambio(
+          this.idIntercambio,
+          this.usuarioActual,
+          parsedOferta.usuarioReceptor || this.usuarioInterlocutor,
+          Array.isArray(parsedOferta.librosOfrecidos) ? parsedOferta.librosOfrecidos : [],
+          Array.isArray(parsedOferta.librosSolicitados) && parsedOferta.librosSolicitados.length > 0
+            ? parsedOferta.librosSolicitados
+            : (libroDelCatalogo ? [libroDelCatalogo] : []),
+          parsedOferta.estado || 'Pendiente'
+        );
+      } catch {
+        this.inicializarNuevaOferta(libroDelCatalogo);
+      }
     } else {
-      this.ofertaActiva.librosOfrecidos = [this.inventarioPersonal[0]];
-      this.ofertaActiva.librosSolicitados = [this.inventarioDelOtroUsuario[2]];
-      this.guardarOferta();
+      this.inicializarNuevaOferta(libroDelCatalogo);
     }
 
-    // 4. Cargar chat
+    // 6. Cargar mensajes del chat
     const chatGuardado = localStorage.getItem(`chat_${this.idIntercambio}`);
     if (chatGuardado) {
-      this.historialMensajes = JSON.parse(chatGuardado);
+      try {
+        this.historialMensajes = JSON.parse(chatGuardado);
+      } catch {
+        this.inicializarChatPorDefecto();
+      }
     } else {
-      this.historialMensajes = [
-        { remitente: "UsuarioB", texto: "¡Hola! Me interesa realizar este intercambio.", hora: "10:00 a. m." }
-      ];
-      this.guardarChatEnBaseDeDatos();
+      this.inicializarChatPorDefecto();
     }
+
+    this.cdr.detectChanges();
   }
 
-  private guardarChatEnBaseDeDatos(): void {
-    localStorage.setItem(`chat_${this.idIntercambio}`, JSON.stringify(this.historialMensajes));
-  }
-
-  public guardarOferta(): void {
-    localStorage.setItem(`oferta_${this.idIntercambio}`, JSON.stringify(this.ofertaActiva));
-  }
-
-  // Añadir libro desde el inventario propio
-  public agregarLibroPropio(libro: Libro): void {
-    const yaExiste = this.ofertaActiva.librosOfrecidos.some(l => l.id === libro.id);
-    if (!yaExiste) {
-      this.ofertaActiva.librosOfrecidos.push(libro);
-      this.guardarOferta();
-    }
-  }
-
-  // Retirar libro propio de la oferta
-  public retirarLibroPropio(idLibro: string): void {
-    this.ofertaActiva.librosOfrecidos = this.ofertaActiva.librosOfrecidos.filter(l => l.id !== idLibro);
+  private inicializarNuevaOferta(libroDelCatalogo: Libro | null): void {
+    this.idIntercambio = localStorage.getItem('oferta_activa_id') || `INT-${Date.now().toString(36)}`;
+    this.ofertaActiva = new OfertaIntercambio(
+      this.idIntercambio,
+      this.usuarioActual,
+      this.usuarioInterlocutor,
+      [], // Inicia estrictamente VACÍO
+      libroDelCatalogo ? [libroDelCatalogo] : [],
+      'Pendiente'
+    );
     this.guardarOferta();
   }
 
-  // Solicitar agregar un libro del inventario del otro usuario
-  public solicitarAgregarLibroAjeno(libro: Libro): void {
-    const yaSolicitado = this.ofertaActiva.librosSolicitados.some(l => l.id === libro.id);
-    if (!yaSolicitado) {
-      this.ofertaActiva.librosSolicitados.push(libro);
+  private inicializarChatPorDefecto(): void {
+    this.historialMensajes = [
+      {
+        remitente: this.usuarioInterlocutor,
+        texto: `¡Hola! Veo que te interesa mi libro. ¿Qué libros de tu inventario tienes disponibles para ofrecerme a cambio?`,
+        hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ];
+    this.guardarChatEnStorage();
+  }
+
+  /*
+    REGLA 3: DEBES OFRECER LIBROS QUE TENGAS.
+    Añade un libro del inventario propio a los libros ofrecidos en la propuesta.
+  */
+  public agregarLibroPropio(libro: Libro): void {
+    if (!this.ofertaActiva.librosOfrecidos) {
+      this.ofertaActiva.librosOfrecidos = [];
+    }
+
+    const yaOfrecido = this.estaOfrecido(libro.id);
+    if (!yaOfrecido) {
+      // Reasignación inmutable para activar detección de cambios de Angular
+      this.ofertaActiva.librosOfrecidos = [...this.ofertaActiva.librosOfrecidos, libro];
       this.guardarOferta();
+      this.cdr.detectChanges();
+    }
+  }
+
+  /*
+    Retira un libro propio de la lista de ofrecidos
+  */
+  public retirarLibroPropio(idLibro: string): void {
+    if (!this.ofertaActiva.librosOfrecidos) return;
+
+    this.ofertaActiva.librosOfrecidos = this.ofertaActiva.librosOfrecidos.filter(
+      l => String(l.id) !== String(idLibro)
+    );
+    this.guardarOferta();
+    this.cdr.detectChanges();
+  }
+
+  /*
+    Comprueba si un libro propio ya está en la oferta activa
+  */
+  public estaOfrecido(idLibro: string): boolean {
+    if (!this.ofertaActiva || !Array.isArray(this.ofertaActiva.librosOfrecidos)) return false;
+    return this.ofertaActiva.librosOfrecidos.some(l => String(l.id) === String(idLibro));
+  }
+
+  /*
+    Comprueba si un libro ajeno ya está en la lista de solicitados
+  */
+  public estaSolicitado(idLibro: string): boolean {
+    if (!this.ofertaActiva || !Array.isArray(this.ofertaActiva.librosSolicitados)) return false;
+    return this.ofertaActiva.librosSolicitados.some(l => String(l.id) === String(idLibro));
+  }
+
+  /*
+    Solicita agregar un libro adicional del inventario del otro usuario
+  */
+  public solicitarAgregarLibroAjeno(libro: Libro): void {
+    if (!this.ofertaActiva.librosSolicitados) {
+      this.ofertaActiva.librosSolicitados = [];
+    }
+
+    const yaSolicitado = this.estaSolicitado(libro.id);
+    if (!yaSolicitado) {
+      this.ofertaActiva.librosSolicitados = [...this.ofertaActiva.librosSolicitados, libro];
+      this.guardarOferta();
+
       this.historialMensajes.push({
         remitente: this.usuarioActual,
-        texto: `Solicitud de modificación: He pedido agregar a la oferta tu libro "${libro.titulo}".`,
+        texto: `He añadido a la solicitud tu libro "${libro.titulo}".`,
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
-      this.guardarChatEnBaseDeDatos();
+      this.guardarChatEnStorage();
+      this.cdr.detectChanges();
     }
   }
 
-  // Solicitar retirar un libro del inventario del otro usuario
+  /*
+    Retira un libro de los solicitados al otro usuario
+  */
   public solicitarRetirarLibroAjeno(idLibro: string): void {
-    const libroRetirado = this.ofertaActiva.librosSolicitados.find(l => l.id === idLibro);
-    this.ofertaActiva.librosSolicitados = this.ofertaActiva.librosSolicitados.filter(l => l.id !== idLibro);
+    if (!this.ofertaActiva.librosSolicitados) return;
+
+    const libroRetirado = this.ofertaActiva.librosSolicitados.find(l => String(l.id) === String(idLibro));
+    this.ofertaActiva.librosSolicitados = this.ofertaActiva.librosSolicitados.filter(
+      l => String(l.id) !== String(idLibro)
+    );
     this.guardarOferta();
-    
+
     if (libroRetirado) {
       this.historialMensajes.push({
         remitente: this.usuarioActual,
-        texto: `Solicitud de modificación: He pedido retirar de la oferta el libro "${libroRetirado.titulo}".`,
+        texto: `He retirado de la solicitud el libro "${libroRetirado.titulo}".`,
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
-      this.guardarChatEnBaseDeDatos();
+      this.guardarChatEnStorage();
+    }
+    this.cdr.detectChanges();
+  }
+
+  /*
+    Guarda los cambios de la oferta cumpliendo las reglas de negocio
+  */
+  public guardarModificacionOferta(): void {
+    // Validación estricta según observación docente: "debe ofrecer libros para pedirlos"
+    if (!this.ofertaActiva.librosOfrecidos || this.ofertaActiva.librosOfrecidos.length === 0) {
+      alert('⚠️ Regla de negocio: No puedes enviar una propuesta sin libros ofrecidos. Debes seleccionar al menos un libro de tu inventario propio en la columna izquierda.');
+      return;
+    }
+
+    if (!this.ofertaActiva.librosSolicitados || this.ofertaActiva.librosSolicitados.length === 0) {
+      alert('⚠️ Debe existir al menos un libro solicitado en el intercambio.');
+      return;
+    }
+
+    this.ofertaActiva.estado = 'Modificada';
+    this.guardarOferta();
+
+    // RNF Cifrado: Se guarda también la versión protegida con ncrypt-js
+    this.cifradoService.guardarEnStorageSeguro('oferta_activa', this.ofertaActiva);
+
+    alert('✅ ¡Oferta de intercambio modificada y enviada al lector con éxito!');
+  }
+
+  /*
+    Cancela y descarta el intercambio activo, limpiando los registros
+  */
+  public cancelarIntercambio(): void {
+    if (confirm('¿Estás seguro de que deseas cancelar este intercambio? Deberás seleccionar un libro nuevamente desde el catálogo.')) {
+      localStorage.removeItem('oferta_activa');
+      localStorage.removeItem('oferta_activa_id');
+      localStorage.removeItem(`oferta_${this.idIntercambio}`);
+      sessionStorage.removeItem('libroSolicitado');
+      this.cifradoService.eliminarDeStorageSeguro('oferta_activa');
+      this.tieneOfertaActiva = false;
+      this.router.navigate(['/catalogo']);
     }
   }
 
+  /*
+    Envío de mensajes en el chat de negociación
+  */
   public enviarMensaje(): void {
     if (!this.mensajeInput || !this.mensajeInput.trim()) return;
-    
+
     if (this.mensajeInput.length > this.maxLengthMensaje) {
-      alert("El mensaje excede el límite de caracteres permitidos.");
+      alert('El mensaje excede el límite de 250 caracteres.');
       return;
     }
 
@@ -168,8 +360,22 @@ export class ModificarOfertaComponent implements AfterViewChecked {
       hora: horaActual
     });
 
-    this.guardarChatEnBaseDeDatos();
-    this.mensajeInput = "";
+    this.guardarChatEnStorage();
+    this.mensajeInput = '';
+    this.cdr.detectChanges();
+  }
+
+  public irAlCatalogo(): void {
+    this.router.navigate(['/catalogo']);
+  }
+
+  private guardarOferta(): void {
+    localStorage.setItem('oferta_activa', JSON.stringify(this.ofertaActiva));
+    localStorage.setItem(`oferta_${this.idIntercambio}`, JSON.stringify(this.ofertaActiva));
+  }
+
+  private guardarChatEnStorage(): void {
+    localStorage.setItem(`chat_${this.idIntercambio}`, JSON.stringify(this.historialMensajes));
   }
 
   private scrollToBottom(): void {
@@ -177,15 +383,23 @@ export class ModificarOfertaComponent implements AfterViewChecked {
       if (this.scrollChatContainer) {
         this.scrollChatContainer.nativeElement.scrollTop = this.scrollChatContainer.nativeElement.scrollHeight;
       }
-    } catch (err) {}
+    } catch {}
   }
 
-  public guardarModificacionOferta(): void {
-    if (this.ofertaActiva.librosOfrecidos.length === 0) {
-      alert("Debe ofrecer al menos un libro de su inventario.");
-      return;
-    }
-    this.guardarOferta();
-    alert("¡Modificación de oferta guardada y notificada con éxito!");
+  private obtenerInventarioPorDefecto(): Libro[] {
+    return [
+      new Libro('L_propio_1', 'Cien Años de Soledad', 'Gabriel García Márquez', true, 'https://books.google.com/books/content?id=7hY7DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Edición ilustrada tapa dura', '9780307474728', 'Novela'),
+      new Libro('L_propio_2', 'Don Quijote de la Mancha', 'Miguel de Cervantes', true, 'https://books.google.com/books/content?id=F-k_DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Clásico de la literatura española', '9788424115166', 'Clásicos'),
+      new Libro('L_propio_3', 'Ficciones', 'Jorge Luis Borges', true, '', 'Colección de cuentos fantásticos', '9788497592444', 'Ficción'),
+      new Libro('L_propio_4', 'Rayuela', 'Julio Cortázar', true, 'https://books.google.com/books/content?id=3w0_DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Novela experimental', '9788466332217', 'Novela')
+    ];
+  }
+
+  private obtenerInventarioOtroPorDefecto(): Libro[] {
+    return [
+      new Libro('L_otro_1', '1984', 'George Orwell', true, 'https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1', 'Distopía clásica', '9780451524935', 'Ciencia Ficción'),
+      new Libro('L_otro_2', 'Fahrenheit 451', 'Ray Bradbury', true, 'https://books.google.com/books/content?id=Vz3aDwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Distopía sobre la censura', '9781451673319', 'Ciencia Ficción'),
+      new Libro('L_otro_3', 'Doña Bárbara', 'Rómulo Gallegos', true, 'https://books.google.com/books/content?id=t-f4DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Literatura Venezolana', '9788437603681', 'Clásicos')
+    ];
   }
 }

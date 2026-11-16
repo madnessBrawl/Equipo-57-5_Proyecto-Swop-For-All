@@ -23,11 +23,10 @@ export const routes: Routes = [
   // Rutas de comunidad (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },
-  { path: 'mi-comunidad', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
-  { path: 'ver-comunidades', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
   { path: 'catalogo', component: CatalogoLibrosComponent },
-  { path: 'inventario', component: InventarioComponent },
-  { 
+  { path: 'explorar-catalogo', redirectTo: 'catalogo', pathMatch: 'full' },
+  { path: 'catalogo-global', redirectTo: 'catalogo', pathMatch: 'full' },
+ { 
     path: 'modificar-oferta', 
     component: ModificarOfertaComponent 
   },

@@ -41,8 +41,8 @@
         <span class="texto-icono">Cat&aacute;logo</span>
       </button>
       
-      <!-- Botón de Intercambiar vinculado directamente a tu ruta de modificar oferta -->
-      <button routerLink="/modificar-oferta" id="btn-intercambio" class="boton-icono">
+      <!-- Botón de Intercambiar: Solo accesible si se inició un intercambio desde el catálogo -->
+      <button id="btn-intercambio" class="boton-icono" (click)="navegarAIntercambio()" title="Ir a la sala de intercambio activa">
         <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
         <span class="texto-icono">Intercambiar</span>
       </button>

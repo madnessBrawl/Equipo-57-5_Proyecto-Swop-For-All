@@ -7,22 +7,32 @@
 
 const PersistenciaJSON = require('./PersistenciaJSON');
 const Libro = require('../models/Libro');
+const CifradoService = require('../Service/CifradoService');
 
-class LibroPersistencia extends PersistenciaJSON {
-  constructor(archivoODatos = 'libros.json', datosIniciales = null) {
-    let nombreArchivo = 'libros.json';
-    let iniciales = datosIniciales;
+class LibroPersistencia {
+  constructor(datosIniciales = null, cifradoService = new CifradoService()) {
+    // Almacenamiento en Map indexado por ID para acceso O(1)
+    this._coleccion = new Map();
+    // Servicio de cifrado con ncrypt-js inyectado para seguridad de datos
+    this._cifradoService = cifradoService;
 
-    if (Array.isArray(archivoODatos)) {
-      iniciales = archivoODatos;
-      nombreArchivo = (typeof datosIniciales === 'string' && datosIniciales) ? datosIniciales : 'libros.json';
-    } else if (typeof archivoODatos === 'string' && archivoODatos.trim()) {
-      nombreArchivo = archivoODatos.trim();
+    if (datosIniciales === null) {
+      this._sembrarDatosIniciales();
+    } else if (Array.isArray(datosIniciales)) {
+      for (const item of datosIniciales) {
+        this.guardar(item instanceof Libro ? item : new Libro(item));
+      }
     }
 
-    // Semilla por defecto si no se especifican datos
-    const semilla = iniciales !== null ? iniciales : [
-      {
+  // Getter del servicio de cifrado
+  get cifradoService() {
+    return this._cifradoService;
+  }
+
+  // Siembra libros iniciales de prueba alineados con el prototipo del sistema
+  _sembrarDatosIniciales() {
+    const demo = [
+      new Libro({
         id: 'lib_100',
         titulo: 'El Principito',
         autores: ['Antoine de Saint-Exupéry'],
@@ -105,6 +115,44 @@ class LibroPersistencia extends PersistenciaJSON {
   // Busca por predicado y retorna instancias de Libro
   buscarPorPredicado(predicado) {
     return this.buscarTodos().filter(predicado);
+  }
+
+  // Elimina un libro por ID
+  eliminar(id) {
+    return this._coleccion.delete(String(id));
+  }
+
+  // Cantidad de registros en la persistencia
+  total() {
+    return this._coleccion.size;
+  }
+
+  /*
+    Exporta todo el catálogo serializado y cifrado con ncrypt-js.
+    Garantiza el requisito no funcional de Confidencialidad y Protección ante fallos.
+  */
+  exportarCifrado() {
+    const listadoDTO = this.buscarTodos().map(libro => libro.toJSON());
+    return this._cifradoService.cifrar(listadoDTO);
+  }
+
+  /*
+    Restaura el catálogo a partir de un respaldo cifrado con ncrypt-js.
+  */
+  importarCifrado(cadenaCifrada) {
+    if (!cadenaCifrada) {
+      throw new Error('Debe proporcionar un respaldo cifrado para importar.');
+    }
+    const librosRecuperados = this._cifradoService.descifrar(cadenaCifrada);
+    if (!Array.isArray(librosRecuperados)) {
+      throw new Error('El contenido descifrado no corresponde a un catálogo válido.');
+    }
+
+    this._coleccion.clear();
+    for (const item of librosRecuperados) {
+      this.guardar(new Libro(item));
+    }
+    return this.total();
   }
 }
 
