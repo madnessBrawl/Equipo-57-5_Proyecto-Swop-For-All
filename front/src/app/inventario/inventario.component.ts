@@ -23,6 +23,7 @@ export class InventarioComponent implements OnInit {
   mostrarConfirmacion = false;
   tituloLibroAnadido = '';
   error = '';
+  intentoGuardar = false;
   private versionInventario = 0;
 
   titulo = '';
@@ -86,20 +87,24 @@ export class InventarioComponent implements OnInit {
 
   agregarLibro(): void {
     const usuario = this.usuarioActual;
-    if (!usuario || !this.titulo.trim()) {
-      this.error = 'El título del libro es obligatorio.';
+    if (!usuario) return;
+
+    this.intentoGuardar = true;
+    const titulo = this.titulo.trim();
+    const isbn = this.isbn.trim();
+    if (!titulo || !isbn) {
+      this.error = 'El título y el ISBN son obligatorios.';
       return;
     }
 
-    const isbn = this.isbn.trim();
-    if (isbn && !/^\d{13}$/.test(isbn)) {
+    if (!/^\d{13}$/.test(isbn)) {
       this.error = 'El ISBN debe tener exactamente 13 dígitos.';
       return;
     }
 
     const libro = new Libro(
       '',
-      this.titulo.trim(),
+      titulo,
       this.autor.trim(),
       true,
       '',
@@ -180,5 +185,6 @@ export class InventarioComponent implements OnInit {
     this.descripcion = '';
     this.isbn = '';
     this.categoria = '';
+    this.intentoGuardar = false;
   }
 }
