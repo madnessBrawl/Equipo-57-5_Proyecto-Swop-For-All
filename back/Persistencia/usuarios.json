@@ -1,0 +1,54 @@
+[
+  {
+    "id": "usr_carlos",
+    "usuario": "carlos_lector",
+    "nombres": "Carlos Andrés",
+    "apellidos": "Pérez",
+    "correo": "carlos@ejemplo.com",
+    "telefono": "04141234567",
+    "clave": "carlos123",
+    "reputacion": 4.8
+  },
+  {
+    "id": "usr_maria",
+    "usuario": "maria_books",
+    "nombres": "María Gabriela",
+    "apellidos": "López",
+    "correo": "maria@ejemplo.com",
+    "telefono": "04249876543",
+    "clave": "maria123",
+    "reputacion": 5
+  },
+  {
+    "id": "usr_ana",
+    "usuario": "ana_lectora",
+    "nombres": "Ana Isabel",
+    "apellidos": "Rodríguez",
+    "correo": "ana@ejemplo.com",
+    "telefono": "04125556677",
+    "clave": "ana123",
+    "reputacion": 4.5
+  },
+  {
+    "usuario": "Mastermind",
+    "nombres": "german",
+    "apellidos": "sanchez",
+    "clave": "qwerty",
+    "generosFavoritos": "ciencia ficción",
+    "genero": "Hombre",
+    "correo": "monafnfan@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjborz3_gvv6v"
+  },
+  {
+    "usuario": "LULA",
+    "nombres": "LULA",
+    "apellidos": "LULA",
+    "clave": "LULA",
+    "generosFavoritos": "LULA",
+    "genero": "Mujer",
+    "correo": "LULA",
+    "reputacion": 5,
+    "id": "reg_mwjd2ze9_0o0q3"
+  }
+]

@@ -34,9 +34,6 @@
       @if (intercambios.length === 0) {
         <div id="aviso-sin-intercambios" class="aviso-vacio">
           <p>Aún no tiene intercambios finalizados para calificar.</p>
-          <button type="button" id="boton-datos-prueba" class="boton-secundario" (click)="cargarDatosDePrueba()">
-            Cargar intercambios de prueba (temporal)
-          </button>
         </div>
       } @else {
 
@@ -54,6 +51,9 @@
 
         <!-- ---------- Resumen del intercambio elegido ---------- -->
         @if (intercambioActual && !yaCalificado) {
+          @if (consultandoCalificacion) {
+            <p role="status">Verificando calificaciones anteriores…</p>
+          }
           <div id="resumen-intercambio" class="resumen-intercambio">
             <p><strong>Lector a calificar:</strong> {{ lectorEvaluado }}</p>
             <p><strong>Libro ofrecido:</strong> {{ intercambioActual.libroOfrecido }}</p>
@@ -61,7 +61,7 @@
           </div>
 
           <!-- ======= PASO 1: formulario de puntuación y comentario ======= -->
-          @if (paso === 'formulario') {
+          @if (paso === 'formulario' && !consultandoCalificacion) {
             <div class="grupo-entrada">
               <label>Puntuación</label>
               <div id="selector-estrellas" class="selector-estrellas">
@@ -87,14 +87,16 @@
           }
 
           <!-- ======= PASO 2: solicitud de confirmación ======= -->
-          @if (paso === 'confirmacion') {
+          @if (paso === 'confirmacion' && !consultandoCalificacion) {
             <div id="panel-confirmacion" class="panel-confirmacion">
               <p class="texto-confirmacion">¿Desea registrar esta calificación? Una vez guardada no podrá modificarla.</p>
               <p><strong>Estrellas:</strong> {{ puntuacion }} de 5</p>
               <p><strong>Comentario:</strong> {{ textoComentario.trim() || 'Sin comentario' }}</p>
               <div class="acciones-mensaje">
-                <button type="button" id="boton-confirmar" class="boton-accion" (click)="confirmarYGuardar()">Confirmar</button>
-                <button type="button" id="boton-volver" class="boton-secundario" (click)="volverAlFormulario()">Volver</button>
+                <button type="button" id="boton-confirmar" class="boton-accion" (click)="confirmarYGuardar()" [disabled]="guardando">
+                  {{ guardando ? 'Guardando…' : 'Confirmar' }}
+                </button>
+                <button type="button" id="boton-volver" class="boton-secundario" (click)="volverAlFormulario()" [disabled]="guardando">Volver</button>
               </div>
             </div>
           }

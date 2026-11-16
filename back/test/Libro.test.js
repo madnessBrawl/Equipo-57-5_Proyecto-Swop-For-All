@@ -7,6 +7,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const Libro = require('../models/Libro');
 const GoogleBooksService = require('../Service/GoogleBooksService');
@@ -110,6 +112,7 @@ test('LibroRepository: Obtiene catálogo global y busca por coincidencia', () =>
 
   const catalogo = repo.obtenerCatalogoGlobal();
   assert.strictEqual(catalogo.length >= 4, true);
+  assert.deepStrictEqual(repo.obtenerLibrosPorUsuario('carlos_lector'), []);
 
   const busqueda = repo.buscarEnCatalogo('Orwell');
   assert.strictEqual(busqueda.length, 1);
@@ -117,54 +120,93 @@ test('LibroRepository: Obtiene catálogo global y busca por coincidencia', () =>
 });
 
 test('LibroRepository: Permite registrar un libro y actualizar disponibilidad', () => {
-  const persistencia = new LibroPersistencia([]);
-  const repo = new LibroRepository({ persistencia });
+  const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
+  try {
+    const persistencia = new LibroPersistencia(archivo, []);
+    const repo = new LibroRepository({ persistencia });
 
-  const nuevo = repo.registrarLibro(new Libro({
-    id: 'lib_custom_1',
-    titulo: 'Crónica de una muerte anunciada',
-    autores: ['Gabriel García Márquez'],
-    propietario: 'andres'
-  }));
+    const nuevo = repo.registrarLibro(new Libro({
+      id: 'lib_custom_1',
+      titulo: 'Crónica de una muerte anunciada',
+      autores: ['Gabriel García Márquez'],
+      propietario: 'andres'
+    }));
 
-  assert.strictEqual(nuevo.id, 'lib_custom_1');
-  assert.strictEqual(repo.obtenerLibrosPorUsuario('andres').length, 1);
+    assert.strictEqual(nuevo.id, 'lib_custom_1');
+    assert.strictEqual(repo.obtenerLibrosPorUsuario('andres').length, 1);
 
-  // Actualizar disponibilidad
-  repo.actualizarDisponibilidad('lib_custom_1', false);
-  const catalogo = repo.obtenerCatalogoGlobal();
-  assert.strictEqual(catalogo.find(l => l.id === 'lib_custom_1'), undefined);
+    repo.actualizarDisponibilidad('lib_custom_1', false);
+    const catalogo = repo.obtenerCatalogoGlobal();
+    assert.strictEqual(catalogo.find(l => l.id === 'lib_custom_1'), undefined);
+  } finally {
+    fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
+  }
 });
 
 /* ---------------- 4. Pruebas de LibroController (Reglas de Negocio) ---------------- */
 test('LibroController: Exige inicio de sesión para agregar libro a inventario', () => {
-  const controller = new LibroController(new LibroRepository({ persistencia: new LibroPersistencia([]) }));
+  const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
+  try {
+    const controller = new LibroController(
+      new LibroRepository({ persistencia: new LibroPersistencia(archivo, []) })
+    );
 
-  // Sin sesión: debe lanzar error
-  assert.throws(
-    () => controller.agregarLibroAInventario({ titulo: 'Rayuela' }, null),
-    /Debe iniciar sesión/
-  );
+    assert.throws(
+      () => controller.agregarLibroAInventario({ titulo: 'Rayuela' }, null),
+      /Debe iniciar sesión/
+    );
 
-  // Con sesión: registra correctamente
-  const libroAgregado = controller.agregarLibroAInventario(
-    { titulo: 'Rayuela', autores: ['Julio Cortázar'] },
-    'lector_logueado'
-  );
+    const libroAgregado = controller.agregarLibroAInventario(
+      { titulo: 'Rayuela', autores: ['Julio Cortázar'] },
+      'lector_logueado'
+    );
 
-  assert.strictEqual(libroAgregado.titulo, 'Rayuela');
-  assert.strictEqual(libroAgregado.propietario, 'lector_logueado');
+    assert.strictEqual(libroAgregado.titulo, 'Rayuela');
+    assert.strictEqual(libroAgregado.propietario, 'lector_logueado');
+  } finally {
+    fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
+  }
+});
+
+test('LibroController: Rechaza ISBN inválido y acepta un ISBN de 13 dígitos', () => {
+  const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
+  try {
+    const controller = new LibroController(
+      new LibroRepository({ persistencia: new LibroPersistencia(archivo, []) })
+    );
+
+    assert.throws(
+      () => controller.agregarLibroAInventario(
+        { titulo: 'Rayuela', isbn: '978123' },
+        'lector_logueado'
+      ),
+      /ISBN debe tener exactamente 13 dígitos/
+    );
+
+    const libroAgregado = controller.agregarLibroAInventario(
+      { titulo: 'Rayuela', isbn: '9780306406157' },
+      'lector_logueado'
+    );
+    assert.strictEqual(libroAgregado.isbn, '9780306406157');
+  } finally {
+    fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
+  }
 });
 
 test('LibroController: Impide que un usuario modifique libros ajenos', () => {
-  const repo = new LibroRepository({ persistencia: new LibroPersistencia([]) });
-  repo.registrarLibro(new Libro({ id: 'lib_secreto', titulo: 'Libro de Juan', propietario: 'juan' }));
-  const controller = new LibroController(repo);
+  const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
+  try {
+    const repo = new LibroRepository({ persistencia: new LibroPersistencia(archivo, []) });
+    repo.registrarLibro(new Libro({ id: 'lib_secreto', titulo: 'Libro de Juan', propietario: 'juan' }));
+    const controller = new LibroController(repo);
 
-  assert.throws(
-    () => controller.actualizarDisponibilidadLibro('lib_secreto', false, 'pedro'),
-    /No tiene permisos/
-  );
+    assert.throws(
+      () => controller.actualizarDisponibilidadLibro('lib_secreto', false, 'pedro'),
+      /No tiene permisos/
+    );
+  } finally {
+    fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
+  }
 });
 
 /* ---------------- 5. Pruebas de Cifrado con ncrypt-js (RNF Seguridad / Confidencialidad) ---------------- */

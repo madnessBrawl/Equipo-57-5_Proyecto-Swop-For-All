@@ -1,0 +1,196 @@
+<!--
+  Vista: Modificar Perfil (Historia de Usuario: Modificar Perfil)
+-->
+<main id="contenedor-modificar-perfil" class="area-trabajo-perfil">
+
+  <section id="tarjeta-formulario-modificar" class="tarjeta-modificar">
+    
+    <!-- Encabezado con Avatar, Nombre, Alias y Reputacion -->
+    <header id="cabecera-perfil-usuario" class="cabecera-usuario-perfil">
+      <div id="avatar-usuario" class="avatar-circulo">
+        {{ obtenerIniciales() }}
+      </div>
+
+      <div id="datos-principales-usuario" class="datos-texto-usuario">
+        <h2 id="nombre-completo-usuario" class="titulo-nombre-usuario">
+          {{ datosFormulario.nombre || perfilOriginal.nombre }} {{ datosFormulario.apellido || perfilOriginal.apellido }}
+        </h2>
+        <span id="identificador-alias" class="texto-alias-usuario">
+          @{{ perfilOriginal.usuario }}
+        </span>
+        <div id="bloque-reputacion-estrellas" class="linea-reputacion">
+          <span class="icono-estrella-dorada">★</span>
+          <strong id="puntuacion-promedio" class="numero-reputacion">{{ perfilOriginal.reputacion | number:'1.1-1' }} / 5.0</strong>
+          <span class="etiqueta-reputacion">(Reputación en intercambios)</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="linea-separadora-cabecera"></div>
+
+    <!-- Banner de notificacion de exito o error -->
+    @if (mensajeNotificacion) {
+      <div 
+        id="alerta-modificar-perfil" 
+        class="banner-alerta" 
+        [class.alerta-exito]="tipoNotificacion === 'exito'" 
+        [class.alerta-error]="tipoNotificacion === 'error'">
+        {{ mensajeNotificacion }}
+      </div>
+    }
+
+    <!-- Indicacion -->
+    <p class="texto-instruccion-edicion">
+      Modifica los campos habilitados. Al finalizar, presiona <strong>Guardar Cambios</strong>.
+    </p>
+
+    <!-- Formulario de edicion -->
+    <form id="formulario-edicion-datos" class="formulario-perfil" (ngSubmit)="guardarCambios()">
+
+      <!-- Identificador unico inmutable -->
+      <div class="grupo-campo">
+        <label for="campo-usuario-identificador" class="etiqueta-formulario">Nombre de Usuario (Identificador):</label>
+        <input 
+          type="text" 
+          id="campo-usuario-identificador" 
+          [value]="perfilOriginal.usuario" 
+          class="campo-entrada campo-deshabilitado" 
+          disabled>
+        <small class="nota-campo-identificador">El nombre de usuario es tu identificador único y no puede cambiarse.</small>
+      </div>
+
+      <!-- Fila 1: Nombre(s) y Apellido(s) -->
+      <div class="fila-dos-columnas">
+        <div class="grupo-campo">
+          <label for="campo-nombre-modificar" class="etiqueta-formulario">Nombre(s) *:</label>
+          <input 
+            type="text" 
+            id="campo-nombre-modificar" 
+            name="nombreModificar" 
+            [(ngModel)]="datosFormulario.nombre" 
+            class="campo-entrada" 
+            placeholder="Ej: Juan" 
+            required>
+        </div>
+
+        <div class="grupo-campo">
+          <label for="campo-apellido-modificar" class="etiqueta-formulario">Apellido(s) *:</label>
+          <input 
+            type="text" 
+            id="campo-apellido-modificar" 
+            name="apellidoModificar" 
+            [(ngModel)]="datosFormulario.apellido" 
+            class="campo-entrada" 
+            placeholder="Ej: Santana" 
+            required>
+        </div>
+      </div>
+
+      <!-- Fila 2: Correo Electronico y Telefono -->
+      <div class="fila-dos-columnas">
+        <div class="grupo-campo">
+          <label for="campo-correo-modificar" class="etiqueta-formulario">Correo Electrónico *:</label>
+          <input 
+            type="email" 
+            id="campo-correo-modificar" 
+            name="correoModificar" 
+            [(ngModel)]="datosFormulario.correo" 
+            class="campo-entrada" 
+            placeholder="tu@correo.com" 
+            required>
+        </div>
+
+        <div class="grupo-campo">
+          <label for="campo-telefono-modificar" class="etiqueta-formulario">Teléfono (Venezuela):</label>
+          <input 
+            type="tel" 
+            id="campo-telefono-modificar" 
+            name="telefonoModificar" 
+            [(ngModel)]="datosFormulario.telefono" 
+            class="campo-entrada" 
+            placeholder="04141234567">
+        </div>
+      </div>
+
+      <!-- Fila 3: Estado y Genero -->
+      <div class="fila-dos-columnas">
+        <div class="grupo-campo">
+          <label for="selector-estado-modificar" class="etiqueta-formulario">Estado (Venezuela) *:</label>
+          <select 
+            id="selector-estado-modificar" 
+            name="estadoModificar" 
+            [(ngModel)]="datosFormulario.estadoVenezuela" 
+            class="campo-entrada selector-formulario">
+            <option value="Distrito Capital">Distrito Capital</option>
+            <option value="Miranda">Miranda</option>
+            <option value="Zulia">Zulia</option>
+            <option value="Carabobo">Carabobo</option>
+            <option value="Aragua">Aragua</option>
+            <option value="Lara">Lara</option>
+            <option value="Anzoátegui">Anzoátegui</option>
+            <option value="Bolívar">Bolívar</option>
+          </select>
+        </div>
+
+        <div class="grupo-campo">
+          <label for="selector-genero-modificar" class="etiqueta-formulario">Género:</label>
+          <select 
+            id="selector-genero-modificar" 
+            name="generoModificar" 
+            [(ngModel)]="datosFormulario.genero" 
+            class="campo-entrada selector-formulario">
+            <option value="Hombre">Hombre</option>
+            <option value="Mujer">Mujer</option>
+            <option value="Otro">Otro</option>
+            <option value="Prefiero no decir">Prefiero no decir</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Fila 4: Generos Literarios Favoritos -->
+      <div class="grupo-campo">
+        <label for="campo-gustos-modificar" class="etiqueta-formulario">Géneros Literarios Favoritos:</label>
+        <input 
+          type="text" 
+          id="campo-gustos-modificar" 
+          name="gustosModificar" 
+          [(ngModel)]="datosFormulario.generosFavoritos" 
+          class="campo-entrada" 
+          placeholder="Ej: Novela, Ciencia Ficción, Terror">
+      </div>
+
+      <!-- Fila 5: Biografia personal -->
+      <div class="grupo-campo">
+        <label for="campo-biografia-modificar" class="etiqueta-formulario">Biografía personal (Máx 400 caracteres):</label>
+        <textarea 
+          id="campo-biografia-modificar" 
+          name="biografiaModificar" 
+          [(ngModel)]="datosFormulario.biografia" 
+          rows="3" 
+          class="campo-entrada area-biografia" 
+          placeholder="Cuéntale a otros lectores sobre tus intereses literarios o tipos de libros que buscas intercambiar..."></textarea>
+      </div>
+
+      <!-- Botones de accion -->
+      <div id="contenedor-botones-acciones" class="barra-acciones-formulario">
+        <button 
+          type="button" 
+          id="boton-cancelar-edicion" 
+          class="boton-secundario-cancelar" 
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        
+        <button 
+          type="submit" 
+          id="boton-guardar-perfil" 
+          class="boton-primario-guardar">
+          Guardar Cambios
+        </button>
+      </div>
+
+    </form>
+
+  </section>
+
+</main>

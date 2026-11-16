@@ -7,8 +7,8 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of, timeout } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 
@@ -152,5 +152,17 @@ export class GoogleBooksService {
       isbnObj ? isbnObj.identifier : 'S/N',
       info.categories?.[0] || 'Literatura'
     );
+  }
+
+  /**
+   * Datos semilla de respaldo si no hay conexión al backend ni a internet
+   */
+  private catalogoRespaldo(): Libro[] {
+    return [
+      new Libro('lib_100', 'El Principito', 'Antoine de Saint-Exupéry', true, 'https://books.google.com/books/content?id=ylT6DwAAQBAJ&printsec=frontcover&img=1&zoom=1'),
+      new Libro('lib_101', '1984', 'George Orwell', true, 'https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1'),
+      new Libro('lib_102', 'Doña Bárbara', 'Rómulo Gallegos', true),
+      new Libro('lib_103', 'Cien Años de Soledad', 'Gabriel García Márquez', true)
+    ];
   }
 }

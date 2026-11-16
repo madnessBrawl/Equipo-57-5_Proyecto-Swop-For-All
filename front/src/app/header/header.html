@@ -1,4 +1,4 @@
-<header id="cabecera-principal" class="cabecera-naranja">
+﻿<header id="cabecera-principal" class="cabecera-naranja">
   <div class="contenedor-izquierdo">
     <!-- Mantenemos el logo que sí carga correctamente -->
     <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-pequeño">
@@ -13,7 +13,7 @@
         <span class="texto-icono">Libros deseados</span>
       </button>
       
-      <button id="btn-inventario" class="boton-icono">
+      <button id="btn-inventario" class="boton-icono" (click)="irAInventario()">
         <img src="/imagenes/Inventario-logo.png" alt="Inventario" class="icono-nav">
         <span class="texto-icono">Inventario</span>
       </button>
@@ -35,10 +35,10 @@
         }
       </div>
 
-      <!-- Botón de Catálogo con la misma estructura de diseño (boton-icono) -->
+      <!-- Botón de Catálogo con icono propio y texto con tilde corregido -->
       <button routerLink="/catalogo" id="btn-catalogo" class="boton-icono">
-        <div class="icono-nav" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">📚</div>
-        <span class="texto-icono">Catálogo</span>
+        <img src="/imagenes/catalogo-logo.svg" alt="Catálogo" class="icono-nav">
+        <span class="texto-icono">Cat&aacute;logo</span>
       </button>
       
       <!-- Botón de Intercambiar: Solo accesible si se inició un intercambio desde el catálogo -->
@@ -47,20 +47,21 @@
         <span class="texto-icono">Intercambiar</span>
       </button>
       
-      <!-- Reputación -->
+      <!-- Reputación con tilde corregido -->
       <button id="btn-reputacion" class="boton-icono" (click)="irAReputacion()">
         <img src="/imagenes/calificacion-estrella-llena.png" alt="Reputación" class="icono-nav">
-        <span class="texto-icono">Reputación</span>
+        <span class="texto-icono">Reputaci&oacute;n</span>
       </button>
 
-      <button id="btn-perfil" class="boton-icono">
+      <button routerLink="/modificar-perfil" id="btn-perfil" class="boton-icono">
         <img src="/imagenes/Perfil-logo.png" alt="Perfil" class="icono-nav">
         <span class="texto-icono">Perfil</span>
       </button>
       
+      <!-- Cerrar sesión con tilde corregido -->
       <button id="btn-cerrar-sesion" class="boton-icono" (click)="cerrarSesion()">
-        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar Sesión" class="icono-nav">
-        <span class="texto-icono">Cerrar sesión</span>
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar sesión" class="icono-nav">
+        <span class="texto-icono">Cerrar sesi&oacute;n</span>
       </button>
     </nav>
   }

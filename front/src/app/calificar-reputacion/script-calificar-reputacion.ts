@@ -3,7 +3,7 @@
 
   Función: Controla la PANTALLA. Recoge los datos del usuario y se los pasa al servicio.
 */
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ServicioReputacion } from '../reputacion/servicio-reputacion';
@@ -29,8 +29,11 @@ export class CalificarReputacionComponent implements OnInit {
   textoComentario: string = '';                        // Texto del comentario (opcional)
   paso: 'formulario' | 'confirmacion' = 'formulario';  // Paso actual del proceso
   completada: boolean = false;                         // true cuando la calificación ya se guardó
+  consultandoCalificacion: boolean = false;
+  guardando: boolean = false;
   mensajeTipo: 'exito' | 'error' | 'advertencia' | '' = ''; // Tipo del mensaje mostrado
   mensajeTexto: string = '';                           // Texto del mensaje (simple string)
+  private verificacionActual = 0;
 
   /* 2. CONSTANTES USADAS POR LA PLANTILLA*/
   readonly estrellasDisponibles: number[] = [1, 2, 3, 4, 5];                       // Botones de estrella
@@ -39,7 +42,11 @@ export class CalificarReputacionComponent implements OnInit {
   readonly longitudMaximaComentario = Comentario.LONGITUD_MAXIMA;                  // Límite del comentario
 
   // Inyección de dependencias (POO): el servicio hace la lógica, el router solo navega
-  constructor(private servicio: ServicioReputacion, private router: Router) {}
+  constructor(
+    private servicio: ServicioReputacion,
+    private router: Router,
+    private readonly changeDetector: ChangeDetectorRef
+  ) {}
 
   /* 3. CICLO DE VIDA: carga inicial*/
   ngOnInit(): void {
@@ -57,12 +64,6 @@ export class CalificarReputacionComponent implements OnInit {
     this.intercambios = this.servicio.obtenerIntercambiosFinalizados(this.usuarioActual!);
   }
 
-  // TEMPORAL: genera intercambios de prueba (se elimina cuando exista el módulo Intercambio)
-  cargarDatosDePrueba(): void {
-    this.servicio.sembrarIntercambiosDemo(this.usuarioActual!);
-    this.cargarIntercambios();
-  }
-
   // Cambia entre calificar al lector o calificar el intercambio
   seleccionarTipo(tipo: TipoCalificacion): void {
     this.tipoSeleccionado = tipo;
@@ -76,11 +77,30 @@ export class CalificarReputacionComponent implements OnInit {
     this.puntuacion = 0;
     this.textoComentario = '';
     this.limpiarMensaje();
-    this.yaCalificado = !!id && this.servicio.yaFueCalificado(this.usuarioActual!, id, this.tipoSeleccionado);
-    if (this.yaCalificado) {
-      this.mostrarMensaje('advertencia',
-        'Usted ya calificó este intercambio. Elija otro intercambio o cambie el tipo de calificación.');
-    }
+    this.yaCalificado = false;
+    this.consultandoCalificacion = false;
+    const verificacion = ++this.verificacionActual;
+    if (!id) return;
+
+    this.consultandoCalificacion = true;
+    this.servicio.yaFueCalificado(this.usuarioActual!, id, this.tipoSeleccionado).subscribe({
+      next: yaCalificado => {
+        if (verificacion !== this.verificacionActual) return;
+        this.yaCalificado = yaCalificado;
+        this.consultandoCalificacion = false;
+        if (yaCalificado) {
+          this.mostrarMensaje('advertencia',
+            'Usted ya calificó este intercambio. Elija otro intercambio o cambie el tipo de calificación.');
+        }
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        if (verificacion !== this.verificacionActual) return;
+        this.consultandoCalificacion = false;
+        this.mostrarMensaje('error', 'No se pudo verificar si ya calificó este intercambio.');
+        this.changeDetector.markForCheck();
+      }
+    });
   }
 
   // Intercambio actualmente seleccionado (o undefined si no hay)
@@ -145,15 +165,28 @@ export class CalificarReputacionComponent implements OnInit {
 
   // Paso B: el usuario confirma y se registra (guardado único en el servicio)
   confirmarYGuardar(): void {
-    const resultado = this.servicio.registrarCalificacion(this.construirCalificacion());
-    if (!resultado.exito) {
-      this.paso = 'formulario';
-      this.mostrarMensaje('error', resultado.mensaje);
-      return;
-    }
-    this.completada = true;
-    this.paso = 'formulario';
-    this.mostrarMensaje('exito', resultado.mensaje);
+    this.guardando = true;
+    this.servicio.registrarCalificacion(this.construirCalificacion()).subscribe({
+      next: resultado => {
+        this.guardando = false;
+        if (!resultado.exito) {
+          this.paso = 'formulario';
+          this.mostrarMensaje('error', resultado.mensaje);
+          this.changeDetector.markForCheck();
+          return;
+        }
+        this.completada = true;
+        this.paso = 'formulario';
+        this.mostrarMensaje('exito', resultado.mensaje);
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.guardando = false;
+        this.paso = 'formulario';
+        this.mostrarMensaje('error', 'No se pudo guardar la calificación. Intente nuevamente.');
+        this.changeDetector.markForCheck();
+      }
+    });
   }
 
   // Acción del actor tras el éxito: preparar otra calificación

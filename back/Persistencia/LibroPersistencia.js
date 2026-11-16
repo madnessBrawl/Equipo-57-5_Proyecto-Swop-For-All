@@ -1,11 +1,11 @@
 /*
   Archivo: LibroPersistencia.js (BACKEND: back/Persistencia/)
   Clase: LibroPersistencia
-  Función: Capa de persistencia para el almacenamiento y recuperación de objetos Libro.
-           Sigue la teoría de Diseño 3 (arquitectura en capas) desacoplando el mecanismo
-           de almacenamiento del resto de la aplicación.
+  Función: Especialización de PersistenciaJSON para la entidad Libro.
+           Guarda y recupera libros directamente desde el archivo back/Persistencia/libros.json.
 */
 
+const PersistenciaJSON = require('./PersistenciaJSON');
 const Libro = require('../models/Libro');
 const CifradoService = require('../Service/CifradoService');
 
@@ -23,7 +23,6 @@ class LibroPersistencia {
         this.guardar(item instanceof Libro ? item : new Libro(item));
       }
     }
-  }
 
   // Getter del servicio de cifrado
   get cifradoService() {
@@ -42,9 +41,10 @@ class LibroPersistencia {
         isbn: '9780156013987',
         categorias: ['Ficción', 'Infantil'],
         disponible: true,
-        propietario: 'carlos_lector'
-      }),
-      new Libro({
+        propietario: null,
+        fechaRegistro: '2026-11-10T00:00:00.000Z'
+      },
+      {
         id: 'lib_101',
         titulo: '1984',
         autores: ['George Orwell'],
@@ -53,9 +53,10 @@ class LibroPersistencia {
         isbn: '9780451524935',
         categorias: ['Distopía', 'Ciencia Ficción'],
         disponible: true,
-        propietario: 'maria_books'
-      }),
-      new Libro({
+        propietario: null,
+        fechaRegistro: '2026-11-10T00:00:00.000Z'
+      },
+      {
         id: 'lib_102',
         titulo: 'Doña Bárbara',
         autores: ['Rómulo Gallegos'],
@@ -64,9 +65,10 @@ class LibroPersistencia {
         isbn: '9788437603681',
         categorias: ['Literatura Venezolana', 'Clásicos'],
         disponible: true,
-        propietario: 'ana_lectora'
-      }),
-      new Libro({
+        propietario: null,
+        fechaRegistro: '2026-11-10T00:00:00.000Z'
+      },
+      {
         id: 'lib_103',
         titulo: 'Cien Años de Soledad',
         autores: ['Gabriel García Márquez'],
@@ -75,43 +77,43 @@ class LibroPersistencia {
         isbn: '9780307474728',
         categorias: ['Realismo Mágico', 'Novela'],
         disponible: true,
-        propietario: 'pedro_lector'
-      })
+        propietario: null,
+        fechaRegistro: '2026-11-10T00:00:00.000Z'
+      }
     ];
 
-    for (const libro of demo) {
-      this.guardar(libro);
-    }
+    super(nombreArchivo, semilla);
   }
 
-  // Guarda una instancia de Libro en la colección
+  // Sobrescribe guardar para validar la instancia de Libro antes de persistir
   guardar(libro) {
-    if (!libro || !(libro instanceof Libro)) {
-      throw new Error('Solo se pueden persistir instancias de la clase Libro.');
+    if (!libro) {
+      throw new Error('Debe proporcionar un libro para persistir.');
     }
-    const errorValidacion = libro.validar();
+
+    const instancia = libro instanceof Libro ? libro : new Libro(libro);
+    const errorValidacion = instancia.validar();
     if (errorValidacion) {
       throw new Error(`Validación de persistencia fallida: ${errorValidacion}`);
     }
 
-    this._coleccion.set(libro.id, libro);
-    return libro;
+    const datosGuardados = super.guardar(instancia.toJSON());
+    return new Libro(datosGuardados);
   }
 
-  // Busca un libro por su ID único
+  // Busca por id y retorna una instancia de Libro
   buscarPorId(id) {
-    if (!id) return null;
-    return this._coleccion.get(String(id)) || null;
+    const datos = super.buscarPorId(id);
+    return datos ? new Libro(datos) : null;
   }
 
-  // Retorna todos los libros registrados
+  // Busca todos y los retorna como instancias de Libro
   buscarTodos() {
-    return Array.from(this._coleccion.values());
+    return super.obtenerTodos().map(datos => new Libro(datos));
   }
 
-  // Busca libros que cumplan con una función predicado
+  // Busca por predicado y retorna instancias de Libro
   buscarPorPredicado(predicado) {
-    if (typeof predicado !== 'function') return [];
     return this.buscarTodos().filter(predicado);
   }
 

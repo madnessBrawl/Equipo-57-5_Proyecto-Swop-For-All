@@ -1,22 +1,26 @@
-import { Routes } from '@angular/router';
-import { AuthComponent } from './auth/script-auth'; // Verifica que la ruta coincida con tu archivo real
+﻿import { Routes } from '@angular/router';
+import { AuthComponent } from './auth/script-auth';
 import { PerfilUsuarioComponent } from './perfil-usuario/perfil-usuario';
-import { DashboardComponent } from './dashboard/script-dashboard'; // Verifica el nombre exacto de tu clase y archivo
-import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputacion'; // Contenedor del módulo Reputación
-import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion'; // HU Calificar lector o intercambio
-import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas'; // HU Consultar reseñas
-import { CrearComunidadComponent } from './comunidad/crear-comunidad';  // Importa el componente
+import { DashboardComponent } from './dashboard/script-dashboard';
+import { PanelReputacionComponent } from './panel-reputacion/script-panel-reputacion';
+import { CalificarReputacionComponent } from './calificar-reputacion/script-calificar-reputacion';
+import { ConsultarResenasComponent } from './consultar-resenas/script-consultar-resenas';
+import { CrearComunidadComponent } from './comunidad/crear-comunidad';
 import { ModificarOfertaComponent } from './modificar-oferta/modificar-oferta.component';
 import { CatalogoLibrosComponent } from './catalogo-libros/catalogo-libros.component';
-
-// 1. Agregamos la importación que faltaba
 import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
+import { ModificarPerfilComponent } from './modificar-perfil/script-modificar-perfil';
+import { InventarioComponent } from './inventario/inventario.component';
 
 export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
   { path: 'dashboard', component: DashboardComponent }, 
   
-  // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
+  // Ruta Modificar Perfil
+  { path: 'modificar-perfil', component: ModificarPerfilComponent },
+  { path: 'perfil', component: ModificarPerfilComponent },
+
+  // Rutas de comunidad (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },
   { path: 'catalogo', component: CatalogoLibrosComponent },

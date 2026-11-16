@@ -1,0 +1,9 @@
+﻿{
+  "name": "equipo-57-5_proyecto-swop-for-all",
+  "version": "1.0.0",
+  "description": "Swop For All - Plataforma de intercambio de libros",
+  "scripts": {
+    "start": "npm start --prefix front",
+    "test:back": "node --test back/test/*.test.js"
+  }
+}
