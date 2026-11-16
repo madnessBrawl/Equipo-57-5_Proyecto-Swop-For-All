@@ -1,6 +1,15 @@
 // front/src/app/modelos/intercambio.model.ts
 export class Libro {
-  constructor(public id: string, public titulo: string, public autor: string, public disponible: boolean) {}
+  constructor(
+    public id: string,
+    public titulo: string,
+    public autor: string,
+    public disponible: boolean = true,
+    public portadaUrl: string = '',
+    public descripcion: string = '',
+    public isbn: string = '',
+    public categoria: string = 'General'
+  ) {}
 }
 
 export class OfertaIntercambio {
