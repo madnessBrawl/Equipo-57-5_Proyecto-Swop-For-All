@@ -2,172 +2,49 @@
   {
     "id": "lib_100",
     "titulo": "El Principito",
-    "autores": [
-      "Antoine de Saint-Exupéry"
-    ],
+    "autores": ["Antoine de Saint-Exupéry"],
     "descripcion": "Un clásico de la literatura infantil y universal sobre la amistad y el sentido de la vida.",
     "portadaUrl": "https://books.google.com/books/content?id=ylT6DwAAQBAJ&printsec=frontcover&img=1&zoom=1",
     "isbn": "9780156013987",
-    "categorias": [
-      "Ficción",
-      "Infantil"
-    ],
+    "categorias": ["Ficción", "Infantil"],
     "disponible": true,
-    "propietario": "carlos_lector",
+    "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
   },
   {
     "id": "lib_101",
     "titulo": "1984",
-    "autores": [
-      "George Orwell"
-    ],
+    "autores": ["George Orwell"],
     "descripcion": "Novela distópica de crítica social y política.",
     "portadaUrl": "https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1",
     "isbn": "9780451524935",
-    "categorias": [
-      "Distopía",
-      "Ciencia Ficción"
-    ],
+    "categorias": ["Distopía", "Ciencia Ficción"],
     "disponible": true,
-    "propietario": "maria_books",
+    "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
   },
   {
     "id": "lib_102",
     "titulo": "Doña Bárbara",
-    "autores": [
-      "Rómulo Gallegos"
-    ],
+    "autores": ["Rómulo Gallegos"],
     "descripcion": "Obra cumbre de la literatura venezolana sobre la lucha entre civilización y barbarie.",
     "portadaUrl": "",
     "isbn": "9788437603681",
-    "categorias": [
-      "Literatura Venezolana",
-      "Clásicos"
-    ],
+    "categorias": ["Literatura Venezolana", "Clásicos"],
     "disponible": true,
-    "propietario": "ana_lectora",
+    "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
   },
   {
     "id": "lib_103",
     "titulo": "Cien Años de Soledad",
-    "autores": [
-      "Gabriel García Márquez"
-    ],
-    "descripcion": "La obra maestra del realismo mágico latinoamericano en el pueblo mítico de Macondo.",
+    "autores": ["Gabriel García Márquez"],
+    "descripcion": "La obra maestra del realismo mágico en el pueblo mítico de Macondo.",
     "portadaUrl": "",
     "isbn": "9780307474728",
-    "categorias": [
-      "Realismo Mágico",
-      "Novela"
-    ],
+    "categorias": ["Realismo Mágico", "Novela"],
     "disponible": true,
-    "propietario": "pedro_lector",
+    "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
-  },
-  {
-    "id": "lib_custom_1",
-    "titulo": "Crónica de una muerte anunciada",
-    "autores": [
-      "Gabriel García Márquez"
-    ],
-    "autoresTexto": "Gabriel García Márquez",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": false,
-    "propietario": "andres",
-    "fechaRegistro": "2026-11-16T02:32:53.125Z"
-  },
-  {
-    "id": "lib_mwinakqi_sdfhd",
-    "titulo": "Rayuela",
-    "autores": [
-      "Julio Cortázar"
-    ],
-    "autoresTexto": "Julio Cortázar",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "lector_logueado",
-    "fechaRegistro": "2026-11-16T02:29:20.634Z"
-  },
-  {
-    "id": "lib_secreto",
-    "titulo": "Libro de Juan",
-    "autores": [],
-    "autoresTexto": "Autor Desconocido",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "juan",
-    "fechaRegistro": "2026-11-16T02:32:53.159Z"
-  },
-  {
-    "id": "lib_mwinayxz_3xltb",
-    "titulo": "Rayuela",
-    "autores": [
-      "Julio Cortázar"
-    ],
-    "autoresTexto": "Julio Cortázar",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "lector_logueado",
-    "fechaRegistro": "2026-11-16T02:29:39.046Z"
-  },
-  {
-    "id": "lib_mwinc5k1_lib7c",
-    "titulo": "Rayuela",
-    "autores": [
-      "Julio Cortázar"
-    ],
-    "autoresTexto": "Julio Cortázar",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "lector_logueado",
-    "fechaRegistro": "2026-11-16T02:30:34.273Z"
-  },
-  {
-    "id": "lib_mwineh3l_pqahq",
-    "titulo": "Rayuela",
-    "autores": [
-      "Julio Cortázar"
-    ],
-    "autoresTexto": "Julio Cortázar",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "lector_logueado",
-    "fechaRegistro": "2026-11-16T02:32:22.545Z"
-  },
-  {
-    "id": "lib_mwinf4po_xzbkp",
-    "titulo": "Rayuela",
-    "autores": [
-      "Julio Cortázar"
-    ],
-    "autoresTexto": "Julio Cortázar",
-    "descripcion": "",
-    "portadaUrl": "",
-    "isbn": "",
-    "categorias": [],
-    "disponible": true,
-    "propietario": "lector_logueado",
-    "fechaRegistro": "2026-11-16T02:32:53.148Z"
   }
 ]

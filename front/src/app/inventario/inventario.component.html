@@ -1,0 +1,81 @@
+<main class="inventario">
+  <header class="encabezado">
+    <div>
+      <h2>Mi inventario</h2>
+      <p>Libros que tienes disponibles para compartir.</p>
+    </div>
+    <button type="button" class="boton-principal" (click)="mostrarFormulario = !mostrarFormulario">
+      {{ mostrarFormulario ? 'Cancelar' : 'Añadir libro' }}
+    </button>
+  </header>
+
+  @if (mensaje) {
+    <p class="mensaje exito" role="status">{{ mensaje }}</p>
+  }
+  @if (error) {
+    <p class="mensaje error" role="alert">{{ error }}</p>
+  }
+
+  @if (mostrarFormulario) {
+    <form class="formulario" (ngSubmit)="agregarLibro()">
+      <h3>Nuevo libro</h3>
+      <label>
+        Título *
+        <input name="titulo" [(ngModel)]="titulo" required maxlength="250">
+      </label>
+      <label>
+        Autor
+        <input name="autor" [(ngModel)]="autor" maxlength="200">
+      </label>
+      <label>
+        Descripción
+        <textarea name="descripcion" [(ngModel)]="descripcion" rows="3"></textarea>
+      </label>
+      <div class="fila-campos">
+        <label>
+          ISBN
+          <input name="isbn" [(ngModel)]="isbn" maxlength="20">
+        </label>
+        <label>
+          Categoría
+          <input name="categoria" [(ngModel)]="categoria" maxlength="100">
+        </label>
+      </div>
+      <button class="boton-principal" type="submit" [disabled]="guardando || !titulo.trim()">
+        {{ guardando ? 'Guardando…' : 'Guardar libro' }}
+      </button>
+    </form>
+  }
+
+  @if (cargando) {
+    <p class="estado">Cargando inventario…</p>
+  } @else if (libros.length === 0) {
+    <section class="vacio">
+      <h3>Tu inventario está vacío</h3>
+      <p>Añade un libro para que aparezca aquí.</p>
+    </section>
+  } @else {
+    <section class="lista-libros" aria-label="Libros de mi inventario">
+      @for (libro of libros; track libro.id) {
+        <article class="libro">
+          @if (libro.portadaUrl) {
+            <img class="portada" [src]="libro.portadaUrl" [alt]="'Portada de ' + libro.titulo">
+          } @else {
+            <div class="portada sin-portada" aria-hidden="true">📖</div>
+          }
+          <div class="detalle">
+            <h3>{{ libro.titulo }}</h3>
+            <p><strong>Autor:</strong> {{ libro.autor || 'Autor desconocido' }}</p>
+            @if (libro.descripcion) {
+              <p>{{ libro.descripcion }}</p>
+            }
+            @if (libro.isbn) {
+              <p><strong>ISBN:</strong> {{ libro.isbn }}</p>
+            }
+            <span class="categoria">{{ libro.categoria || 'General' }}</span>
+          </div>
+        </article>
+      }
+    </section>
+  }
+</main>

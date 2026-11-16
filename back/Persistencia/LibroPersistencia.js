@@ -31,7 +31,7 @@ class LibroPersistencia extends PersistenciaJSON {
         isbn: '9780156013987',
         categorias: ['Ficción', 'Infantil'],
         disponible: true,
-        propietario: 'carlos_lector',
+        propietario: null,
         fechaRegistro: '2026-11-10T00:00:00.000Z'
       },
       {
@@ -43,7 +43,7 @@ class LibroPersistencia extends PersistenciaJSON {
         isbn: '9780451524935',
         categorias: ['Distopía', 'Ciencia Ficción'],
         disponible: true,
-        propietario: 'maria_books',
+        propietario: null,
         fechaRegistro: '2026-11-10T00:00:00.000Z'
       },
       {
@@ -55,7 +55,7 @@ class LibroPersistencia extends PersistenciaJSON {
         isbn: '9788437603681',
         categorias: ['Literatura Venezolana', 'Clásicos'],
         disponible: true,
-        propietario: 'ana_lectora',
+        propietario: null,
         fechaRegistro: '2026-11-10T00:00:00.000Z'
       },
       {
@@ -67,7 +67,7 @@ class LibroPersistencia extends PersistenciaJSON {
         isbn: '9780307474728',
         categorias: ['Realismo Mágico', 'Novela'],
         disponible: true,
-        propietario: 'pedro_lector',
+        propietario: null,
         fechaRegistro: '2026-11-10T00:00:00.000Z'
       }
     ];
