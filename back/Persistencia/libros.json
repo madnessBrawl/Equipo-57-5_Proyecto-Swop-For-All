@@ -186,7 +186,7 @@
     "categorias": [],
     "disponible": false,
     "propietario": "andres",
-    "fechaRegistro": "2026-11-16T18:04:50.213Z"
+    "fechaRegistro": "2026-11-16T19:20:55.696Z"
   },
   {
     "id": "lib_mwjkp5d4_wis8k",
@@ -227,7 +227,7 @@
     "categorias": [],
     "disponible": true,
     "propietario": "juan",
-    "fechaRegistro": "2026-11-16T18:04:50.238Z"
+    "fechaRegistro": "2026-11-16T19:20:55.731Z"
   },
   {
     "id": "lib_mwjkpmlw_9hogk",
@@ -256,5 +256,33 @@
     "disponible": true,
     "propietario": "lector_logueado",
     "fechaRegistro": "2026-11-16T18:04:50.232Z"
+  },
+  {
+    "id": "lib_mwjnfhd3_m3eu6",
+    "titulo": "Rayuela",
+    "autores": [
+      "Julio Cortázar"
+    ],
+    "autoresTexto": "Julio Cortázar",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T19:20:55.719Z"
+  },
+  {
+    "id": "lib_mwjnfhda_3kdwo",
+    "titulo": "Rayuela",
+    "autores": [],
+    "autoresTexto": "Autor Desconocido",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "9780306406157",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T19:20:55.726Z"
   }
 ]

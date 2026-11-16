@@ -295,12 +295,12 @@ p.categoria-libro {
 /* ---------- button: Botón para solicitar intercambio ---------- */
 button.boton-solicitar-intercambio {
   width: 100%;                                   /* Botón a todo lo ancho de la tarjeta */
-  background-color: var(--color-boton-primario); /* Marrón cálido institucional */
-  color: #ffffff;                                /* Texto blanco para legibilidad */
-  border: none;                                  /* Sin borde */
+  background-color: #b46032 !important;          /* Marrón cálido institucional — forzado */
+  color: #ffffff !important;                     /* Texto blanco para legibilidad — forzado */
+  border: 2px solid #964a22 !important;          /* Borde visible para reforzar el botón */
   padding: 10px;                                 /* Relleno cómodo */
   font-size: 13px;                               /* Tamaño proporcional */
-  font-weight: 600;                              /* Texto destacado */
+  font-weight: 700;                              /* Texto destacado */
   border-radius: 6px;                            /* Bordes redondeados */
   cursor: pointer;                               /* Cursor de interactividad */
   transition: background-color 0.2s ease;        /* Transición suave */
@@ -308,10 +308,12 @@ button.boton-solicitar-intercambio {
   justify-content: center;                       /* Centrado horizontal */
   align-items: center;                           /* Centrado vertical */
   gap: 6px;                                      /* Espacio del icono */
+  margin-top: 12px;                              /* Separación respecto al contenido */
 }
 
 button.boton-solicitar-intercambio:hover {
-  background-color: var(--color-boton-primario-hover); /* Oscurecimiento al pasar cursor */
+  background-color: #964a22 !important;          /* Oscurecimiento al pasar cursor */
+  color: #ffffff !important;
 }
 
 /* ---------- div: Barra de paginación inferior ---------- */

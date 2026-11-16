@@ -97,20 +97,22 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
 
     this.tieneOfertaActiva = true;
 
-    // 2. Cargar inventario propio del usuario (libros que posee)
-    const inventarioGuardado = localStorage.getItem('inventario_usuario');
+    // 2. Determinar el usuario logueado actualmente en la sesión
+    const username = this.obtenerUsuarioActual();
+    this.usuarioActual = username;
+
+    // 3. Cargar inventario propio del usuario logueado (clave dinámica: inventario_<usuario>)
+    const claveInventarioPropio = `inventario_${username}`;
+    const inventarioGuardado = localStorage.getItem(claveInventarioPropio);
     if (inventarioGuardado) {
       try {
         const parsed = JSON.parse(inventarioGuardado);
-        this.inventarioPersonal = (Array.isArray(parsed) && parsed.length > 0)
-          ? parsed
-          : this.obtenerInventarioPorDefecto();
+        this.inventarioPersonal = Array.isArray(parsed) ? parsed : [];
       } catch {
-        this.inventarioPersonal = this.obtenerInventarioPorDefecto();
+        this.inventarioPersonal = [];
       }
     } else {
-      this.inventarioPersonal = this.obtenerInventarioPorDefecto();
-      localStorage.setItem('inventario_usuario', JSON.stringify(this.inventarioPersonal));
+      this.inventarioPersonal = [];
     }
 
     // 3. Determinar los datos del libro solicitado desde el catálogo
@@ -398,19 +400,25 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   }
 
   private obtenerInventarioPorDefecto(): Libro[] {
-    return [
-      new Libro('L_propio_1', 'Cien Años de Soledad', 'Gabriel García Márquez', true, '', 'Edición ilustrada tapa dura', '9780307474728', 'Novela'),
-      new Libro('L_propio_2', 'Don Quijote de la Mancha', 'Miguel de Cervantes', true, '', 'Clásico de la literatura española', '9788424115166', 'Clásicos'),
-      new Libro('L_propio_3', 'Ficciones', 'Jorge Luis Borges', true, '', 'Colección de cuentos fantásticos', '9788497592444', 'Ficción'),
-      new Libro('L_propio_4', 'Rayuela', 'Julio Cortázar', true, '', 'Novela experimental', '9788466332217', 'Novela')
-    ];
+    // Sin libros por defecto: el inventario debe venir del localStorage del usuario logueado
+    return [];
   }
 
   private obtenerInventarioOtroPorDefecto(): Libro[] {
-    return [
-      new Libro('L_otro_1', '1984', 'George Orwell', true, '', 'Distopía clásica', '9780451524935', 'Ciencia Ficción'),
-      new Libro('L_otro_2', 'Fahrenheit 451', 'Ray Bradbury', true, '', 'Distopía sobre la censura', '9781451673319', 'Ciencia Ficción'),
-      new Libro('L_otro_3', 'Doña Bárbara', 'Rómulo Gallegos', true, '', 'Literatura Venezolana', '9788437603681', 'Clásicos')
-    ];
+    // Sin libros por defecto: el inventario del otro usuario debe venir de su localStorage
+    return [];
+  }
+
+  /*
+    Obtiene el nombre del usuario logueado desde localStorage.
+    Retorna 'usuario_local' como valor por defecto.
+  */
+  private obtenerUsuarioActual(): string {
+    try {
+      const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
+      return sesion?.usuario || 'usuario_local';
+    } catch {
+      return 'usuario_local';
+    }
   }
 }

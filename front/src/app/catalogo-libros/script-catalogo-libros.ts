@@ -14,7 +14,7 @@ import { Router } from '@angular/router';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { GoogleBooksService, ResultadoCatalogo } from '../servicios/google-books.service';
 import { CifradoService } from '../servicios/cifrado.service';
-import { LIBROS_PRUEBA_JSON, LibroJSON } from '../datos/libros-prueba';
+import { LIBROS_PRUEBA_JSON, LibroJSON, inicializarInventariosDesdeJSON } from '../datos/libros-prueba';
 
 /* ---------- Clase de Dominio: ItemCatalogo (POO) ---------- */
 export class ItemCatalogo {
@@ -105,7 +105,37 @@ export class CatalogoLibrosComponent implements OnInit {
     Ciclo de vida inicial del componente: carga inicialmente los libros desde el JSON
   */
   ngOnInit(): void {
+    // Inicializar inventarios de todos los usuarios desde el JSON (incluye usuario_local)
+    // Garantiza que localStorage tenga los datos correctos antes de cargar el catálogo
+    inicializarInventariosDesdeJSON();
     this.cargarCatalogo();
+  }
+
+  /*
+    Obtiene el nombre de usuario del logueado actualmente en la sesión.
+    Retorna 'usuario_local' como valor por defecto si no hay sesión activa.
+  */
+  private obtenerUsuarioActual(): string {
+    try {
+      const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
+      return sesion?.usuario || 'usuario_local';
+    } catch {
+      return 'usuario_local';
+    }
+  }
+
+  /*
+    Verifica si el usuario logueado tiene al menos un libro en su inventario personal.
+    Bloquea el inicio del intercambio si el inventario está vacío.
+  */
+  private tieneLibrosEnInventario(): boolean {
+    const usuario = this.obtenerUsuarioActual();
+    try {
+      const inventario = JSON.parse(localStorage.getItem(`inventario_${usuario}`) || '[]');
+      return Array.isArray(inventario) && inventario.length > 0;
+    } catch {
+      return false;
+    }
   }
 
   /*
@@ -278,6 +308,12 @@ export class CatalogoLibrosComponent implements OnInit {
     - Conecta con la pantalla de modificar oferta
   */
   public iniciarSolicitudIntercambio(item: ItemCatalogo): void {
+    // REGLA DE NEGOCIO: No se puede iniciar un intercambio si el inventario propio está vacío
+    if (!this.tieneLibrosEnInventario()) {
+      alert('⚠️ No puedes solicitar un intercambio porque tu inventario está vacío.\n\nDirígete a "Inventario" en el menú y agrega libros propios antes de intercambiar.');
+      return;
+    }
+
     if (!item.libro.disponible) {
       alert('Este libro ya se encuentra en un intercambio activo.');
       return;
@@ -285,9 +321,10 @@ export class CatalogoLibrosComponent implements OnInit {
 
     // 1. Preparar la oferta orientada a objetos con 0 libros ofrecidos
     const idIntercambio = `INT-${Date.now().toString(36)}`;
+    const usuarioEmisor = this.obtenerUsuarioActual();
     const oferta = new OfertaIntercambio(
       idIntercambio,
-      'UsuarioA', // Usuario emisor activo de sesión
+      usuarioEmisor, // Usuario emisor: el logueado actualmente en sesión
       item.propietario,
       [], // Inicia estrictamente VACÍO en la parte del usuario
       [item.libro], // El libro seleccionado del catálogo
