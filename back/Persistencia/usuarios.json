@@ -52,14 +52,19 @@
     "id": "reg_mwjd2ze9_0o0q3"
   },
   {
-    "usuario": "pepe20",
+    "usuario": "Edusam02",
     "nombres": "gabriel",
-    "apellidos": "pasos",
-    "clave": "tyuiop",
-    "generosFavoritos": "Romance",
+    "apellidos": "da luz",
+    "clave": "gabsam02",
+    "generosFavoritos": "terror",
     "genero": "Hombre",
-    "correo": "aaeffa@gmail.com",
+    "correo": "gabrieldaluz16122004@gmail.com",
     "reputacion": 5,
-    "id": "reg_mwjhs6yd_rjl0d"
+    "id": "reg_mwjpnmtn_k39xx",
+    "nombre": "gabo",
+    "apellido": "da luz",
+    "telefono": "",
+    "estadoVenezuela": "Distrito Capital",
+    "biografia": ""
   }
 ]
