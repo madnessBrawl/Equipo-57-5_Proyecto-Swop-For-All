@@ -28,5 +28,16 @@
     "telefono": "04125556677",
     "clave": "ana123",
     "reputacion": 4.5
+  },
+  {
+    "usuario": "Mastermind",
+    "nombres": "german",
+    "apellidos": "sanchez",
+    "clave": "qwerty",
+    "generosFavoritos": "ciencia ficción",
+    "genero": "Hombre",
+    "correo": "monafnfan@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjborz3_gvv6v"
   }
 ]
