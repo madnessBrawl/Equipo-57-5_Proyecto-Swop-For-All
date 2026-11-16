@@ -50,5 +50,16 @@
     "correo": "LULA",
     "reputacion": 5,
     "id": "reg_mwjd2ze9_0o0q3"
+  },
+  {
+    "usuario": "pepe20",
+    "nombres": "gabriel",
+    "apellidos": "pasos",
+    "clave": "tyuiop",
+    "generosFavoritos": "Romance",
+    "genero": "Hombre",
+    "correo": "aaeffa@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjhs6yd_rjl0d"
   }
 ]
