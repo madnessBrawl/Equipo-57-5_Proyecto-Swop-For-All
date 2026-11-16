@@ -1,0 +1,138 @@
+<div class="pantalla-comunidad">
+  <!-- Header: Logo a la izquierda, Volver al dashboard a la derecha -->
+  <header class="header-comunidad">
+    <div class="header-izquierdo">
+      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-principal">
+      <h1 class="titulo-header">Swop-For-All</h1>
+    </div>
+
+    <nav class="header-derecho">
+      <button class="btn-volver" (click)="volverDashboard()" title="Volver al Dashboard">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Volver" class="icono-volver">
+        <span class="texto-volver">Volver</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="contenedor-principal">
+    <div class="encabezado-seccion">
+      <h2 class="titulo-seccion">Comunidades disponibles</h2>
+    </div>
+
+    <!-- Barra de búsqueda y filtros -->
+    <div class="contenedor-buscador">
+      <input
+        type="text"
+        class="input-buscador"
+        placeholder="Buscador por nombre de comunidad..."
+        [(ngModel)]="terminoBusqueda"
+      />
+
+      <div class="fila-filtros">
+        <div class="grupo-filtro">
+          <label>Filtrar por género:</label>
+          <select [(ngModel)]="generoSeleccionado" class="select-filtro">
+            <option value="todos">Todos los géneros</option>
+            <option value="terror">Terror</option>
+            <option value="drama">Drama</option>
+            <option value="comedia">Comedia</option>
+            <option value="misterio">Misterio</option>
+            <option value="horror">Horror</option>
+            <option value="fantasia">Fantasía</option>
+            <option value="ciencia-ficcion">Ciencia-ficción</option>
+            <option value="accion">Acción</option>
+            <option value="aventura">Aventura</option>
+            <option value="romance">Romance</option>
+          </select>
+        </div>
+
+        <label class="checkbox-filtro">
+          <input type="checkbox" [(ngModel)]="soloDisponibles" />
+          Solo disponibles (que no estén llenas)
+        </label>
+      </div>
+    </div>
+
+    <!-- Contenedor / Marco del Directorio de comunidades (Estilo Boceto PDF) -->
+    <div class="marco-directorio">
+      @if (cargando) {
+        <p class="mensaje-estado">⏳ Cargando comunidades registradas...</p>
+      }
+
+      @if (!cargando && comunidadesFiltradas.length === 0) {
+        <div class="mensaje-vacio">
+          <p>No se encontraron comunidades que coincidan con los filtros aplicados.</p>
+        </div>
+      }
+
+      <!-- Listado de tarjetas de comunidad ordenadas de izquierda a derecha -->
+      <div class="lista-tarjetas">
+        @for (item of comunidadesFiltradas; track item.id) {
+          <div class="tarjeta-comunidad">
+            <!-- 1. Nombre de la comunidad -->
+            <div class="col-nombre">
+              <span class="comillas">"</span><strong>{{ item.nombre }}</strong><span class="comillas">"</span>
+            </div>
+
+            <!-- 2. Género literario -->
+            <div class="col-genero">
+              <span class="badge-genero">{{ item.genero || 'General' }}</span>
+            </div>
+
+            <!-- 3. Número de miembros (X/20 con pastilla amarilla) -->
+            <div class="col-miembros">
+              <span class="texto-etiqueta">Nro Miembros:</span>
+              <span class="pastilla-miembros">{{ item.miembros.length || 1 }}/20</span>
+            </div>
+
+            <!-- 4. Botón "Unirse" (Naranja) -->
+            <div class="col-accion">
+              <button
+                type="button"
+                class="btn-unirse"
+                (click)="unirse(item)"
+                [class.btn-lleno]="(item.miembros.length || 1) >= 20">
+                Unirse
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL / DIÁLOGO: Lógica de Comunidad Privada (Condición 2 del PDF) -->
+  @if (mostrarModalPrivada && comunidadSeleccionada) {
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <!-- Paso 1: Pregunta al lector que solicita unirse -->
+        @if (pasoSolicitud === 'pregunta_usuario') {
+          <h3 class="modal-titulo">🔒 Comunidad Privada</h3>
+          <p class="modal-texto">
+            Esta comunidad es privada, ¿Quieres mandar una solicitud de unión?
+          </p>
+          <div class="modal-botones">
+            <button class="btn-modal-si" (click)="confirmarEnvioSolicitud()">SÍ</button>
+            <button class="btn-modal-no" (click)="cancelarSolicitud()">NO</button>
+          </div>
+        }
+
+        <!-- Paso 2: Interfaz del Administrador para confirmar con Sí o No (Condición 2.1) -->
+        @if (pasoSolicitud === 'confirmacion_admin') {
+          <h3 class="modal-titulo">👤 Confirmación del Administrador</h3>
+          <p class="modal-texto">
+            El lector <strong>{{ usuarioActual }}</strong> ha solicitado unirse a <em>{{ comunidadSeleccionada.nombre }}</em>.
+          </p>
+          <p class="modal-subtexto">
+            Como administrador, ¿deseas aceptar la solicitud de este lector?
+          </p>
+          <div class="modal-botones">
+            <button class="btn-modal-si" (click)="adminAceptaSolicitud()">SÍ (Aceptar)</button>
+            <button class="btn-modal-no" (click)="adminRechazaSolicitud()">NO (Rechazar)</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,117 +1,164 @@
-/* Centrado absoluto en el espacio restante debajo del header */
-.pantalla-centrada {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 80px); /* Ajusta según el alto de tu header */
-  padding: 20px;
-  background-color: #fcebd5; /* Fondo beige de tu app */
-  font-family: inherit; /* Hereda la fuente del resto de la página */
-}
-
-/* Diseño de la Tarjeta (Card) */
-.card-formulario {
-  background-color: #ffffff;
-  padding: 30px 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 500px;
-  border: 1px solid #e3cdae;
-}
-
-.card-formulario h2 {
-  text-align: center;
-  color: #333;
-  margin-top: 0;
-  margin-bottom: 25px;
-  font-size: 1.8rem;
-}
-
-/* Organización de los inputs (Flexbox en columna) */
-.grupo-form {
+/* Estilos de Crear Comunidad (Boceto PDF Página 1) */
+.pantalla-comunidad {
+  min-height: 100vh;
+  background-color: #fcebd5;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.grupo-form label,
-.label-principal {
+.header-comunidad {
+  background-color: #f4722b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  height: 80px;
+  box-sizing: border-box;
+}
+
+.header-izquierdo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-principal {
+  height: 50px;
+  width: auto;
+}
+
+.titulo-header {
+  color: #ffffff;
+  font-size: 26px;
+  margin: 0;
   font-weight: bold;
-  margin-bottom: 8px;
-  color: #4a4a4a;
-  font-size: 0.95rem;
 }
 
-/* Estilos de campos de texto y selección */
-.grupo-form input[type="text"],
-.grupo-form textarea,
-.grupo-form select {
-  padding: 12px 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
+.btn-volver {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 12px;
+}
+
+.btn-volver:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+.icono-volver {
+  height: 42px;
+  width: auto;
+}
+
+.texto-volver {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.contenedor-formulario {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+}
+
+.card-formulario {
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+  padding: 35px 40px;
+  max-width: 460px;
+  width: 100%;
+}
+
+.titulo-form {
+  margin: 0 0 24px 0;
+  color: #222222;
+  font-size: 24px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.grupo-form {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label-form {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.input-form, .select-form, .textarea-form {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #cccccc;
+  font-size: 14px;
   outline: none;
-  background-color: #fcfcfc;
+  box-sizing: border-box;
+  font-family: inherit;
   transition: border-color 0.2s;
 }
 
-.grupo-form input[type="text"]:focus,
-.grupo-form textarea:focus,
-.grupo-form select:focus {
-  border-color: #f4722b; /* Borde naranja al seleccionar */
-  background-color: #fff;
+.input-form:focus, .select-form:focus, .textarea-form:focus {
+  border-color: #f4722b;
 }
 
-.grupo-form textarea {
-  resize: vertical; /* Permite estirar solo hacia abajo */
+.textarea-form {
+  resize: vertical;
 }
 
-/* Botones de Privacidad (Radio) */
 .grupo-form-radio {
   margin-bottom: 20px;
 }
 
 .opciones-radio {
   display: flex;
-  gap: 25px;
-  margin-top: 5px;
+  gap: 24px;
+  margin-top: 6px;
 }
 
-.opciones-radio label {
+.radio-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: normal;
+  gap: 6px;
+  font-size: 14px;
+  color: #444444;
   cursor: pointer;
-  color: #333;
 }
 
-.opciones-radio input[type="radio"] {
-  transform: scale(1.2);
-  accent-color: #f4722b; /* Color naranja nativo para el radio */
-}
-
-/* Botón principal */
 .btn-confirmar {
   width: 100%;
-  padding: 14px;
   background-color: #f4722b;
-  color: white;
+  color: #ffffff;
   border: none;
+  padding: 12px;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.1s;
   margin-top: 10px;
+  transition: background-color 0.2s;
 }
 
 .btn-confirmar:hover {
-  background-color: #d95a1a;
+  background-color: #d95a16;
 }
 
-.btn-confirmar:active {
-  transform: scale(0.98); /* Pequeño efecto al hacer clic */
+.btn-confirmar:disabled {
+  background-color: #999999;
+  cursor: not-allowed;
 }

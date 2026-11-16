@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; // <--- Necesario para el @if
 import { Router, NavigationEnd, RouterLink } from '@angular/router'; // <--- ¡Importante RouterLink!
 
@@ -9,17 +9,30 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router'; // <--- ¡I
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class HeaderComponent {
-  mostrarMenu: boolean = false;
+export class HeaderComponent implements OnInit {
+  mostrarMenu: boolean = true;
 
   constructor(private router: Router) {
-    // Escucha los cambios de ruta
+    // Inicializar visibilidad inmediatamente con la URL actual
+    this.actualizarVisibilidadMenu(this.router.url);
+
+    // Escucha los cambios de ruta futuros
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
-        // Si la ruta es '/' (inicio de sesión), ocultamos el menú. En el resto, se muestra.
-        this.mostrarMenu = event.url !== '/';
+        this.actualizarVisibilidadMenu(event.urlAfterRedirects || event.url);
       }
     });
+  }
+
+  ngOnInit(): void {
+    // Al montarse de nuevo el componente, sincroniza la visibilidad de inmediato
+    this.actualizarVisibilidadMenu(this.router.url);
+  }
+
+  private actualizarVisibilidadMenu(url: string): void {
+    const rutaLimpia = (url || '').split('?')[0].split('#')[0];
+    // Oculta el menú solo en la pantalla de inicio/login ('/'), en el resto siempre está visible
+    this.mostrarMenu = rutaLimpia !== '/' && rutaLimpia !== '';
   }
 
   // Navega al inventario personal del usuario

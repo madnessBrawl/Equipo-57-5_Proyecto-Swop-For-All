@@ -1,23 +1,42 @@
+/* Estilos para el Espacio de la Comunidad (Boceto PDF Página 2 y 3) */
 .espacio-comunidad-contenedor {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background-color: #fcebd5; /* Fondo beige claro similar a la imagen */
+  min-height: 100vh;
+  background-color: #fcebd5; /* Fondo beige claro */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Ajustes del header */
+/* Header naranja */
 .header-comunidad {
+  background-color: #f4722b;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 30px; /* Menos alto, más ancho */
-  background-color: #f4722b; /* Naranja */
-  height: 80px; /* Forzamos el mismo alto del dashboard */
+  padding: 10px 30px;
+  height: 80px;
   box-sizing: border-box;
 }
 
-/* Elimina el fondo gris y el borde del botón */
-.boton-transparente {
+.header-izquierdo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-principal {
+  height: 50px;
+  width: auto;
+}
+
+.titulo-header {
+  color: #ffffff;
+  font-size: 26px;
+  margin: 0;
+  font-weight: bold;
+}
+
+.btn-volver {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -25,65 +44,334 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px 15px;
+  gap: 2px;
+  padding: 5px 12px;
 }
 
-.boton-transparente:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+.btn-volver:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
 }
 
+.icono-volver {
+  height: 42px;
+  width: auto;
+}
+
+.texto-volver {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Cuerpo de la comunidad */
 .cuerpo-comunidad {
   flex: 1;
-  padding: 20px;
+  max-width: 1000px;
+  width: 95%;
+  margin: 20px auto 30px auto;
   display: flex;
   flex-direction: column;
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
+  gap: 15px;
 }
 
-.contador-miembros {
-  font-weight: bold;
-  font-size: 1.1rem;
+/* Fila Superior: Miembros a la izq, Título centrado grande */
+.fila-superior {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  align-items: center;
   margin-bottom: 10px;
 }
 
-.badge-admin {
-  color: #d9534f;
-  font-size: 0.9rem;
-  margin-left: 10px;
+.bloque-miembros-izq {
+  font-size: 16px;
+  font-weight: bold;
+  color: #222222;
 }
 
-.caja-chat {
-  flex: 1;
-  background-color: #e3cdae;
-  border: 4px solid #cc7a53;
-  border-radius: 8px;
+.badge-admin {
+  color: #c9302c;
+  font-size: 14px;
+  margin-left: 6px;
+}
+
+.bloque-titulo-centro {
+  grid-column: 2;
+  text-align: center;
+}
+
+.titulo-bienvenida {
+  margin: 0;
+  font-size: 24px;
+  color: #111111;
+  font-weight: 700;
+}
+
+/* Layout interactivo: Botones a la izquierda, Chat a la derecha (Boceto PDF) */
+.layout-interactivo {
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+  min-height: 520px;
+}
+
+/* Columna de botones laterales (Miembros y Ajustes) */
+.columna-botones-laterales {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  width: 110px;
+  padding-top: 10px;
 }
 
-.mensajes-area {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-}
-
-.input-area {
-  background-color: #a89481;
-  padding: 10px;
+.btn-lateral-icono {
+  background: transparent;
+  border: none;
+  cursor: pointer;
   display: flex;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 10px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-lateral-icono:hover {
+  background-color: rgba(244, 114, 43, 0.15);
+  transform: translateY(-2px);
+}
+
+.btn-lateral-icono:active {
+  transform: scale(0.95);
+}
+
+.icono-lateral {
+  height: 55px;
+  width: auto;
+}
+
+.texto-lateral {
+  font-size: 14px;
+  font-weight: bold;
+  color: #222222;
+}
+
+/* Caja de Chat Principal (Boceto PDF Página 2 y 3) */
+.caja-chat-principal {
+  flex: 1;
+  background-color: #e3cdae; /* Color arena/marrón del boceto */
+  border: 5px solid #a8724d; /* Borde marrón grueso del boceto */
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 550px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.area-mensajes {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.placeholder-chat {
+  margin: auto;
+  text-align: center;
+  color: #554433;
+  font-size: 17px;
+  font-weight: 500;
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+.subtexto-placeholder {
+  display: block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #776655;
+}
+
+/* Globos de mensaje */
+.globo-mensaje {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  max-width: 75%;
+  align-self: flex-start;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.globo-mensaje.mi-mensaje {
+  align-self: flex-end;
+  background-color: #fff1e0;
+  border: 1px solid #f4722b;
+}
+
+.encabezado-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #555555;
+  margin-bottom: 4px;
+}
+
+.rol-emisor {
+  font-weight: 600;
+  color: #f4722b;
+}
+
+.fecha-mensaje {
+  margin-left: auto;
+  color: #888888;
+}
+
+.cuerpo-mensaje {
+  margin: 0;
+  font-size: 14px;
+  color: #111111;
+  word-break: break-word;
+}
+
+/* Barra inferior del chat "Escribe..." */
+.barra-input-chat {
+  background-color: #7c7267; /* Barra gris del boceto */
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .input-chat {
-  width: 100%;
-  padding: 10px;
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 25px;
   border: none;
-  border-radius: 20px;
-  background-color: #ccc;
-  font-size: 1rem;
+  font-size: 15px;
   outline: none;
+  background-color: #e8e3dc;
+  color: #111111;
+}
+
+.input-chat::placeholder {
+  color: #666666;
+  font-style: italic;
+}
+
+.btn-enviar-chat {
+  background-color: #f4722b;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.btn-enviar-chat:hover {
+  background-color: #d95a16;
+}
+
+/* MODAL DE MIEMBROS (Tooltip/Card al pulsar el botón Miembros) */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-card-miembros {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+
+.modal-miembros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-miembros-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #222222;
+}
+
+.btn-cerrar-modal {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666666;
+}
+
+.desc-miembros {
+  font-size: 14px;
+  color: #555555;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 10px;
+}
+
+.lista-miembros-roles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.item-miembro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.info-lector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.tag-tu {
+  color: #f4722b;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.badge-rol {
+  background-color: #e0e0e0;
+  color: #444444;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-rol-admin {
+  background-color: #ffeedd;
+  color: #d95a16;
+  border: 1px solid #f4722b;
 }

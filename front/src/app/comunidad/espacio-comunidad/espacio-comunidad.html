@@ -1,31 +1,122 @@
 <div class="espacio-comunidad-contenedor">
-  <!-- Header exclusivo de la comunidad -->
-  <header id="cabecera-principal" class="cabecera-naranja header-comunidad">
-    <div class="contenedor-izquierdo" style="display: flex; align-items: center; gap: 15px;">
-      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo" class="logo-pequeño" style="height: 50px;">
-      <h1 id="titulo-sistema" class="titulo-blanco" style="margin: 0; font-size: 1.5rem;">Swop-For-All</h1>
+  <!-- Header: Logo Swop-For-All a la izquierda, Botón Volver al dashboard a la derecha -->
+  <header class="header-comunidad">
+    <div class="header-izquierdo">
+      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-principal">
+      <h1 class="titulo-header">Swop-For-All</h1>
     </div>
-    
-    <nav class="contenedor-derecho">
-      <button id="btn-volver" class="boton-icono boton-transparente" (click)="volverDashboard()">
-        <img src="/imagenes/salir-de-pagina-logo.png" alt="Exit" class="icono-nav" style="height: 40px;">
-        <span class="texto-icono" style="color: white; font-weight: bold;">Volver</span>
+
+    <nav class="header-derecho">
+      <button class="btn-volver" (click)="volverDashboard()" title="Volver al Dashboard">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Volver" class="icono-volver">
+        <span class="texto-volver">Volver</span>
       </button>
     </nav>
   </header>
 
-  <!-- Cuerpo de la comunidad -->
+  <!-- Contenido abajo del header (Boceto PDF Página 2 y 3) -->
   <main class="cuerpo-comunidad">
-    <p class="contador-miembros">Miembros: 1/20 <span class="badge-admin">(Tú - Admin)</span></p>
-    
-    <div class="caja-chat">
-      <div class="mensajes-area">
-        <!-- Aquí irán los mensajes en el futuro -->
+    <!-- Fila superior: Contador de miembros a la izquierda y Título centrado y grande -->
+    <div class="fila-superior">
+      <div class="bloque-miembros-izq">
+        <span class="contador-miembros">Miembros: {{ totalMiembros }}/20</span>
+        @if (esAdmin) {
+          <span class="badge-admin">(Tú - Admin)</span>
+        }
       </div>
-      
-      <div class="input-area">
-        <input type="text" placeholder="Escribe..." class="input-chat">
+
+      <div class="bloque-titulo-centro">
+        <h2 class="titulo-bienvenida">
+          Bienvenido a <u>"{{ comunidad?.nombre || 'Lectores de Fantasía' }}"</u>
+        </h2>
       </div>
     </div>
+
+    <!-- Área de interacción: Botones laterales + Chat General Grande -->
+    <div class="layout-interactivo">
+      <!-- Columna Izquierda: Botones Miembros y Ajustes (Boceto PDF Página 3) -->
+      <aside class="columna-botones-laterales">
+        <!-- Botón 1: Miembros (Muestra Card con miembros y roles) -->
+        <button type="button" class="btn-lateral-icono" (click)="toggleModalMiembros()">
+          <img src="/imagenes/Lista-de-miembros-logo.png" alt="Miembros" class="icono-lateral">
+          <span class="texto-lateral">Miembros</span>
+        </button>
+
+        <!-- Botón 2: Ajustes (Por ahora solo déjalo ahí sin hacer nada) -->
+        <button type="button" class="btn-lateral-icono" title="Ajustes de la comunidad">
+          <img src="/imagenes/Configuracion-logo.png" alt="Ajustes" class="icono-lateral">
+          <span class="texto-lateral">Ajustes</span>
+        </button>
+      </aside>
+
+      <!-- Columna Derecha: Chat general grande para que todos los miembros hablen -->
+      <section class="caja-chat-principal">
+        <!-- Lista de mensajes del grupo -->
+        <div class="area-mensajes">
+          @if (!comunidad?.mensajes || comunidad?.mensajes?.length === 0) {
+            <div class="placeholder-chat">
+              <p>💬 Implementar chat para que todos los miembros del grupo hablen</p>
+              <span class="subtexto-placeholder">¡Sé el primero en enviar un mensaje a la comunidad!</span>
+            </div>
+          }
+
+          @for (m of comunidad?.mensajes; track $index) {
+            <div class="globo-mensaje" [class.mi-mensaje]="m.emisor === usuarioActual">
+              <div class="encabezado-mensaje">
+                <strong>{{ m.emisor }}</strong>
+                <span class="rol-emisor">({{ obtenerRol(m.emisor) }})</span>
+                <span class="fecha-mensaje">{{ m.fecha | date:'shortTime' }}</span>
+              </div>
+              <p class="cuerpo-mensaje">{{ m.texto }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Barra inferior del chat: Input "Escribe..." (Boceto PDF) -->
+        <form class="barra-input-chat" (submit)="enviarMensaje(); $event.preventDefault();">
+          <input
+            type="text"
+            class="input-chat"
+            placeholder="Escribe un mensaje para la comunidad..."
+            [(ngModel)]="textoMensaje"
+            name="textoMensaje"
+          />
+          <button type="submit" class="btn-enviar-chat">Enviar</button>
+        </form>
+      </section>
+    </div>
   </main>
+
+  <!-- TARJETA / CARD DE MIEMBROS (Página 3 del PDF) -->
+  @if (mostrarModalMiembros) {
+    <div class="modal-backdrop" (click)="toggleModalMiembros()">
+      <div class="modal-card-miembros" (click)="$event.stopPropagation()">
+        <div class="modal-miembros-header">
+          <h3>👥 Miembros de la comunidad ({{ totalMiembros }}/20)</h3>
+          <button class="btn-cerrar-modal" (click)="toggleModalMiembros()">✕</button>
+        </div>
+
+        <p class="desc-miembros">
+          Creador y Administrador: <strong>{{ comunidad?.creador }}</strong>
+        </p>
+
+        <div class="lista-miembros-roles">
+          @for (miembro of comunidad?.miembros; track miembro) {
+            <div class="item-miembro">
+              <div class="info-lector">
+                <span class="icono-avatar">👤</span>
+                <span class="nombre-miembro">{{ miembro }}</span>
+                @if (miembro === usuarioActual) {
+                  <span class="tag-tu">(Tú)</span>
+                }
+              </div>
+              <span class="badge-rol" [class.badge-rol-admin]="obtenerRol(miembro) === 'Administrador'">
+                {{ obtenerRol(miembro) }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

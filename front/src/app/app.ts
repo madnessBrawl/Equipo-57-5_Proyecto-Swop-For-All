@@ -1,8 +1,7 @@
 ﻿import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './header/header';
-// import { PerfilUsuarioComponent } from './perfil-usuario/perfil-usuario';
-import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, HeaderComponent],
@@ -11,9 +10,29 @@ import { Router } from '@angular/router';
 })
 export class App {
   protected readonly title = signal('front');
+  public rutaActual = signal<string>('');
 
-  // 2. Inyectar el router como 'public' para que el HTML pueda leerlo
-  constructor(public router: Router) {}
+  constructor(public router: Router) {
+    this.rutaActual.set(this.router.url);
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.rutaActual.set(event.urlAfterRedirects || event.url);
+      }
+    });
+  }
+
+  // Oculta el header global en las vistas de comunidad que tienen su propio header con botón Volver
+  mostrarHeaderGlobal(): boolean {
+    const rutasSinHeaderGlobal = [
+      '/espacio-comunidad',
+      '/ver-comunidades',
+      '/mi-comunidad',
+      '/mis-comunidades',
+      '/crear-comunidad'
+    ];
+    const url = this.rutaActual();
+    return !rutasSinHeaderGlobal.some(r => url.startsWith(r));
+  }
 }
 
 export class AppComponent {

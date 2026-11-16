@@ -28,5 +28,21 @@
       "ana_lectora"
     ],
     "fechaCreacion": "2026-11-09T15:00:00.000Z"
+  },
+  {
+    "nombre": "el klub de komedia y kanto",
+    "descripcion": "JIJIJAJA",
+    "tipo": "publico",
+    "genero": "Comedia",
+    "creador": "pepe20",
+    "administradores": [
+      "pepe20"
+    ],
+    "miembros": [
+      "pepe20"
+    ],
+    "maxMiembros": 20,
+    "mensajes": [],
+    "id": "reg_mwjq8d5x_0vxo8"
   }
 ]

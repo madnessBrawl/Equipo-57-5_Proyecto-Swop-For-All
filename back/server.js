@@ -151,17 +151,96 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     /* ---------------- 3. RUTAS DE COMUNIDADES ---------------- */
+    // GET /api/comunidades -> Listar todas las comunidades disponibles
     if (metodo === 'GET' && ruta === '/api/comunidades') {
       return responderJSON(res, 200, comunidadPersistencia.obtenerTodos());
     }
 
+    // GET /api/comunidades/mis-comunidades/:usuario -> Comunidades creadas por el lector
+    if (metodo === 'GET' && ruta.startsWith('/api/comunidades/mis-comunidades/')) {
+      const usuario = decodeURIComponent(ruta.replace('/api/comunidades/mis-comunidades/', ''));
+      const misComunidades = comunidadPersistencia.buscarPorCreador(usuario);
+      return responderJSON(res, 200, misComunidades);
+    }
+
+    // GET /api/comunidades/:id -> Obtener detalle de una comunidad
+    if (metodo === 'GET' && ruta.startsWith('/api/comunidades/') && !ruta.includes('/unir') && !ruta.includes('/mensajes')) {
+      const id = ruta.replace('/api/comunidades/', '');
+      const comunidad = comunidadPersistencia.buscarPorId(id);
+      if (!comunidad) {
+        return responderJSON(res, 404, { error: 'Comunidad no encontrada.' });
+      }
+      return responderJSON(res, 200, comunidad);
+    }
+
+    // POST /api/comunidades -> Crear nueva comunidad
     if (metodo === 'POST' && ruta === '/api/comunidades') {
       const body = await parsearBodyJSON(req);
+      if (!body.nombre || !body.descripcion || !body.genero) {
+        return responderJSON(res, 400, { error: 'Nombre, descripción y género son requeridos.' });
+      }
       if (comunidadPersistencia.buscarPorNombre(body.nombre)) {
         return responderJSON(res, 400, { error: 'Este nombre ya existe, por favor intente con otro' });
       }
-      const guardada = comunidadPersistencia.guardar(body);
-      return responderJSON(res, 201, { mensaje: 'comunidad creada con Ã©xito', comunidad: guardada });
+
+      const creador = usuarioSesion || body.creador || body.admin || 'usuario_activo';
+      const nueva = {
+        id: body.id || `com_${Date.now().toString(36)}`,
+        nombre: body.nombre.trim(),
+        descripcion: body.descripcion.trim(),
+        genero: body.genero,
+        tipo: body.tipo || 'publico',
+        creador: creador,
+        administradores: [creador],
+        miembros: [creador],
+        maxMiembros: 20,
+        fechaCreacion: new Date().toISOString(),
+        mensajes: []
+      };
+
+      const guardada = comunidadPersistencia.guardar(nueva);
+      return responderJSON(res, 201, { mensaje: 'comunidad creada con éxito', comunidad: guardada });
+    }
+
+    // POST /api/comunidades/:id/unir -> Unirse a una comunidad
+    if (metodo === 'POST' && ruta.includes('/unir')) {
+      const partes = ruta.split('/');
+      const id = partes[3];
+      const body = await parsearBodyJSON(req);
+      const usuario = usuarioSesion || body.usuario;
+
+      if (!usuario) {
+        return responderJSON(res, 400, { error: 'Debe especificar el usuario que desea unirse.' });
+      }
+
+      try {
+        const resultado = comunidadPersistencia.unirMiembro(id, usuario);
+        return responderJSON(res, 200, {
+          mensaje: resultado.yaEsMiembro ? 'Ya eres miembro de esta comunidad' : 'Te has unido exitosamente',
+          comunidad: resultado.comunidad
+        });
+      } catch (err) {
+        if (err.message === 'Comunidad llena') {
+          return responderJSON(res, 400, { error: 'Comunidad llena' });
+        }
+        return responderJSON(res, 400, { error: err.message });
+      }
+    }
+
+    // POST /api/comunidades/:id/mensajes -> Enviar mensaje al chat general
+    if (metodo === 'POST' && ruta.includes('/mensajes')) {
+      const partes = ruta.split('/');
+      const id = partes[3];
+      const body = await parsearBodyJSON(req);
+      const emisor = usuarioSesion || body.emisor || 'Miembro';
+      const texto = body.texto || '';
+
+      if (!texto.trim()) {
+        return responderJSON(res, 400, { error: 'El mensaje no puede estar vacío.' });
+      }
+
+      const mensajeGuardado = comunidadPersistencia.agregarMensaje(id, emisor, texto);
+      return responderJSON(res, 201, { mensaje: 'Mensaje enviado', data: mensajeGuardado });
     }
 
     /* ---------------- 4. RUTAS DE INTERCAMBIOS ---------------- */

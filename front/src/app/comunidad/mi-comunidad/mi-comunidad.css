@@ -1,0 +1,189 @@
+/* Estilos para Mis Comunidades (Boceto PDF Página 6 y 7) */
+.pantalla-comunidad {
+  min-height: 100vh;
+  background-color: #fcebd5;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.header-comunidad {
+  background-color: #f4722b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 30px;
+  height: 80px;
+  box-sizing: border-box;
+}
+
+.header-izquierdo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-principal {
+  height: 50px;
+  width: auto;
+}
+
+.titulo-header {
+  color: #ffffff;
+  font-size: 26px;
+  margin: 0;
+  font-weight: bold;
+}
+
+.btn-volver {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 12px;
+}
+
+.btn-volver:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+.icono-volver {
+  height: 42px;
+  width: auto;
+}
+
+.texto-volver {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.contenedor-principal {
+  max-width: 900px;
+  width: 92%;
+  margin: 30px auto 40px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Título centrado grande como exige el PDF */
+.encabezado-centrado {
+  text-align: center;
+}
+
+.titulo-centrado {
+  font-size: 32px;
+  color: #222222;
+  margin: 0;
+  font-weight: 700;
+}
+
+.marco-directorio {
+  background-color: #e4cbb0;
+  border: 4px solid #b28359;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.mensaje-estado, .mensaje-vacio {
+  text-align: center;
+  padding: 30px;
+  color: #554433;
+  font-size: 16px;
+}
+
+.btn-crear-primera {
+  margin-top: 15px;
+  background-color: #f4722b;
+  color: #ffffff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn-crear-primera:hover {
+  background-color: #d95a16;
+}
+
+.lista-tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tarjeta de Mis Comunidades (SIN botón Unirse) */
+.tarjeta-comunidad-mi {
+  background-color: #f7e6d2;
+  border: 2px solid #a3754e;
+  border-radius: 20px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s;
+}
+
+.tarjeta-comunidad-mi:hover {
+  transform: translateY(-2px);
+  background-color: #fef1e2;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.col-nombre {
+  flex: 2.5;
+  font-size: 16px;
+  color: #111111;
+}
+
+.comillas {
+  color: #777777;
+}
+
+.col-genero {
+  flex: 1.5;
+  text-align: center;
+}
+
+.badge-genero {
+  background-color: #bfa182;
+  color: #ffffff;
+  padding: 5px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.col-miembros {
+  flex: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.texto-etiqueta {
+  color: #333333;
+}
+
+.pastilla-miembros {
+  background-color: #ffff33;
+  color: #000000;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid #c4c400;
+  font-size: 14px;
+}

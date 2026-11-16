@@ -1,0 +1,63 @@
+<div class="pantalla-comunidad">
+  <!-- Header: Logo a la izquierda, Volver al dashboard a la derecha -->
+  <header class="header-comunidad">
+    <div class="header-izquierdo">
+      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-principal">
+      <h1 class="titulo-header">Swop-For-All</h1>
+    </div>
+
+    <nav class="header-derecho">
+      <button class="btn-volver" (click)="volverDashboard()" title="Volver al Dashboard">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Volver" class="icono-volver">
+        <span class="texto-volver">Volver</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="contenedor-principal">
+    <!-- Título centrado grande como exige el PDF (Página 6 y 7) -->
+    <div class="encabezado-centrado">
+      <h2 class="titulo-centrado">Mis comunidades</h2>
+    </div>
+
+    <!-- Contenedor / Marco del Directorio -->
+    <div class="marco-directorio">
+      @if (cargando) {
+        <p class="mensaje-estado">⏳ Cargando tus comunidades...</p>
+      }
+
+      @if (!cargando && misComunidades.length === 0) {
+        <div class="mensaje-vacio">
+          <p>Aún no has creado comunidades en tu perfil.</p>
+          <button class="btn-crear-primera" (click)="irACrearComunidad()">
+            ➕ Crear mi primera comunidad
+          </button>
+        </div>
+      }
+
+      <!-- Listado de tarjetas SIN botón Unirse (Boceto PDF Página 6) -->
+      <div class="lista-tarjetas">
+        @for (item of misComunidades; track item.id) {
+          <div class="tarjeta-comunidad-mi" (click)="abrirEspacioComunidad(item)" title="Haga clic para abrir la comunidad">
+            <!-- 1. Nombre de la comunidad -->
+            <div class="col-nombre">
+              <span class="comillas">"</span><strong>{{ item.nombre }}</strong><span class="comillas">"</span>
+            </div>
+
+            <!-- 2. Género literario -->
+            <div class="col-genero">
+              <span class="badge-genero">{{ item.genero || 'General' }}</span>
+            </div>
+
+            <!-- 3. Número de miembros (X/20 con pastilla amarilla) -->
+            <div class="col-miembros">
+              <span class="texto-etiqueta">Nro Miembros:</span>
+              <span class="pastilla-miembros">{{ item.miembros.length || 1 }}/20</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </main>
+</div>

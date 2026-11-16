@@ -1,49 +1,88 @@
-<div class="pantalla-centrada">
-  <div class="card-formulario">
-    <h2>Crear Nueva Comunidad</h2>
-    
-    <form (ngSubmit)="confirmarCreacion()">
-      <!-- Nombre -->
-      <div class="grupo-form">
-        <label>Nombre de la comunidad:</label>
-        <input type="text" [(ngModel)]="comunidad.nombre" name="nombre" placeholder="Ej: Lectores de Fantasía">
-      </div>
+<div class="pantalla-comunidad">
+  <!-- Header con logo y botón Volver al dashboard -->
+  <header class="header-comunidad">
+    <div class="header-izquierdo">
+      <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-principal">
+      <h1 class="titulo-header">Swop-For-All</h1>
+    </div>
 
-      <!-- Descripción corta -->
-      <div class="grupo-form">
-        <label>Descripción corta (máx 1000 palabras):</label>
-        <textarea [(ngModel)]="comunidad.descripcion" name="descripcion" rows="4"></textarea>
-      </div>
+    <nav class="header-derecho">
+      <button class="btn-volver" (click)="volverDashboard()" title="Volver al Dashboard">
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Volver" class="icono-volver">
+        <span class="texto-volver">Volver</span>
+      </button>
+    </nav>
+  </header>
 
-      <!-- Opciones: Privado o Público -->
-      <div class="grupo-form-radio">
-        <label class="label-principal">Privacidad:</label>
-        <div class="opciones-radio">
-          <label><input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="publico"> Público</label>
-          <label><input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="privado"> Privado</label>
+  <!-- Formulario de Crear Nueva Comunidad (Boceto PDF Página 1) -->
+  <main class="contenedor-formulario">
+    <div class="card-formulario">
+      <h2 class="titulo-form">Crear Nueva Comunidad</h2>
+      
+      <form (ngSubmit)="confirmarCreacion()">
+        <!-- Nombre de la comunidad -->
+        <div class="grupo-form">
+          <label class="label-form">Nombre de la comunidad:</label>
+          <input
+            type="text"
+            class="input-form"
+            [(ngModel)]="comunidad.nombre"
+            name="nombre"
+            placeholder="Ej: Lectores de Fantasía"
+            required
+          />
         </div>
-      </div>
 
-      <!-- Opciones: Géneros literarios -->
-      <div class="grupo-form">
-        <label>Género literario:</label>
-        <select [(ngModel)]="comunidad.genero" name="genero">
-          <option value="" disabled selected>Seleccione tu género</option>
-          <option value="terror">Terror</option>
-          <option value="drama">Drama</option>
-          <option value="comedia">Comedia</option>
-          <option value="misterio">Misterio</option>
-          <option value="horror">Horror</option>
-          <option value="fantasia">Fantasía</option>
-          <option value="ciencia-ficcion">Ciencia-ficción</option>
-          <option value="accion">Acción</option>
-          <option value="aventura">Aventura</option>
-          <option value="romance">Romance</option>
-        </select>
-      </div>
+        <!-- Descripción corta (máx 1000 palabras) -->
+        <div class="grupo-form">
+          <label class="label-form">Descripción corta (máx 1000 palabras):</label>
+          <textarea
+            class="textarea-form"
+            [(ngModel)]="comunidad.descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Describe la temática, libros a debatir o propósitos del grupo..."
+            required></textarea>
+        </div>
 
-      <!-- Botón Confirmar -->
-      <button type="submit" class="btn-confirmar">Confirmar</button>
-    </form>
-  </div>
+        <!-- Privacidad: Público o Privado -->
+        <div class="grupo-form-radio">
+          <label class="label-form">Privacidad:</label>
+          <div class="opciones-radio">
+            <label class="radio-label">
+              <input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="publico">
+              Público
+            </label>
+            <label class="radio-label">
+              <input type="radio" [(ngModel)]="comunidad.tipo" name="tipo" value="privado">
+              Privado
+            </label>
+          </div>
+        </div>
+
+        <!-- Género literario (Opciones exactas del PDF Página 1) -->
+        <div class="grupo-form">
+          <label class="label-form">Género literario:</label>
+          <select class="select-form" [(ngModel)]="comunidad.genero" name="genero" required>
+            <option value="" disabled selected>Seleccione tu género</option>
+            <option value="Terror">Terror</option>
+            <option value="Drama">Drama</option>
+            <option value="Comedia">Comedia</option>
+            <option value="Misterio">Misterio</option>
+            <option value="Horror">Horror</option>
+            <option value="Fantasía">Fantasía</option>
+            <option value="Ciencia-ficción">Ciencia-ficción</option>
+            <option value="Acción">Acción</option>
+            <option value="Aventura">Aventura</option>
+            <option value="Romance">Romance</option>
+          </select>
+        </div>
+
+        <!-- Botón Confirmar Naranja -->
+        <button type="submit" class="btn-confirmar" [disabled]="cargando">
+          {{ cargando ? 'Guardando en comunidades.json...' : 'Confirmar' }}
+        </button>
+      </form>
+    </div>
+  </main>
 </div>

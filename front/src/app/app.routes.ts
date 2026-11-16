@@ -9,6 +9,8 @@ import { CrearComunidadComponent } from './comunidad/crear-comunidad';
 import { ModificarOfertaComponent } from './modificar-oferta/modificar-oferta.component';
 import { CatalogoLibrosComponent } from './catalogo-libros/catalogo-libros.component';
 import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
+import { VerComunidadesComponent } from './comunidad/ver-comunidades/ver-comunidades';
+import { MiComunidadComponent } from './comunidad/mi-comunidad/mi-comunidad';
 import { ModificarPerfilComponent } from './modificar-perfil/script-modificar-perfil';
 import { InventarioComponent } from './inventario/inventario.component';
 
@@ -23,7 +25,10 @@ export const routes: Routes = [
   // Ruta Inventario personal del usuario
   { path: 'inventario', component: InventarioComponent },
 
-  // Rutas de comunidad (Nivel principal)
+  // Rutas de comunidad (Nivel principal - Consultar y Unirse a Comunidad PDF)
+  { path: 'ver-comunidades', component: VerComunidadesComponent },
+  { path: 'mi-comunidad', component: MiComunidadComponent },
+  { path: 'mis-comunidades', redirectTo: 'mi-comunidad', pathMatch: 'full' },
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },
   { path: 'catalogo', component: CatalogoLibrosComponent },
