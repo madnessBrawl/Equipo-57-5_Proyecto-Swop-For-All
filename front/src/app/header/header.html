@@ -1,7 +1,7 @@
-<header id="cabecera-principal" class="cabecera-naranja">
+﻿<header id="cabecera-principal" class="cabecera-naranja">
   <div class="contenedor-izquierdo">
-    <!-- Mantenemos el logo que sí carga correctamente -->
-    <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-pequeño">
+    <!-- Mantenemos el logo que sÃ­ carga correctamente -->
+    <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-pequeÃ±o">
     <h1 id="titulo-sistema" class="titulo-blanco">Swop-For-All</h1>
   </div>
   
@@ -25,7 +25,7 @@
           <span class="texto-icono">Comunidad</span>
         </button>
 
-        <!-- Menú desplegable (Dropdown) de Comunidad -->
+        <!-- MenÃº desplegable (Dropdown) de Comunidad -->
         @if (mostrarMenuComunidad) {
           <div class="dropdown-menu">
             <button class="dropdown-item" (click)="navegarA('/ver-comunidades')">Ver comunidades</button>
@@ -35,32 +35,32 @@
         }
       </div>
 
-      <!-- Botón de Catálogo con la misma estructura de diseño (boton-icono) -->
+      <!-- BotÃ³n de CatÃ¡logo con la misma estructura de diseÃ±o (boton-icono) -->
       <button routerLink="/catalogo" id="btn-catalogo" class="boton-icono">
-        <div class="icono-nav" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">📚</div>
-        <span class="texto-icono">Catálogo</span>
+        <div class="icono-nav" style="font-size: 20px; display: flex; align-items: center; justify-content: center;">ðŸ“š</div>
+        <span class="texto-icono">CatÃ¡logo</span>
       </button>
       
-      <!-- Botón de Intercambiar vinculado directamente a tu ruta de modificar oferta -->
+      <!-- BotÃ³n de Intercambiar vinculado directamente a tu ruta de modificar oferta -->
       <button routerLink="/modificar-oferta" id="btn-intercambio" class="boton-icono">
         <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
         <span class="texto-icono">Intercambiar</span>
       </button>
       
-      <!-- Reputación -->
+      <!-- ReputaciÃ³n -->
       <button id="btn-reputacion" class="boton-icono" (click)="irAReputacion()">
-        <img src="/imagenes/calificacion-estrella-llena.png" alt="Reputación" class="icono-nav">
-        <span class="texto-icono">Reputación</span>
+        <img src="/imagenes/calificacion-estrella-llena.png" alt="ReputaciÃ³n" class="icono-nav">
+        <span class="texto-icono">ReputaciÃ³n</span>
       </button>
 
-      <button id="btn-perfil" class="boton-icono">
+      <button routerLink="/modificar-perfil" id="btn-perfil" class="boton-icono">
         <img src="/imagenes/Perfil-logo.png" alt="Perfil" class="icono-nav">
         <span class="texto-icono">Perfil</span>
       </button>
       
       <button id="btn-cerrar-sesion" class="boton-icono" (click)="cerrarSesion()">
-        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar Sesión" class="icono-nav">
-        <span class="texto-icono">Cerrar sesión</span>
+        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar SesiÃ³n" class="icono-nav">
+        <span class="texto-icono">Cerrar sesiÃ³n</span>
       </button>
     </nav>
   }

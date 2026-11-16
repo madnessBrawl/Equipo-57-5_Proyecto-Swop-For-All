@@ -1,0 +1,230 @@
+/*
+  Estilos: Modificar Perfil
+*/
+
+.area-trabajo-perfil {
+  display: flex;
+  justify-content: center;
+  padding: 30px 20px;
+  box-sizing: border-box;
+  min-height: calc(100vh - 80px);
+}
+
+.tarjeta-modificar {
+  background-color: #ffffff;
+  border-radius: var(--radio-tarjeta, 12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 780px;
+  padding: 36px 40px;
+  box-sizing: border-box;
+  align-self: flex-start;
+}
+
+/* Cabecera del usuario */
+.cabecera-usuario-perfil {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.avatar-circulo {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c35c28, #a84e22);
+  color: #ffffff;
+  font-size: 1.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.datos-texto-usuario {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.titulo-nombre-usuario {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #222222;
+  font-weight: 700;
+}
+
+.texto-alias-usuario {
+  font-size: 1rem;
+  color: #666666;
+  font-weight: 500;
+}
+
+.linea-reputacion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.icono-estrella-dorada {
+  color: #f5a623;
+  font-size: 1.15rem;
+}
+
+.numero-reputacion {
+  color: #222222;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.etiqueta-reputacion {
+  color: #777777;
+  font-size: 0.88rem;
+}
+
+.linea-separadora-cabecera {
+  height: 1px;
+  background-color: #eeeeee;
+  margin: 0 0 20px 0;
+}
+
+.texto-instruccion-edicion {
+  color: #444444;
+  font-size: 0.95rem;
+  margin: 0 0 22px 0;
+}
+
+/* Alertas de retroalimentacion */
+.banner-alerta {
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.banner-alerta.alerta-exito {
+  background-color: #e8f5e9;
+  border: 1px solid #2e7d32;
+  color: #2e7d32;
+}
+
+.banner-alerta.alerta-error {
+  background-color: #ffebee;
+  border: 1px solid #c62828;
+  color: #c62828;
+}
+
+/* Campos de formulario */
+.formulario-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fila-dos-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 620px) {
+  .fila-dos-columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grupo-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.etiqueta-formulario {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+
+.campo-entrada {
+  padding: 10px 14px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #333333;
+  outline: none;
+  box-sizing: border-box;
+  width: 100%;
+  background-color: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.campo-entrada:focus {
+  border-color: #f4722b;
+  box-shadow: 0 0 0 2px rgba(244, 114, 43, 0.15);
+}
+
+.campo-entrada.campo-deshabilitado {
+  background-color: #f5f5f5;
+  color: #666666;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.nota-campo-identificador {
+  font-size: 0.78rem;
+  color: #777777;
+  margin-top: 2px;
+}
+
+.selector-formulario {
+  cursor: pointer;
+}
+
+.area-biografia {
+  resize: vertical;
+  font-family: inherit;
+  min-height: 85px;
+}
+
+/* Botones de accion */
+.barra-acciones-formulario {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.boton-primario-guardar {
+  background-color: #b46032;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 22px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.boton-primario-guardar:hover {
+  background-color: #9a4e25;
+}
+
+.boton-secundario-cancelar {
+  background-color: #f0f0f0;
+  color: #333333;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.boton-secundario-cancelar:hover {
+  background-color: #e2e2e2;
+}

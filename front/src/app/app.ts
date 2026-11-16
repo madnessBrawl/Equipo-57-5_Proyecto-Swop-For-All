@@ -1,11 +1,11 @@
-import { Component, signal } from '@angular/core';
+﻿import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './header/header';
-import { PerfilUsuarioComponent } from './perfil-usuario/perfil-usuario';
+// import { PerfilUsuarioComponent } from './perfil-usuario/perfil-usuario';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet,HeaderComponent,PerfilUsuarioComponent],
+  imports: [RouterOutlet, HeaderComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -19,4 +19,5 @@ export class App {
 export class AppComponent {
   title = 'Swop For All';
 }
+
 
