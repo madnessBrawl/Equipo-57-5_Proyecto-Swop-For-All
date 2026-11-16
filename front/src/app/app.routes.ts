@@ -20,6 +20,9 @@ export const routes: Routes = [
   { path: 'modificar-perfil', component: ModificarPerfilComponent },
   { path: 'perfil', component: ModificarPerfilComponent },
 
+  // Ruta Inventario personal del usuario
+  { path: 'inventario', component: InventarioComponent },
+
   // Rutas de comunidad (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },

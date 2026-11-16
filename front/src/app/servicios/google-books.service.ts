@@ -4,11 +4,12 @@
   Función: Servicio Angular que consume Google Books API v1 para alimentar
            el Catálogo Global de Libros y soportar búsquedas, filtros y paginación.
            Integra caché en memoria para cumplir el requisito de eficiencia (< 15 seg).
+           También gestiona el inventario personal del usuario (localStorage).
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of, timeout } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 
@@ -43,6 +44,20 @@ export interface ResultadoCatalogo {
   totalEncontrados: number;
 }
 
+// Interfaz para la respuesta al añadir un libro al inventario
+export interface RespuestaAñadirLibro {
+  libro: {
+    id: string;
+    titulo: string;
+    autores?: string[];
+    disponible: boolean;
+    portadaUrl?: string;
+    descripcion?: string;
+    isbn?: string;
+    categorias?: string[];
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -51,6 +66,8 @@ export class GoogleBooksService {
   private readonly baseUrl = 'https://www.googleapis.com/books/v1/volumes';
   // Caché en memoria para optimizar tiempo de respuesta y evitar peticiones repetitivas
   private cacheBusqueda = new Map<string, ResultadoCatalogo>();
+  // Caché en memoria del inventario por usuario
+  private cacheInventario = new Map<string, Libro[]>();
 
   constructor(private http: HttpClient) {}
 
@@ -125,6 +142,111 @@ export class GoogleBooksService {
   }
 
   /*
+    Obtiene el inventario de libros del usuario desde caché o localStorage.
+    Retorna null si no hay datos (carga inicial sin datos).
+  */
+  public obtenerInventarioEnCache(usuario: string): Libro[] | null {
+    // Primero revisar la caché en memoria
+    if (this.cacheInventario.has(usuario)) {
+      return this.cacheInventario.get(usuario)!;
+    }
+    // Luego revisar localStorage
+    try {
+      const guardado = localStorage.getItem(`inventario_${usuario}`);
+      if (guardado) {
+        const parsed: Libro[] = JSON.parse(guardado);
+        this.cacheInventario.set(usuario, parsed);
+        return parsed;
+      }
+    } catch {
+      console.warn('[GoogleBooksService] Error leyendo inventario de localStorage');
+    }
+    return null;
+  }
+
+  /*
+    Actualiza el inventario en caché de memoria y en localStorage
+  */
+  public actualizarInventarioEnCache(usuario: string, libros: Libro[]): void {
+    this.cacheInventario.set(usuario, libros);
+    try {
+      localStorage.setItem(`inventario_${usuario}`, JSON.stringify(libros));
+    } catch {
+      console.warn('[GoogleBooksService] No se pudo guardar inventario en localStorage');
+    }
+  }
+
+  /*
+    Obtiene el inventario del usuario desde localStorage (simula llamada al backend).
+  */
+  public obtenerInventarioUsuario(usuario: string): Observable<Libro[]> {
+    try {
+      const guardado = localStorage.getItem(`inventario_${usuario}`);
+      if (guardado) {
+        const libros: Libro[] = JSON.parse(guardado);
+        this.cacheInventario.set(usuario, libros);
+        return of(libros);
+      }
+      // Inventario vacío por defecto para usuarios nuevos
+      return of([]);
+    } catch {
+      return throwError(() => new Error('No se pudo cargar el inventario del usuario.'));
+    }
+  }
+
+  /*
+    Añade un libro al inventario del usuario (simula llamada al backend via localStorage).
+    Valida duplicados y retorna una respuesta compatible con RespuestaAñadirLibro.
+  */
+  public añadirLibroAInventario(libro: Libro, usuario: string): Observable<RespuestaAñadirLibro> {
+    try {
+      const nuevoId = `inv_${usuario}_${Date.now()}`;
+      const libroConId = new Libro(
+        nuevoId,
+        libro.titulo,
+        libro.autor,
+        libro.disponible,
+        libro.portadaUrl,
+        libro.descripcion,
+        libro.isbn,
+        libro.categoria
+      );
+
+      // Cargar inventario actual
+      const inventarioActual = this.obtenerInventarioEnCache(usuario) || [];
+
+      // Validar que no exista un libro con el mismo título y autor
+      const duplicado = inventarioActual.some(
+        l => l.titulo.toLowerCase() === libro.titulo.toLowerCase() &&
+             l.autor.toLowerCase() === libro.autor.toLowerCase()
+      );
+      if (duplicado) {
+        return throwError(() => ({ error: { error: 'Ya tienes este libro en tu inventario.' } }));
+      }
+
+      const inventarioActualizado = [libroConId, ...inventarioActual];
+      this.actualizarInventarioEnCache(usuario, inventarioActualizado);
+
+      // Respuesta simulada compatible con RespuestaAñadirLibro
+      const respuesta: RespuestaAñadirLibro = {
+        libro: {
+          id: nuevoId,
+          titulo: libroConId.titulo,
+          autores: [libroConId.autor],
+          disponible: true,
+          portadaUrl: libroConId.portadaUrl,
+          descripcion: libroConId.descripcion,
+          isbn: libroConId.isbn,
+          categorias: [libroConId.categoria]
+        }
+      };
+      return of(respuesta);
+    } catch {
+      return throwError(() => new Error('Error al añadir el libro al inventario.'));
+    }
+  }
+
+  /*
     Mapea un volumen crudo de Google Books a la clase orientada a objetos Libro
   */
   private mapearALibro(item: GoogleBookItem): Libro {
@@ -146,23 +268,11 @@ export class GoogleBooksService {
       item.id,
       info.title || 'Sin Título',
       autores,
-      true, // Disponible para intercambio inicialmente
+      true,
       portada,
       info.description || 'Sin descripción disponible para esta obra.',
       isbnObj ? isbnObj.identifier : 'S/N',
       info.categories?.[0] || 'Literatura'
     );
-  }
-
-  /**
-   * Datos semilla de respaldo si no hay conexión al backend ni a internet
-   */
-  private catalogoRespaldo(): Libro[] {
-    return [
-      new Libro('lib_100', 'El Principito', 'Antoine de Saint-Exupéry', true, 'https://books.google.com/books/content?id=ylT6DwAAQBAJ&printsec=frontcover&img=1&zoom=1'),
-      new Libro('lib_101', '1984', 'George Orwell', true, 'https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1'),
-      new Libro('lib_102', 'Doña Bárbara', 'Rómulo Gallegos', true),
-      new Libro('lib_103', 'Cien Años de Soledad', 'Gabriel García Márquez', true)
-    ];
   }
 }

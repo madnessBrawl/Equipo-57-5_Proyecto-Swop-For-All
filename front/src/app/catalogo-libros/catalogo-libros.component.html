@@ -2,6 +2,8 @@
      PLANTILLA: catalogo-libros.component.html (Interfaz 7: Catálogo Global)
      Función: Explorar catálogo global de libros con opción de libros de prueba
               almacenados en JSON y búsqueda en tiempo real con Google Books API.
+     Nota: Las imágenes de portada han sido reemplazadas por iconos para
+           mejorar la velocidad de carga del catálogo.
      ========================================================================== -->
 
 <!-- Contenedor principal de la página del catálogo global -->
@@ -124,24 +126,22 @@
         <!-- Tarjeta individual de libro del catálogo -->
         <article class="tarjeta-libro" [attr.id]="'tarjeta-libro-' + item.libro.id">
 
-          <!-- Contenedor superior con portada y datos principales -->
+          <!-- Contenedor superior con icono y datos principales -->
+          <!-- NOTA: Las imágenes fueron removidas para mejorar la velocidad de carga del catálogo -->
           <div>
-            <!-- Portada oficial del libro -->
-            <div class="contenedor-portada-libro" (click)="abrirModalDetalle(item)" title="Ver detalles completos del libro">
-              @if (item.libro.portadaUrl) {
-                <img
-                  [src]="item.libro.portadaUrl"
-                  [alt]="'Portada de ' + item.libro.titulo"
-                  class="imagen-portada-libro"
-                  loading="lazy"
-                />
-              } @else {
-                <div style="font-size: 48px;">📖</div>
-              }
+            <!-- Icono representativo en lugar de portada para mayor velocidad -->
+            <div class="contenedor-portada-libro" (click)="abrirModalDetalle(item)" title="Ver detalles completos del libro"
+                 style="background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 6px; min-height: 120px;">
+              <div style="text-align: center; padding: 12px;">
+                <div style="font-size: 44px; margin-bottom: 6px;">📖</div>
+                <div style="font-size: 10px; color: #bf360c; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">
+                  {{ item.libro.categoria }}
+                </div>
+              </div>
             </div>
 
             <!-- Etiqueta de disponibilidad y origen -->
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; margin-top: 8px;">
               <span class="etiqueta-disponibilidad">
                 {{ item.libro.disponible ? '✓ Disponible' : 'En Intercambio' }}
               </span>
@@ -176,7 +176,7 @@
           <!-- Botón de acción para solicitar el intercambio de este libro -->
           <button
             type="button"
-            id="boton-solicitar-intercambio-{{ item.libro.id }}"
+            [id]="'boton-solicitar-intercambio-' + item.libro.id"
             class="boton-solicitar-intercambio"
             (click)="iniciarSolicitudIntercambio(item)"
             title="Proponer intercambio con este libro">
@@ -229,13 +229,13 @@
         </h2>
 
         <div class="contenido-modal-flex">
+          <!-- Icono del libro en el modal (sin imagen para mayor velocidad) -->
           <div class="modal-columna-portada">
-            <div style="width: 140px; height: 190px; background: #f7f3ea; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 12px;">
-              @if (libroSeleccionadoModal.libro.portadaUrl) {
-                <img [src]="libroSeleccionadoModal.libro.portadaUrl" alt="Portada completa" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-              } @else {
-                <div style="font-size: 54px;">📚</div>
-              }
+            <div style="width: 140px; height: 190px; background: linear-gradient(135deg, #fff8e1 0%, #ffe0b2 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; flex-direction: column;">
+              <div style="font-size: 60px;">📖</div>
+              <div style="font-size: 11px; color: #bf360c; font-weight: bold; text-transform: uppercase; margin-top: 6px; text-align: center; padding: 0 8px;">
+                {{ libroSeleccionadoModal.libro.categoria }}
+              </div>
             </div>
             <span class="etiqueta-disponibilidad">
               {{ libroSeleccionadoModal.libro.disponible ? '✓ Disponible' : 'En Intercambio' }}

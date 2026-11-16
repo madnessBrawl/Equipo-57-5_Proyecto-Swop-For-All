@@ -22,6 +22,11 @@ export class HeaderComponent {
     });
   }
 
+  // Navega al inventario personal del usuario
+  irAInventario(): void {
+    this.router.navigate(['/inventario']);
+  }
+
   // Navega al panel de Reputación (calificar, reseñas recibidas y enviadas)
   irAReputacion(): void {
     this.router.navigate(['/reputacion']);

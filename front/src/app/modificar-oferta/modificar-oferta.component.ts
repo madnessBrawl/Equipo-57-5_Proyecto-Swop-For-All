@@ -5,6 +5,7 @@
             iniciada exclusivamente desde el Catálogo Global.
    Reglas de negocio:
      1. Solo accesible si existe un intercambio iniciado desde el catálogo.
+        Si no hay oferta activa, redirige automáticamente al catálogo.
      2. Inicia con 0 libros ofrecidos (el usuario debe agregarlos activamente).
      3. Solo se pueden ofrecer libros que el usuario posea en su inventario.
      4. Debe ofrecer al menos un libro propio para solicitar el intercambio.
@@ -47,13 +48,13 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   // Inventario disponible del otro usuario para contraofertas
   public inventarioDelOtroUsuario: Libro[] = [];
 
-  // Oferta activa: inicia con 0 libros ofrecidos
+  // Oferta activa: inicia con 0 libros ofrecidos en el lado del usuario
   public ofertaActiva: OfertaIntercambio = new OfertaIntercambio(
     this.idIntercambio,
     this.usuarioActual,
     this.usuarioInterlocutor,
-    [], // Inicia estrictamente VACÍO en la parte del usuario
-    [], // Llenado con el libro seleccionado desde el catálogo
+    [], // Inicia VACÍO — el usuario selecciona sus libros manualmente
+    [], // Se llena con el libro seleccionado desde el catálogo
     'Pendiente'
   );
 
@@ -76,10 +77,27 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   }
 
   /*
-    Carga y valida la existencia de una oferta iniciada desde el Catálogo Global.
+    REGLA 1: Solo accesible si existe una oferta iniciada desde el Catálogo Global.
+    Si no existe ninguna oferta activa, redirige automáticamente al catálogo.
   */
   private cargarDatosIntercambio(): void {
-    // 1. Cargar inventario propio del usuario (libros que posee)
+    // 1. Verificar si se inició una oferta desde el Catálogo Global
+    const libroSolicitadoRaw = sessionStorage.getItem('libroSolicitado');
+    const ofertaActivaRaw = localStorage.getItem('oferta_activa');
+    const ofertaActivaId = localStorage.getItem('oferta_activa_id');
+
+    // Si NO hay ninguna señal de intercambio activo → redirigir al catálogo
+    if (!libroSolicitadoRaw && !ofertaActivaRaw && !ofertaActivaId) {
+      this.tieneOfertaActiva = false;
+      // Redirigir automáticamente al catálogo con mensaje informativo
+      alert('⚠️ No tienes ningún intercambio activo.\n\nDebes ir al Catálogo Global, seleccionar un libro y presionar "Solicitar Intercambio" para iniciar la negociación.');
+      this.router.navigate(['/catalogo']);
+      return;
+    }
+
+    this.tieneOfertaActiva = true;
+
+    // 2. Cargar inventario propio del usuario (libros que posee)
     const inventarioGuardado = localStorage.getItem('inventario_usuario');
     if (inventarioGuardado) {
       try {
@@ -95,18 +113,6 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       localStorage.setItem('inventario_usuario', JSON.stringify(this.inventarioPersonal));
     }
 
-    // 2. Verificar si se inició una oferta desde el Catálogo Global
-    const libroSolicitadoRaw = sessionStorage.getItem('libroSolicitado');
-    const ofertaActivaRaw = localStorage.getItem('oferta_activa');
-    const ofertaCifrada = this.cifradoService.obtenerDeStorageSeguro<any>('oferta_activa');
-
-    if (!libroSolicitadoRaw && !ofertaActivaRaw && !ofertaCifrada) {
-      this.tieneOfertaActiva = false;
-      return;
-    }
-
-    this.tieneOfertaActiva = true;
-
     // 3. Determinar los datos del libro solicitado desde el catálogo
     let libroDelCatalogo: Libro | null = null;
     let propietarioDestino = 'carlos_lector';
@@ -120,7 +126,10 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
           parsed.titulo || 'Libro del Catálogo',
           parsed.autor || 'Autor del Catálogo',
           true,
-          parsed.portadaUrl || ''
+          '',  // Sin portadaUrl — no se usan imágenes para mayor velocidad
+          parsed.descripcion || '',
+          parsed.isbn || '',
+          parsed.categoria || 'General'
         );
       } catch (e) {
         console.warn('Error al parsear libro solicitado:', e);
@@ -140,6 +149,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     } else {
       this.inventarioDelOtroUsuario = this.obtenerInventarioOtroPorDefecto();
       if (libroDelCatalogo) {
+        // Añadir el libro del catálogo al inventario del otro usuario si no existe
         if (!this.inventarioDelOtroUsuario.some(l => String(l.id) === String(libroDelCatalogo!.id))) {
           this.inventarioDelOtroUsuario.unshift(libroDelCatalogo);
         }
@@ -148,20 +158,21 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     }
 
     // 5. Configurar la oferta activa
-    // REGLA 2: Inicia con 0 libros ofrecidos en la parte del usuario
+    // REGLA 2: librosOfrecidos SIEMPRE inicia VACÍO (el usuario los agrega)
+    // librosSolicitados inicia con el libro seleccionado desde el catálogo
     if (ofertaActivaRaw) {
       try {
         const parsedOferta = JSON.parse(ofertaActivaRaw);
-        this.idIntercambio = parsedOferta.idIntercambio || `INT-${Date.now().toString(36)}`;
+        this.idIntercambio = parsedOferta.idIntercambio || ofertaActivaId || `INT-${Date.now().toString(36)}`;
         this.ofertaActiva = new OfertaIntercambio(
           this.idIntercambio,
           this.usuarioActual,
           parsedOferta.usuarioReceptor || this.usuarioInterlocutor,
-          Array.isArray(parsedOferta.librosOfrecidos) ? parsedOferta.librosOfrecidos : [],
-          Array.isArray(parsedOferta.librosSolicitados) && parsedOferta.librosSolicitados.length > 0
-            ? parsedOferta.librosSolicitados
-            : (libroDelCatalogo ? [libroDelCatalogo] : []),
-          parsedOferta.estado || 'Pendiente'
+          // REGLA 2: Siempre vacío al cargar — no se restauran libros ofrecidos previos
+          [],
+          // librosSolicitados: solo el libro del catálogo seleccionado
+          libroDelCatalogo ? [libroDelCatalogo] : [],
+          'Pendiente'
         );
       } catch {
         this.inicializarNuevaOferta(libroDelCatalogo);
@@ -191,7 +202,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.idIntercambio,
       this.usuarioActual,
       this.usuarioInterlocutor,
-      [], // Inicia estrictamente VACÍO
+      [], // REGLA 2: Inicia estrictamente VACÍO — sin libros ofrecidos
       libroDelCatalogo ? [libroDelCatalogo] : [],
       'Pendiente'
     );
@@ -306,9 +317,9 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     Guarda los cambios de la oferta cumpliendo las reglas de negocio
   */
   public guardarModificacionOferta(): void {
-    // Validación estricta según observación docente: "debe ofrecer libros para pedirlos"
+    // Validación estricta: "debe ofrecer libros para pedirlos"
     if (!this.ofertaActiva.librosOfrecidos || this.ofertaActiva.librosOfrecidos.length === 0) {
-      alert('⚠️ Regla de negocio: No puedes enviar una propuesta sin libros ofrecidos. Debes seleccionar al menos un libro de tu inventario propio en la columna izquierda.');
+      alert('⚠️ Regla de negocio: No puedes enviar una propuesta sin libros ofrecidos.\n\nDebes seleccionar al menos un libro de tu inventario propio en la columna izquierda.');
       return;
     }
 
@@ -388,18 +399,18 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
 
   private obtenerInventarioPorDefecto(): Libro[] {
     return [
-      new Libro('L_propio_1', 'Cien Años de Soledad', 'Gabriel García Márquez', true, 'https://books.google.com/books/content?id=7hY7DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Edición ilustrada tapa dura', '9780307474728', 'Novela'),
-      new Libro('L_propio_2', 'Don Quijote de la Mancha', 'Miguel de Cervantes', true, 'https://books.google.com/books/content?id=F-k_DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Clásico de la literatura española', '9788424115166', 'Clásicos'),
+      new Libro('L_propio_1', 'Cien Años de Soledad', 'Gabriel García Márquez', true, '', 'Edición ilustrada tapa dura', '9780307474728', 'Novela'),
+      new Libro('L_propio_2', 'Don Quijote de la Mancha', 'Miguel de Cervantes', true, '', 'Clásico de la literatura española', '9788424115166', 'Clásicos'),
       new Libro('L_propio_3', 'Ficciones', 'Jorge Luis Borges', true, '', 'Colección de cuentos fantásticos', '9788497592444', 'Ficción'),
-      new Libro('L_propio_4', 'Rayuela', 'Julio Cortázar', true, 'https://books.google.com/books/content?id=3w0_DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Novela experimental', '9788466332217', 'Novela')
+      new Libro('L_propio_4', 'Rayuela', 'Julio Cortázar', true, '', 'Novela experimental', '9788466332217', 'Novela')
     ];
   }
 
   private obtenerInventarioOtroPorDefecto(): Libro[] {
     return [
-      new Libro('L_otro_1', '1984', 'George Orwell', true, 'https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1', 'Distopía clásica', '9780451524935', 'Ciencia Ficción'),
-      new Libro('L_otro_2', 'Fahrenheit 451', 'Ray Bradbury', true, 'https://books.google.com/books/content?id=Vz3aDwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Distopía sobre la censura', '9781451673319', 'Ciencia Ficción'),
-      new Libro('L_otro_3', 'Doña Bárbara', 'Rómulo Gallegos', true, 'https://books.google.com/books/content?id=t-f4DwAAQBAJ&printsec=frontcover&img=1&zoom=1', 'Literatura Venezolana', '9788437603681', 'Clásicos')
+      new Libro('L_otro_1', '1984', 'George Orwell', true, '', 'Distopía clásica', '9780451524935', 'Ciencia Ficción'),
+      new Libro('L_otro_2', 'Fahrenheit 451', 'Ray Bradbury', true, '', 'Distopía sobre la censura', '9781451673319', 'Ciencia Ficción'),
+      new Libro('L_otro_3', 'Doña Bárbara', 'Rómulo Gallegos', true, '', 'Literatura Venezolana', '9788437603681', 'Clásicos')
     ];
   }
 }

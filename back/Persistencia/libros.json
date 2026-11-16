@@ -5,6 +5,7 @@
     "autores": [
       "Antoine de Saint-Exupéry"
     ],
+    "autoresTexto": "Antoine de Saint-Exupéry",
     "descripcion": "Un clásico de la literatura infantil y universal sobre la amistad y el sentido de la vida.",
     "portadaUrl": "https://books.google.com/books/content?id=ylT6DwAAQBAJ&printsec=frontcover&img=1&zoom=1",
     "isbn": "9780156013987",
@@ -22,6 +23,7 @@
     "autores": [
       "George Orwell"
     ],
+    "autoresTexto": "George Orwell",
     "descripcion": "Novela distópica de crítica social y política.",
     "portadaUrl": "https://books.google.com/books/content?id=cotPYEqe-rkC&printsec=frontcover&img=1&zoom=1",
     "isbn": "9780451524935",
@@ -39,6 +41,7 @@
     "autores": [
       "Rómulo Gallegos"
     ],
+    "autoresTexto": "Rómulo Gallegos",
     "descripcion": "Obra cumbre de la literatura venezolana sobre la lucha entre civilización y barbarie.",
     "portadaUrl": "",
     "isbn": "9788437603681",
@@ -56,6 +59,7 @@
     "autores": [
       "Gabriel García Márquez"
     ],
+    "autoresTexto": "Gabriel García Márquez",
     "descripcion": "La obra maestra del realismo mágico en el pueblo mítico de Macondo.",
     "portadaUrl": "",
     "isbn": "9780307474728",
@@ -168,5 +172,89 @@
     "disponible": true,
     "propietario": "LULA",
     "fechaRegistro": "2026-11-16T16:05:56.243Z"
+  },
+  {
+    "id": "lib_custom_1",
+    "titulo": "Crónica de una muerte anunciada",
+    "autores": [
+      "Gabriel García Márquez"
+    ],
+    "autoresTexto": "Gabriel García Márquez",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": false,
+    "propietario": "andres",
+    "fechaRegistro": "2026-11-16T18:04:50.213Z"
+  },
+  {
+    "id": "lib_mwjkp5d4_wis8k",
+    "titulo": "Rayuela",
+    "autores": [
+      "Julio Cortázar"
+    ],
+    "autoresTexto": "Julio Cortázar",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T18:04:27.880Z"
+  },
+  {
+    "id": "lib_mwjkp5d7_z54eh",
+    "titulo": "Rayuela",
+    "autores": [],
+    "autoresTexto": "Autor Desconocido",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "9780306406157",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T18:04:27.883Z"
+  },
+  {
+    "id": "lib_secreto",
+    "titulo": "Libro de Juan",
+    "autores": [],
+    "autoresTexto": "Autor Desconocido",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "juan",
+    "fechaRegistro": "2026-11-16T18:04:50.238Z"
+  },
+  {
+    "id": "lib_mwjkpmlw_9hogk",
+    "titulo": "Rayuela",
+    "autores": [
+      "Julio Cortázar"
+    ],
+    "autoresTexto": "Julio Cortázar",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T18:04:50.228Z"
+  },
+  {
+    "id": "lib_mwjkpmm0_rqu0k",
+    "titulo": "Rayuela",
+    "autores": [],
+    "autoresTexto": "Autor Desconocido",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "9780306406157",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-16T18:04:50.232Z"
   }
 ]
