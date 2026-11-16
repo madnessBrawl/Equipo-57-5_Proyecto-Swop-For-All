@@ -165,6 +165,31 @@ test('LibroController: Exige inicio de sesión para agregar libro a inventario',
   }
 });
 
+test('LibroController: Rechaza ISBN inválido y acepta un ISBN de 13 dígitos', () => {
+  const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
+  try {
+    const controller = new LibroController(
+      new LibroRepository({ persistencia: new LibroPersistencia(archivo, []) })
+    );
+
+    assert.throws(
+      () => controller.agregarLibroAInventario(
+        { titulo: 'Rayuela', isbn: '978123' },
+        'lector_logueado'
+      ),
+      /ISBN debe tener exactamente 13 dígitos/
+    );
+
+    const libroAgregado = controller.agregarLibroAInventario(
+      { titulo: 'Rayuela', isbn: '9780306406157' },
+      'lector_logueado'
+    );
+    assert.strictEqual(libroAgregado.isbn, '9780306406157');
+  } finally {
+    fs.rmSync(path.join(__dirname, '..', 'persistencia', archivo), { force: true });
+  }
+});
+
 test('LibroController: Impide que un usuario modifique libros ajenos', () => {
   const archivo = `libros-test-${process.pid}-${Date.now()}.json`;
   try {

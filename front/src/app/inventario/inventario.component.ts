@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { finalize } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 import { GoogleBooksService, RespuestaAñadirLibro } from '../servicios/google-books.service';
 
@@ -18,8 +20,10 @@ export class InventarioComponent implements OnInit {
   cargando = false;
   guardando = false;
   mostrarFormulario = false;
-  mensaje = '';
+  mostrarConfirmacion = false;
+  tituloLibroAnadido = '';
   error = '';
+  private versionInventario = 0;
 
   titulo = '';
   autor = '';
@@ -29,7 +33,8 @@ export class InventarioComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
-    private readonly librosService: GoogleBooksService
+    private readonly librosService: GoogleBooksService,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -44,28 +49,51 @@ export class InventarioComponent implements OnInit {
       this.router.navigate(['/']);
       return;
     }
-    this.cargarInventario();
+    const inventarioEnCache = this.librosService.obtenerInventarioEnCache(this.usuarioActual);
+    if (inventarioEnCache !== null) {
+      this.libros = inventarioEnCache;
+      this.cargarInventario(true);
+    } else {
+      this.cargarInventario();
+    }
   }
 
-  cargarInventario(): void {
-    if (!this.usuarioActual) return;
-    this.cargando = true;
+  cargarInventario(silencioso = false): void {
+    const usuario = this.usuarioActual;
+    if (!usuario) return;
+    const versionConsulta = this.versionInventario;
+    if (!silencioso) this.cargando = true;
     this.error = '';
-    this.librosService.obtenerInventarioUsuario(this.usuarioActual).subscribe({
+    this.librosService.obtenerInventarioUsuario(usuario).subscribe({
       next: libros => {
+        if (versionConsulta !== this.versionInventario) return;
         this.libros = libros;
+        this.librosService.actualizarInventarioEnCache(usuario, libros);
         this.cargando = false;
+        this.changeDetector.markForCheck();
       },
-      error: () => {
-        this.error = 'No se pudo cargar el inventario. Verifique que el servidor esté disponible e inténtelo de nuevo.';
+      error: (error: unknown) => {
+        if (versionConsulta !== this.versionInventario) return;
+        const hayInventarioEnCache = this.librosService.obtenerInventarioEnCache(usuario) !== null;
+        this.error = hayInventarioEnCache
+          ? 'No fue posible actualizar el inventario; se muestran los últimos datos cargados.'
+          : this.mensajeErrorInventario(error);
         this.cargando = false;
+        this.changeDetector.markForCheck();
       }
     });
   }
 
   agregarLibro(): void {
-    if (!this.usuarioActual || !this.titulo.trim()) {
+    const usuario = this.usuarioActual;
+    if (!usuario || !this.titulo.trim()) {
       this.error = 'El título del libro es obligatorio.';
+      return;
+    }
+
+    const isbn = this.isbn.trim();
+    if (isbn && !/^\d{13}$/.test(isbn)) {
+      this.error = 'El ISBN debe tener exactamente 13 dígitos.';
       return;
     }
 
@@ -76,26 +104,60 @@ export class InventarioComponent implements OnInit {
       true,
       '',
       this.descripcion.trim(),
-      this.isbn.trim(),
+      isbn,
       this.categoria.trim() || 'General'
     );
 
     this.guardando = true;
-    this.mensaje = '';
     this.error = '';
-    this.librosService.añadirLibroAInventario(libro, this.usuarioActual).subscribe({
+    this.librosService.añadirLibroAInventario(libro, usuario).pipe(
+      finalize(() => {
+        this.guardando = false;
+        this.changeDetector.markForCheck();
+      })
+    ).subscribe({
       next: respuesta => {
-        this.libros = [this.convertirLibro(respuesta), ...this.libros];
+        const libroAñadido = this.convertirLibro(respuesta);
+        this.versionInventario += 1;
+        this.libros = [libroAñadido, ...this.libros.filter(actual => actual.id !== libroAñadido.id)];
+        this.librosService.actualizarInventarioEnCache(usuario, this.libros);
+        this.cargando = false;
+        this.tituloLibroAnadido = libroAñadido.titulo;
         this.limpiarFormulario();
         this.mostrarFormulario = false;
-        this.mensaje = 'Libro añadido a tu inventario.';
-        this.guardando = false;
+        this.error = '';
+        this.mostrarConfirmacion = true;
+        this.changeDetector.markForCheck();
       },
-      error: () => {
-        this.error = 'No se pudo guardar el libro. Verifique los datos y vuelva a intentarlo.';
-        this.guardando = false;
+      error: (error: unknown) => {
+        const mensajeServidor = error instanceof HttpErrorResponse && typeof error.error?.error === 'string'
+          ? error.error.error
+          : null;
+        this.error = mensajeServidor ||
+          (error instanceof Error && error.name !== 'TimeoutError' ? error.message : '') ||
+          'No se recibió confirmación del backend. Revise el inventario antes de volver a intentarlo.';
+        this.changeDetector.markForCheck();
       }
     });
+  }
+
+  volverAlInventario(): void {
+    this.mostrarConfirmacion = false;
+  }
+
+  private mensajeErrorInventario(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const mensajeServidor = error.error?.error;
+      if (typeof mensajeServidor === 'string') return mensajeServidor;
+      if (error.status === 0) {
+        return 'No se pudo comunicar con el backend. Compruebe que la aplicación siga ejecutándose.';
+      }
+      return `El backend respondió con el estado ${error.status} al cargar el inventario.`;
+    }
+    if (error instanceof Error && error.name === 'TimeoutError') {
+      return 'La consulta del inventario tardó demasiado. Inténtelo de nuevo.';
+    }
+    return 'No se pudo cargar el inventario.';
   }
 
   private convertirLibro(respuesta: RespuestaAñadirLibro): Libro {

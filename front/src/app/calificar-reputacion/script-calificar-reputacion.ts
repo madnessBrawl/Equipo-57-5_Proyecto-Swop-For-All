@@ -3,7 +3,7 @@
 
   Función: Controla la PANTALLA. Recoge los datos del usuario y se los pasa al servicio.
 */
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ServicioReputacion } from '../reputacion/servicio-reputacion';
@@ -42,7 +42,11 @@ export class CalificarReputacionComponent implements OnInit {
   readonly longitudMaximaComentario = Comentario.LONGITUD_MAXIMA;                  // Límite del comentario
 
   // Inyección de dependencias (POO): el servicio hace la lógica, el router solo navega
-  constructor(private servicio: ServicioReputacion, private router: Router) {}
+  constructor(
+    private servicio: ServicioReputacion,
+    private router: Router,
+    private readonly changeDetector: ChangeDetectorRef
+  ) {}
 
   /* 3. CICLO DE VIDA: carga inicial*/
   ngOnInit(): void {
@@ -58,12 +62,6 @@ export class CalificarReputacionComponent implements OnInit {
   // Carga los intercambios finalizados donde participó el usuario
   cargarIntercambios(): void {
     this.intercambios = this.servicio.obtenerIntercambiosFinalizados(this.usuarioActual!);
-  }
-
-  // TEMPORAL: genera intercambios de prueba (se elimina cuando exista el módulo Intercambio)
-  cargarDatosDePrueba(): void {
-    this.servicio.sembrarIntercambiosDemo(this.usuarioActual!);
-    this.cargarIntercambios();
   }
 
   // Cambia entre calificar al lector o calificar el intercambio
@@ -94,11 +92,13 @@ export class CalificarReputacionComponent implements OnInit {
           this.mostrarMensaje('advertencia',
             'Usted ya calificó este intercambio. Elija otro intercambio o cambie el tipo de calificación.');
         }
+        this.changeDetector.markForCheck();
       },
       error: () => {
         if (verificacion !== this.verificacionActual) return;
         this.consultandoCalificacion = false;
         this.mostrarMensaje('error', 'No se pudo verificar si ya calificó este intercambio.');
+        this.changeDetector.markForCheck();
       }
     });
   }
@@ -172,16 +172,19 @@ export class CalificarReputacionComponent implements OnInit {
         if (!resultado.exito) {
           this.paso = 'formulario';
           this.mostrarMensaje('error', resultado.mensaje);
+          this.changeDetector.markForCheck();
           return;
         }
         this.completada = true;
         this.paso = 'formulario';
         this.mostrarMensaje('exito', resultado.mensaje);
+        this.changeDetector.markForCheck();
       },
       error: () => {
         this.guardando = false;
         this.paso = 'formulario';
         this.mostrarMensaje('error', 'No se pudo guardar la calificación. Intente nuevamente.');
+        this.changeDetector.markForCheck();
       }
     });
   }

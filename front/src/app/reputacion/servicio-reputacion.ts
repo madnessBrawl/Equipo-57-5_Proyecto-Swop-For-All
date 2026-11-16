@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError, timeout } from 'rxjs';
 import { Calificacion, Intercambio } from './modelo-reputacion';
 import type {
   CalificacionPlana, FiltroResenas, IntercambioPlano, ResultadoOperacion
@@ -9,7 +9,6 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class ServicioReputacion {
   private readonly API_CALIFICACIONES = 'http://localhost:3000/api/calificaciones';
-  private readonly CLAVE_INTERCAMBIOS = 'swop_intercambios';
   private readonly CLAVE_SESION = 'usuarioLogueado';
 
   constructor(private readonly http: HttpClient) {}
@@ -26,36 +25,9 @@ export class ServicioReputacion {
   }
 
   public obtenerIntercambiosFinalizados(usuario: string): Intercambio[] {
-    return this.leerLista<IntercambioPlano>(this.CLAVE_INTERCAMBIOS)
+    return this.leerLista<IntercambioPlano>('swop_intercambios')
       .map(plano => Intercambio.desdeJSON(plano))
       .filter(intercambio => intercambio.estaFinalizado() && intercambio.participa(usuario));
-  }
-
-  public sembrarIntercambiosDemo(usuario: string): number {
-    const existentes = this.leerLista<IntercambioPlano>(this.CLAVE_INTERCAMBIOS);
-    const hoy = new Date().toISOString();
-    const demo: IntercambioPlano[] = [
-      {
-        id: this.generarId(),
-        libroOfrecido: 'Cien años de soledad',
-        libroSolicitado: 'Doña Bárbara',
-        ofertante: usuario,
-        receptor: 'lector_ejemplo_1',
-        estado: 'Finalizado',
-        fecha: hoy
-      },
-      {
-        id: this.generarId(),
-        libroOfrecido: 'Pedro Páramo',
-        libroSolicitado: 'La casa de los espíritus',
-        ofertante: 'lector_ejemplo_2',
-        receptor: usuario,
-        estado: 'Finalizado',
-        fecha: hoy
-      }
-    ];
-    this.guardarLista(this.CLAVE_INTERCAMBIOS, [...existentes, ...demo]);
-    return demo.length;
   }
 
   public yaFueCalificado(
@@ -90,6 +62,7 @@ export class ServicioReputacion {
 
     const headers = new HttpHeaders({ 'x-usuario': usuarioSesion });
     return this.http.post<{ mensaje: string }>(this.API_CALIFICACIONES, calificacion, { headers }).pipe(
+      timeout(10000),
       map(respuesta => ({ exito: true, mensaje: respuesta.mensaje || '¡Calificación registrada con éxito!' })),
       catchError(error => of({
         exito: false,
@@ -139,6 +112,7 @@ export class ServicioReputacion {
 
     const headers = new HttpHeaders({ 'x-usuario': usuarioSesion });
     return this.http.get<CalificacionPlana[]>(this.API_CALIFICACIONES, { headers, params }).pipe(
+      timeout(8000),
       map(datos => {
         if (!Array.isArray(datos)) throw new Error('La respuesta de reseñas no tiene un formato válido.');
         return datos
@@ -158,7 +132,4 @@ export class ServicioReputacion {
     }
   }
 
-  private guardarLista(clave: string, lista: unknown[]): void {
-    localStorage.setItem(clave, JSON.stringify(lista));
-  }
 }

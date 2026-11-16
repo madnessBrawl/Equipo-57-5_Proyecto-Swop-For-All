@@ -2,11 +2,11 @@
   Clase: ConsultarResenasComponent
   HU: "Consultar reseñas" (Épica Reputación) - 1er Sprint
 */
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ServicioReputacion } from '../reputacion/servicio-reputacion';
 import { Calificacion } from '../reputacion/modelo-reputacion'; // Clase de dominio
 import type { FiltroResenas } from '../reputacion/modelo-reputacion'; // Solo tipo
@@ -29,6 +29,7 @@ export class ConsultarResenasComponent implements OnInit {
   totalEnviadas: number = 0;                // Total de reseñas enviadas sin filtro (modo enviadas)
   cargando = false;
   errorConsulta = '';
+  private resenasSinFiltrar: Calificacion[] | null = null;
 
   /* 2. CONSTANTES USADAS POR LA PLANTILLA*/
   readonly estrellasDisponibles: number[] = [1, 2, 3, 4, 5];                 // Posiciones de estrella
@@ -39,7 +40,8 @@ export class ConsultarResenasComponent implements OnInit {
   constructor(
     private servicio: ServicioReputacion,
     private router: Router,
-    private ruta: ActivatedRoute
+    private ruta: ActivatedRoute,
+    private readonly changeDetector: ChangeDetectorRef
   ) {}
 
   /* 3. CICLO DE VIDA: carga inicial*/
@@ -57,7 +59,12 @@ export class ConsultarResenasComponent implements OnInit {
   // Al elegir otro filtro (todas / lector / intercambio)
   alCambiarFiltro(filtro: FiltroResenas): void {
     this.filtro = filtro;
-    this.actualizarVista();
+    if (this.resenasSinFiltrar !== null) {
+      this.aplicarFiltro();
+      this.changeDetector.markForCheck();
+    } else if (!this.cargando) {
+      this.actualizarVista();
+    }
   }
 
   /* 5. CONSULTA: pide los datos al servicio según el modo*/
@@ -66,37 +73,52 @@ export class ConsultarResenasComponent implements OnInit {
     this.cargando = true;
     this.errorConsulta = '';
 
-    if (this.modo === 'enviadas') {
-      forkJoin({
-        resenas: this.servicio.obtenerResenasEnviadas(this.usuarioActual, this.filtro),
-        todas: this.servicio.obtenerResenasEnviadas(this.usuarioActual)
-      }).subscribe({
-        next: resultado => {
-          this.resenas = resultado.resenas;
-          this.totalEnviadas = resultado.todas.length;
-          this.cargando = false;
-        },
-        error: () => this.mostrarErrorConsulta()
-      });
-    } else {
-      forkJoin({
-        resenas: this.servicio.obtenerResenas(this.usuarioActual, this.filtro),
-        promedio: this.servicio.calcularPromedio(this.usuarioActual)
-      }).subscribe({
-        next: resultado => {
-          this.resenas = resultado.resenas;
-          this.promedio = resultado.promedio;
-          this.cargando = false;
-        },
-        error: () => this.mostrarErrorConsulta()
-      });
-    }
+    const consulta = this.modo === 'enviadas'
+      ? this.servicio.obtenerResenasEnviadas(this.usuarioActual)
+      : this.servicio.obtenerResenas(this.usuarioActual);
+
+    consulta.subscribe({
+      next: resenas => {
+        this.resenasSinFiltrar = resenas;
+        if (this.modo === 'enviadas') {
+          this.totalEnviadas = resenas.length;
+        } else {
+          const resenasDeLector = resenas.filter(resena => resena.tipo === 'lector');
+          this.promedio = resenasDeLector.length
+            ? Math.round(resenasDeLector.reduce((suma, resena) => suma + resena.puntuacion, 0) / resenasDeLector.length * 10) / 10
+            : null;
+        }
+        this.aplicarFiltro();
+        this.cargando = false;
+        this.changeDetector.markForCheck();
+      },
+      error: error => this.mostrarErrorConsulta(error)
+    });
   }
 
-  private mostrarErrorConsulta(): void {
+  private aplicarFiltro(): void {
+    const resenas = this.resenasSinFiltrar || [];
+    this.resenas = this.filtro === 'todas'
+      ? [...resenas]
+      : resenas.filter(resena => resena.tipo === this.filtro);
+  }
+
+  private mostrarErrorConsulta(error: unknown): void {
     this.resenas = [];
+    this.resenasSinFiltrar = null;
+    this.promedio = null;
+    this.totalEnviadas = 0;
     this.cargando = false;
-    this.errorConsulta = 'No se pudieron cargar las reseñas. Verifique que el servidor esté disponible e inténtelo de nuevo.';
+    if (error instanceof HttpErrorResponse && typeof error.error?.error === 'string') {
+      this.errorConsulta = error.error.error;
+    } else if (error instanceof HttpErrorResponse && error.status === 0) {
+      this.errorConsulta = 'No se pudo comunicar con el backend. Compruebe que la aplicación siga ejecutándose.';
+    } else if (error instanceof Error && error.name === 'TimeoutError') {
+      this.errorConsulta = 'La consulta de reseñas tardó demasiado. Inténtelo de nuevo.';
+    } else {
+      this.errorConsulta = 'No se pudieron cargar las reseñas.';
+    }
+    this.changeDetector.markForCheck();
   }
 
   // Estrellas llenas que se dibujan para un valor (el promedio se redondea al entero más cercano)

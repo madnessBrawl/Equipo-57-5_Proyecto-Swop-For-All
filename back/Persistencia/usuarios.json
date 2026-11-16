@@ -28,5 +28,16 @@
     "telefono": "04125556677",
     "clave": "ana123",
     "reputacion": 4.5
+  },
+  {
+    "usuario": "LULA",
+    "nombres": "LULA",
+    "apellidos": "LULA",
+    "clave": "LULA",
+    "generosFavoritos": "LULA",
+    "genero": "Mujer",
+    "correo": "LULA",
+    "reputacion": 5,
+    "id": "reg_mwjd2ze9_0o0q3"
   }
 ]

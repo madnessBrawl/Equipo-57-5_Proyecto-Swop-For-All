@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, timeout } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 
@@ -47,6 +47,7 @@ export class GoogleBooksService {
   private readonly baseUrlGoogle = 'https://www.googleapis.com/books/v1/volumes';
   private readonly apiUrlBackend = 'http://localhost:3000/api/libros';
   private cacheBusqueda = new Map<string, Libro[]>();
+  private cacheInventarios = new Map<string, Libro[]>();
 
   constructor(private http: HttpClient) {}
 
@@ -81,17 +82,18 @@ export class GoogleBooksService {
   obtenerInventarioUsuario(usuario: string): Observable<Libro[]> {
     const url = `${this.apiUrlBackend}/inventario/${encodeURIComponent(usuario)}`;
     return this.http.get<LibroPersistido[]>(url).pipe(
-      map(libros => libros.map(item => new Libro(
-        item.id,
-        item.titulo,
-        Array.isArray(item.autores) ? item.autores.join(', ') : 'Autor Desconocido',
-        item.disponible,
-        item.portadaUrl || '',
-        item.descripcion || '',
-        item.isbn || '',
-        item.categorias?.[0] || 'General'
-      )))
+      timeout(8000),
+      map(libros => libros.map(item => this.mapearLibroPersistido(item)))
     );
+  }
+
+  obtenerInventarioEnCache(usuario: string): Libro[] | null {
+    const inventario = this.cacheInventarios.get(this.claveUsuario(usuario));
+    return inventario ? [...inventario] : null;
+  }
+
+  actualizarInventarioEnCache(usuario: string, libros: Libro[]): void {
+    this.cacheInventarios.set(this.claveUsuario(usuario), [...libros]);
   }
 
   /**
@@ -148,7 +150,58 @@ export class GoogleBooksService {
       propietario: usuario
     };
 
-    return this.http.post<RespuestaAñadirLibro>(this.apiUrlBackend, payload, { headers });
+    return this.http.post<unknown>(this.apiUrlBackend, payload, { headers }).pipe(
+      timeout(10000),
+      map(respuesta => this.normalizarRespuestaAñadirLibro(respuesta))
+    );
+  }
+
+  private normalizarRespuestaAñadirLibro(respuesta: unknown): RespuestaAñadirLibro {
+    if (typeof respuesta !== 'object' || respuesta === null) {
+      throw new Error('El backend devolvió una confirmación inválida al guardar el libro.');
+    }
+
+    const cuerpo = respuesta as Record<string, unknown>;
+    const libro = this.esLibroPersistido(cuerpo['libro'])
+      ? cuerpo['libro']
+      : this.esLibroPersistido(cuerpo)
+        ? cuerpo
+        : null;
+
+    if (!libro) {
+      throw new Error('El backend no confirmó el libro guardado. Recargue el inventario antes de volver a intentarlo.');
+    }
+
+    return {
+      mensaje: typeof cuerpo['mensaje'] === 'string' ? cuerpo['mensaje'] : 'Libro añadido a tu inventario.',
+      libro
+    };
+  }
+
+  private esLibroPersistido(valor: unknown): valor is LibroPersistido {
+    if (typeof valor !== 'object' || valor === null) return false;
+    const libro = valor as Record<string, unknown>;
+    return typeof libro['id'] === 'string' &&
+      typeof libro['titulo'] === 'string' &&
+      Array.isArray(libro['autores']) &&
+      typeof libro['disponible'] === 'boolean';
+  }
+
+  private mapearLibroPersistido(item: LibroPersistido): Libro {
+    return new Libro(
+      item.id,
+      item.titulo,
+      Array.isArray(item.autores) ? item.autores.join(', ') : 'Autor Desconocido',
+      item.disponible,
+      item.portadaUrl || '',
+      item.descripcion || '',
+      item.isbn || '',
+      item.categorias?.[0] || 'General'
+    );
+  }
+
+  private claveUsuario(usuario: string): string {
+    return usuario.trim().toLowerCase();
   }
 
   /**

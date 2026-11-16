@@ -9,15 +9,12 @@
     </button>
   </header>
 
-  @if (mensaje) {
-    <p class="mensaje exito" role="status">{{ mensaje }}</p>
-  }
   @if (error) {
     <p class="mensaje error" role="alert">{{ error }}</p>
   }
 
   @if (mostrarFormulario) {
-    <form class="formulario" (ngSubmit)="agregarLibro()">
+    <form #formularioLibro="ngForm" class="formulario" (ngSubmit)="agregarLibro()">
       <h3>Nuevo libro</h3>
       <label>
         Título *
@@ -34,14 +31,23 @@
       <div class="fila-campos">
         <label>
           ISBN
-          <input name="isbn" [(ngModel)]="isbn" maxlength="20">
+          <input
+            #isbnControl="ngModel"
+            name="isbn"
+            [(ngModel)]="isbn"
+            inputmode="numeric"
+            pattern="[0-9]{13}"
+            maxlength="13">
+          @if (isbnControl.invalid && isbnControl.touched) {
+            <small class="error-campo">El ISBN debe tener exactamente 13 dígitos.</small>
+          }
         </label>
         <label>
           Categoría
           <input name="categoria" [(ngModel)]="categoria" maxlength="100">
         </label>
       </div>
-      <button class="boton-principal" type="submit" [disabled]="guardando || !titulo.trim()">
+      <button class="boton-principal" type="submit" [disabled]="guardando || !titulo.trim() || formularioLibro.invalid">
         {{ guardando ? 'Guardando…' : 'Guardar libro' }}
       </button>
     </form>
@@ -77,5 +83,18 @@
         </article>
       }
     </section>
+  }
+
+  @if (mostrarConfirmacion) {
+    <div class="capa-confirmacion">
+      <section class="confirmacion" role="dialog" aria-modal="true" aria-labelledby="confirmacion-titulo">
+        <div class="icono-confirmacion" aria-hidden="true">✓</div>
+        <h3 id="confirmacion-titulo">Libro añadido satisfactoriamente</h3>
+        <p><strong>{{ tituloLibroAnadido }}</strong> ya aparece en tu inventario.</p>
+        <button type="button" class="boton-principal" (click)="volverAlInventario()">
+          Volver al inventario
+        </button>
+      </section>
+    </div>
   }
 </main>

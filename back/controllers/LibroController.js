@@ -51,6 +51,11 @@ class LibroController {
       throw new Error('Datos del libro inválidos.');
     }
 
+    const isbn = datosLibro.isbn == null ? '' : String(datosLibro.isbn).trim();
+    if (isbn && !/^\d{13}$/.test(isbn)) {
+      throw new Error('El ISBN debe tener exactamente 13 dígitos.');
+    }
+
     // 1. Controllers -> Models: Instanciación de la clase Libro (objeto de dominio)
     const libroInstancia = new Libro({
       id: datosLibro.id || null,
@@ -58,7 +63,7 @@ class LibroController {
       autores: datosLibro.autores,
       descripcion: datosLibro.descripcion,
       portadaUrl: datosLibro.portadaUrl,
-      isbn: datosLibro.isbn,
+      isbn,
       categorias: datosLibro.categorias,
       disponible: true,
       propietario: usuarioSesion.trim()
