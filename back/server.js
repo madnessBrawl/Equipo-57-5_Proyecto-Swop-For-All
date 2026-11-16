@@ -6,7 +6,6 @@
 */
 
 const http = require('node:http');
-const url = require('node:url');
 
 // Controladores y persistencias
 const LibroController = require('./controllers/LibroController');
@@ -64,7 +63,7 @@ const servidor = http.createServer(async (req, res) => {
     return res.end();
   }
 
-  const parsedUrl = url.parse(req.url, true);
+  const parsedUrl = new URL(req.url, 'http://localhost');
   const ruta = parsedUrl.pathname;
   const metodo = req.method;
   const usuarioSesion = req.headers['x-usuario'] || null;
@@ -73,7 +72,7 @@ const servidor = http.createServer(async (req, res) => {
     /* ---------------- 1. RUTAS DE LIBROS (Diagrama de secuencia MVC) ---------------- */
     // GET /api/libros -> CatÃ¡logo global de libros
     if (metodo === 'GET' && ruta === '/api/libros') {
-      const filtro = parsedUrl.query.filtro || '';
+      const filtro = parsedUrl.searchParams.get('filtro') || '';
       const catalogo = libroController.obtenerCatalogoGlobal(filtro);
       return responderJSON(res, 200, catalogo);
     }
@@ -88,7 +87,7 @@ const servidor = http.createServer(async (req, res) => {
 
     // GET /api/libros/google -> BÃºsqueda externa en Google Books API
     if (metodo === 'GET' && ruta === '/api/libros/google') {
-      const query = parsedUrl.query.q || '';
+      const query = parsedUrl.searchParams.get('q') || '';
       const resultados = await libroController.buscarEnGoogleBooks(query);
       return responderJSON(res, 200, resultados);
     }
@@ -182,8 +181,8 @@ const servidor = http.createServer(async (req, res) => {
         return responderJSON(res, 401, { error: 'Debe iniciar sesión para consultar reseñas.' });
       }
 
-      const evaluado = parsedUrl.query.evaluado;
-      const evaluador = parsedUrl.query.evaluador;
+      const evaluado = parsedUrl.searchParams.get('evaluado');
+      const evaluador = parsedUrl.searchParams.get('evaluador');
       if ((!evaluado && !evaluador) || (evaluado && evaluador)) {
         return responderJSON(res, 400, { error: 'Especifique si desea consultar reseñas recibidas o enviadas.' });
       }
@@ -191,8 +190,8 @@ const servidor = http.createServer(async (req, res) => {
         return responderJSON(res, 403, { error: 'Solo puede consultar sus propias reseñas.' });
       }
 
-      const filtro = parsedUrl.query.filtro;
-      const idIntercambio = parsedUrl.query.idIntercambio;
+      const filtro = parsedUrl.searchParams.get('filtro');
+      const idIntercambio = parsedUrl.searchParams.get('idIntercambio');
       const tipo = evaluado ? 'evaluado' : 'evaluador';
       const resenas = calificacionPersistencia.buscarPorPredicado(calificacion =>
         calificacion[tipo] === usuarioSesion &&
