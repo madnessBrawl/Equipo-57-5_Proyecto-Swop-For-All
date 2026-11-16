@@ -150,41 +150,45 @@ span.nombre-libro-item {
 
 /* ---------- Botones de acción ---------- */
 button.boton-accion-agregar {
-  background-color: var(--color-verde);
-  color: #ffffff;
-  border: none;
-  padding: 6px 12px;
+  background-color: #1a7f37 !important;    /* Verde oscuro fuerte — máxima visibilidad */
+  color: #ffffff !important;
+  border: 2px solid #145c28 !important;
+  padding: 7px 14px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s;
+  white-space: nowrap;
+  transition: background-color 0.2s;
 }
 
 button.boton-accion-agregar:hover {
-  opacity: 0.9;
+  background-color: #145c28 !important;
+  color: #ffffff !important;
 }
 
 button.boton-accion-retirar {
-  background-color: var(--color-rojo);
-  color: #ffffff;
-  border: none;
-  padding: 6px 12px;
+  background-color: #c0392b !important;    /* Rojo oscuro fuerte — máxima visibilidad */
+  color: #ffffff !important;
+  border: 2px solid #96281b !important;
+  padding: 7px 14px;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s;
+  white-space: nowrap;
+  transition: background-color 0.2s;
 }
 
 button.boton-accion-retirar:hover {
-  opacity: 0.9;
+  background-color: #96281b !important;
+  color: #ffffff !important;
 }
 
 button.boton-guardar-modificacion {
-  background-color: var(--color-boton-primario);
-  color: #ffffff;
-  border: none;
+  background-color: #b46032 !important;    /* Marrón institucional — forzado visible */
+  color: #ffffff !important;
+  border: 2px solid #964a22 !important;
   padding: 12px 24px;
   border-radius: var(--radio-borde);
   font-size: 15px;
@@ -194,17 +198,18 @@ button.boton-guardar-modificacion {
 }
 
 button.boton-guardar-modificacion:hover {
-  background-color: var(--color-boton-primario-hover);
+  background-color: #964a22 !important;
+  color: #ffffff !important;
 }
 
 button.boton-cancelar-intercambio {
   background-color: #ffffff;
-  color: var(--color-rojo);
-  border: 1px solid var(--color-rojo);
+  color: #c0392b !important;
+  border: 2px solid #c0392b !important;
   padding: 12px 20px;
   border-radius: var(--radio-borde);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: background-color 0.2s;
 }

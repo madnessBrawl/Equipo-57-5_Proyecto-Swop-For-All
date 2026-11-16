@@ -50,5 +50,27 @@
     "correo": "LULA",
     "reputacion": 5,
     "id": "reg_mwjd2ze9_0o0q3"
+  },
+  {
+    "usuario": "andres2804",
+    "nombres": "andres",
+    "apellidos": "vanegas",
+    "clave": "tailwag45",
+    "generosFavoritos": "Terror",
+    "genero": "Hombre",
+    "correo": "andresvanegas2804@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjlomcp_awina"
+  },
+  {
+    "usuario": "ajvanegas24",
+    "nombres": "aj",
+    "apellidos": "vanegas",
+    "clave": "tailwag45",
+    "generosFavoritos": "terror",
+    "genero": "Hombre",
+    "correo": "andresvanegas2804@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjmozeh_obmm4"
   }
 ]
