@@ -1,0 +1,25 @@
+# Dependencias
+node_modules/
+front/node_modules/
+back/node_modules/
+
+# Builds
+front/dist/
+front/.angular/
+
+# Variables de entorno (NUNCA subir a Git - contiene claves secretas)
+.env
+*.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+*.suo
+*.user

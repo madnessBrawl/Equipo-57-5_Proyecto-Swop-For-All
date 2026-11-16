@@ -57,16 +57,16 @@ export class ServicioReputacion {
 
     const usuarioSesion = this.obtenerUsuarioActual();
     if (!usuarioSesion || usuarioSesion !== calificacion.evaluador) {
-      return of({ exito: false, mensaje: 'Debe iniciar sesión con la cuenta que realiza la calificación.' });
+      return of({ exito: false, mensaje: 'Debe iniciar sesion con la cuenta que realiza la calificacion.' });
     }
 
     const headers = new HttpHeaders({ 'x-usuario': usuarioSesion });
     return this.http.post<{ mensaje: string }>(this.API_CALIFICACIONES, calificacion, { headers }).pipe(
       timeout(10000),
-      map(respuesta => ({ exito: true, mensaje: respuesta.mensaje || '¡Calificación registrada con éxito!' })),
+      map(respuesta => ({ exito: true, mensaje: respuesta.mensaje || 'Calificacion registrada con exito.' })),
       catchError(error => of({
         exito: false,
-        mensaje: error.error?.error || 'No se pudo guardar la calificación. Intente nuevamente.'
+        mensaje: error.error?.error || 'No se pudo guardar la calificacion. Intente nuevamente.'
       }))
     );
   }
@@ -96,13 +96,38 @@ export class ServicioReputacion {
     );
   }
 
+  // Calcula el promedio de reputacion de CUALQUIER usuario (sin restriccion de sesion propia).
+  // Devuelve 0 si no tiene resenas. Usado en la vista de perfil para mostrar la reputacion real.
+  public calcularPromedioPublico(lector: string): Observable<number> {
+    const usuarioSesion = this.obtenerUsuarioActual();
+    const headers = usuarioSesion
+      ? new HttpHeaders({ 'x-usuario': usuarioSesion })
+      : new HttpHeaders();
+    const params = new HttpParams().set('evaluado', lector).set('filtro', 'lector');
+
+    return this.http.get<any[]>(this.API_CALIFICACIONES, { headers, params }).pipe(
+      timeout(8000),
+      map(datos => {
+        if (!Array.isArray(datos) || datos.length === 0) return 0;
+        const notas = datos
+          .filter((c: any) => c.tipo === 'lector')
+          .map((c: any) => Number(c.puntuacion))
+          .filter((n: number) => !isNaN(n));
+        if (notas.length === 0) return 0;
+        const promedio = notas.reduce((acc: number, n: number) => acc + n, 0) / notas.length;
+        return Math.round(promedio * 10) / 10;
+      }),
+      catchError(() => of(0))
+    );
+  }
+
   private consultarCalificaciones(
     consulta: { evaluado?: string; evaluador?: string; idIntercambio?: string; filtro?: FiltroResenas }
   ): Observable<Calificacion[]> {
     const usuarioSesion = this.obtenerUsuarioActual();
     const usuarioConsultado = consulta.evaluado || consulta.evaluador;
     if (!usuarioSesion || usuarioConsultado !== usuarioSesion) {
-      return throwError(() => new Error('Solo puede consultar sus propias reseñas.'));
+      return throwError(() => new Error('Solo puede consultar sus propias resenas.'));
     }
 
     let params = new HttpParams();
@@ -114,7 +139,7 @@ export class ServicioReputacion {
     return this.http.get<CalificacionPlana[]>(this.API_CALIFICACIONES, { headers, params }).pipe(
       timeout(8000),
       map(datos => {
-        if (!Array.isArray(datos)) throw new Error('La respuesta de reseñas no tiene un formato válido.');
+        if (!Array.isArray(datos)) throw new Error('La respuesta de resenas no tiene un formato valido.');
         return datos
           .map(plano => Calificacion.desdeJSON(plano))
           .sort((a, b) => b.comentario.fecha.localeCompare(a.comentario.fecha));

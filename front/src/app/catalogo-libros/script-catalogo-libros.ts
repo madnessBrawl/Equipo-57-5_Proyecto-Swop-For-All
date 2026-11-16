@@ -332,8 +332,8 @@ export class CatalogoLibrosComponent implements OnInit {
     );
 
     // 2. RNF Seguridad / Confidencialidad: Guardar los datos cifrados con ncrypt-js
-    this.cifradoService.guardarEnStorageSeguro('oferta_activa', oferta);
-    this.cifradoService.guardarEnStorageSeguro('libro_solicitado', item.libro);
+    this.cifradoService.guardarEnStorageSeguroSync('oferta_activa', oferta);
+    this.cifradoService.guardarEnStorageSeguroSync('libro_solicitado', item.libro);
 
     // Guardar en almacenamiento para interoperabilidad
     sessionStorage.setItem('libroSolicitado', JSON.stringify({
@@ -360,7 +360,7 @@ export class CatalogoLibrosComponent implements OnInit {
   private guardarCopiaSeguraEnCache(items: ItemCatalogo[]): void {
     try {
       const serializado = items.map(i => i.toJSON());
-      this.cifradoService.guardarEnStorageSeguro('catalogo_offline_cache', serializado);
+      this.cifradoService.guardarEnStorageSeguroSync('catalogo_offline_cache', serializado);
     } catch (e) {
       console.warn('[CatalogoLibrosComponent] No se pudo guardar la caché cifrada:', e);
     }
@@ -370,7 +370,7 @@ export class CatalogoLibrosComponent implements OnInit {
     Recupera el catálogo de respaldo descifrando con ncrypt-js si la API falla
   */
   private recuperarCatalogoCifradoContingencia(): void {
-    const datosRecuperados = this.cifradoService.obtenerDeStorageSeguro<any[]>('catalogo_offline_cache');
+    const datosRecuperados = this.cifradoService.obtenerDeStorageSeguroSync<any[]>('catalogo_offline_cache');
 
     if (datosRecuperados && Array.isArray(datosRecuperados) && datosRecuperados.length > 0) {
       this.listaLibrosCatalogo = datosRecuperados.map(raw => {

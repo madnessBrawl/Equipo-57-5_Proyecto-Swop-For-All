@@ -14,6 +14,8 @@ const UsuarioPersistencia = require('./Persistencia/UsuarioPersistencia');
 const ComunidadPersistencia = require('./Persistencia/ComunidadPersistencia');
 const IntercambioPersistencia = require('./Persistencia/IntercambioPersistencia');
 const CalificacionPersistencia = require('./Persistencia/CalificacionPersistencia');
+const CifradoService          = require('./Service/CifradoService');
+
 const { Calificacion } = require('./models/Calificacion');
 
 const libroController = new LibroController();
@@ -22,6 +24,8 @@ const usuarioPersistencia = new UsuarioPersistencia();
 const comunidadPersistencia = new ComunidadPersistencia();
 const intercambioPersistencia = new IntercambioPersistencia();
 const calificacionPersistencia = new CalificacionPersistencia();
+const cifradoService          = new CifradoService();
+
 
 const PUERTO = process.env.PORT || 3000;
 
@@ -103,7 +107,10 @@ const servidor = http.createServer(async (req, res) => {
     // GET /api/usuarios -> Listar usuarios registrados
     if (metodo === 'GET' && ruta === '/api/usuarios') {
       const usuarios = usuarioPersistencia.obtenerTodos().map(u => {
-        const { clave, ...publico } = u; // No exponer la clave
+        const { clave, correo, ...resto } = u;
+        // Descifrar correo con ncrypt-js para retornar valor legible sin exponer la clave
+        const correoLegible = correo && correo.includes('.') ? (() => { try { return cifradoService.descifrar(correo); } catch { return correo; } })() : correo;
+        const publico = { ...resto, correo: correoLegible };
         return publico;
       });
       return responderJSON(res, 200, usuarios);
@@ -120,19 +127,22 @@ const servidor = http.createServer(async (req, res) => {
         return responderJSON(res, 409, { error: 'El usuario ya se encuentra registrado.' });
       }
       const nuevo = usuarioPersistencia.guardar(body);
-      const { clave, ...perfilSeguro } = nuevo;
+      const { clave: _c, correo: correoCifrado, ...resto } = nuevo;
+      // Descifrar correo para la respuesta al cliente (nunca se devuelve la clave)
+      const correoRespuesta = correoCifrado && correoCifrado.includes('.') ? (() => { try { return cifradoService.descifrar(correoCifrado); } catch { return correoCifrado; } })() : correoCifrado;
+      const perfilSeguro = { ...resto, correo: correoRespuesta };
       return responderJSON(res, 201, { mensaje: 'Usuario registrado exitosamente', usuario: perfilSeguro });
     }
 
     // POST /api/usuarios/login -> Iniciar sesiÃ³n
     if (metodo === 'POST' && ruta === '/api/usuarios/login') {
       const body = await parsearBodyJSON(req);
-      const encontrado = usuarioPersistencia.buscarPorUsuario(body.usuario);
-      if (!encontrado || encontrado.clave !== body.clave) {
-        return responderJSON(res, 401, { error: 'Credenciales invÃ¡lidas.' });
+      // verificarCredenciales() descifra clave/correo con ncrypt-js (AES-256-CBC)
+      const perfilSeguro = usuarioPersistencia.verificarCredenciales(body.usuario, body.clave);
+      if (!perfilSeguro) {
+        return responderJSON(res, 401, { error: 'Credenciales inválidas.' });
       }
-      const { clave, ...sesion } = encontrado;
-      return responderJSON(res, 200, { mensaje: 'Inicio de sesiÃ³n exitoso', usuario: sesion });
+      return responderJSON(res, 200, { mensaje: 'Inicio de sesión exitoso', usuario: perfilSeguro });
     }
 
     // GET /api/perfil/:usuario -> Consultar perfil del lector

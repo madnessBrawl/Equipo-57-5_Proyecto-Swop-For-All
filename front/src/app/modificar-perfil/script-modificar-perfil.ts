@@ -1,14 +1,10 @@
-/*
-  Componente: ModificarPerfilComponent
-  Historia de Usuario: Modificar Perfil
-*/
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { catchError, map, of } from 'rxjs';
 
-// Clase de dominio POO del perfil del lector
 export class PerfilLectorDominio {
   constructor(
     public usuario: string,
@@ -20,38 +16,25 @@ export class PerfilLectorDominio {
     public genero: string = 'Prefiero no decir',
     public generosFavoritos: string = '',
     public biografia: string = '',
-    public reputacion: number = 5.0,
+    public reputacion: number = 0,
     public clave: string = ''
   ) {}
 
-  // Validacion de formato y campos obligatorios
   validar(): string | null {
-    if (!this.nombre.trim()) {
-      return 'El nombre no puede estar vacío.';
-    }
-    if (!this.apellido.trim()) {
-      return 'El apellido no puede estar vacío.';
-    }
-    if (!this.correo.trim()) {
-      return 'El correo electrónico es obligatorio.';
-    }
+    if (!this.nombre.trim()) return 'El nombre no puede estar vacio.';
+    if (!this.apellido.trim()) return 'El apellido no puede estar vacio.';
+    if (!this.correo.trim()) return 'El correo electronico es obligatorio.';
 
     const patronCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!patronCorreo.test(this.correo.trim())) {
-      return 'El correo electrónico no tiene un formato válido.';
-    }
+    if (!patronCorreo.test(this.correo.trim())) return 'El correo no tiene un formato valido.';
 
     if (this.telefono.trim()) {
       const telLimpio = this.telefono.replace(/[\s-]/g, '');
       const patronTel = /^0(412|414|424|416|426|212)\d{7}$/;
-      if (!patronTel.test(telLimpio)) {
-        return 'El teléfono debe ser un número válido de Venezuela (ej: 04141234567).';
-      }
+      if (!patronTel.test(telLimpio)) return 'El telefono debe ser un numero valido de Venezuela (ej: 04141234567).';
     }
 
-    if (this.biografia && this.biografia.length > 400) {
-      return 'La biografía no puede exceder los 400 caracteres.';
-    }
+    if (this.biografia && this.biografia.length > 400) return 'La biografia no puede exceder los 400 caracteres.';
 
     return null;
   }
@@ -81,71 +64,93 @@ export class ModificarPerfilComponent implements OnInit {
 
   mensajeNotificacion: string = '';
   tipoNotificacion: 'exito' | 'error' = 'exito';
+  guardando: boolean = false;
 
-  constructor(private router: Router) {}
+  private readonly API_PERFIL = 'http://localhost:3000/api/perfil';
+  private readonly API_CALIFICACIONES = 'http://localhost:3000/api/calificaciones';
+
+  constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.cargarPerfilDesdeSesion();
   }
 
-  // Carga los datos del perfil activo sin pedir re-autenticacion
   private cargarPerfilDesdeSesion(): void {
     const sesion = localStorage.getItem('usuarioLogueado');
 
-    if (sesion) {
-      try {
-        const u = JSON.parse(sesion);
-        this.perfilOriginal = new PerfilLectorDominio(
-          u.usuario || 'Juan02',
-          u.nombre || 'Juan',
-          u.apellido || 'Santana',
-          u.correo || 'juanito023@gmail.com',
-          u.telefono || '04143731047',
-          u.estadoVenezuela || 'Distrito Capital',
-          u.genero || 'Hombre',
-          u.generosFavoritos || 'Terror',
-          u.biografia || '',
-          Number(u.reputacion) || 5.0,
-          u.clave || '123456'
-        );
-      } catch (e) {
-        this.crearPerfilPredeterminado();
-      }
-    } else {
-      this.crearPerfilPredeterminado();
+    if (!sesion) {
+      this.router.navigate(['/']);
+      return;
     }
 
-    this.datosFormulario = {
-      usuario: this.perfilOriginal.usuario,
-      nombre: this.perfilOriginal.nombre,
-      apellido: this.perfilOriginal.apellido,
-      correo: this.perfilOriginal.correo,
-      telefono: this.perfilOriginal.telefono,
-      estadoVenezuela: this.perfilOriginal.estadoVenezuela,
-      genero: this.perfilOriginal.genero,
-      generosFavoritos: this.perfilOriginal.generosFavoritos,
-      biografia: this.perfilOriginal.biografia
-    };
+    try {
+      const u = JSON.parse(sesion);
+
+      if (!u.usuario) {
+        this.router.navigate(['/']);
+        return;
+      }
+
+      // Soporta campos tanto en singular (nombre/apellido) como plural (nombres/apellidos)
+      const nombre = u.nombre || u.nombres || '';
+      const apellido = u.apellido || u.apellidos || '';
+
+      this.perfilOriginal = new PerfilLectorDominio(
+        u.usuario,
+        nombre,
+        apellido,
+        u.correo || '',
+        u.telefono || '',
+        u.estadoVenezuela || 'Distrito Capital',
+        u.genero || 'Prefiero no decir',
+        u.generosFavoritos || '',
+        u.biografia || '',
+        0,
+        u.clave || ''
+      );
+
+      this.datosFormulario = {
+        usuario: this.perfilOriginal.usuario,
+        nombre: this.perfilOriginal.nombre,
+        apellido: this.perfilOriginal.apellido,
+        correo: this.perfilOriginal.correo,
+        telefono: this.perfilOriginal.telefono,
+        estadoVenezuela: this.perfilOriginal.estadoVenezuela,
+        genero: this.perfilOriginal.genero,
+        generosFavoritos: this.perfilOriginal.generosFavoritos,
+        biografia: this.perfilOriginal.biografia
+      };
+
+      this.cargarReputacion(u.usuario);
+
+    } catch (e) {
+      this.router.navigate(['/']);
+    }
   }
 
-  private crearPerfilPredeterminado(): void {
-    this.perfilOriginal = new PerfilLectorDominio(
-      'Juan02',
-      'Juan',
-      'Santana',
-      'juanito023@gmail.com',
-      '04143731047',
-      'Distrito Capital',
-      'Hombre',
-      'Terror',
-      'Lector buscando intercambiar libros.',
-      5.0,
-      '123456'
-    );
-    localStorage.setItem('usuarioLogueado', JSON.stringify(this.perfilOriginal));
+  private cargarReputacion(usuario: string): void {
+    const params = new HttpParams().set('evaluado', usuario).set('filtro', 'lector');
+    const headers = new HttpHeaders({ 'x-usuario': usuario });
+
+    this.http.get<any[]>(this.API_CALIFICACIONES, { headers, params }).pipe(
+      map(datos => {
+        if (!Array.isArray(datos) || datos.length === 0) return 0;
+        const notas = datos
+          .filter((c: any) => c.tipo === 'lector')
+          .map((c: any) => Number(c.puntuacion))
+          .filter((n: number) => !isNaN(n));
+        if (notas.length === 0) return 0;
+        const promedio = notas.reduce((acc: number, n: number) => acc + n, 0) / notas.length;
+        return Math.round(promedio * 10) / 10;
+      }),
+      catchError(() => of(0))
+    ).subscribe(promedio => {
+      if (this.perfilOriginal) {
+        this.perfilOriginal.reputacion = promedio;
+      }
+    });
   }
 
-  // Guarda los cambios verificando validacion de dominio y unicidad
   guardarCambios(): void {
     const f = this.datosFormulario;
 
@@ -163,85 +168,82 @@ export class ModificarPerfilComponent implements OnInit {
       this.perfilOriginal.clave
     );
 
-    // 1. Validacion en el modelo
+    // Validacion en el modelo
     const errorValidacion = perfilModificado.validar();
     if (errorValidacion) {
       this.mostrarMensaje(errorValidacion, 'error');
       return;
     }
 
-    // 2. Verificacion de unicidad en repositorio
-    const listaUsuariosRaw = localStorage.getItem('swop_usuarios');
-    if (listaUsuariosRaw) {
-      try {
-        const usuarios = JSON.parse(listaUsuariosRaw);
+    const confirmacion = confirm('Esta seguro de que desea guardar los cambios en su perfil?');
+    if (!confirmacion) return;
 
-        const correoEnUso = usuarios.some(
-          (u: any) => u.usuario.toLowerCase() !== this.perfilOriginal.usuario.toLowerCase() &&
-               u.correo.toLowerCase() === f.correo.trim().toLowerCase()
-        );
-        if (correoEnUso) {
-          this.mostrarMensaje('El correo electrónico ya se encuentra registrado por otro usuario.', 'error');
-          return;
-        }
+    this.guardando = true;
 
-        if (f.telefono.trim()) {
-          const telLimpio = f.telefono.replace(/[\s-]/g, '');
-          const telEnUso = usuarios.some(
-            (u: any) => u.usuario.toLowerCase() !== this.perfilOriginal.usuario.toLowerCase() &&
-                 u.telefono && u.telefono.replace(/[\s-]/g, '') === telLimpio
-          );
-          if (telEnUso) {
-            this.mostrarMensaje('El teléfono ya se encuentra registrado por otro usuario.', 'error');
-            return;
-          }
-        }
-      } catch (e) {
-        console.error('Error al verificar unicidad:', e);
-      }
-    }
+    // Payload para el backend (usa los campos que el backend espera)
+    const payload = {
+      nombre: f.nombre,
+      nombres: f.nombre,
+      apellido: f.apellido,
+      apellidos: f.apellido,
+      correo: f.correo,
+      telefono: f.telefono,
+      estadoVenezuela: f.estadoVenezuela,
+      genero: f.genero,
+      generosFavoritos: f.generosFavoritos,
+      biografia: f.biografia
+    };
 
-    // 3. Confirmacion del actor
-    const confirmacion = confirm('¿Está seguro de que desea guardar los cambios en su perfil?');
-    if (!confirmacion) {
-      return;
-    }
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-usuario': this.perfilOriginal.usuario
+    });
 
-    // 4. Persistencia
-    this.perfilOriginal = perfilModificado;
-    localStorage.setItem('usuarioLogueado', JSON.stringify(this.perfilOriginal));
+    // Llama al backend para persistir los cambios en usuarios.json
+    this.http.put<any>(this.API_PERFIL, payload, { headers }).pipe(
+      catchError(err => {
+        // Si el backend falla, se guarda solo en localStorage como contingencia
+        console.warn('Backend no disponible, guardando solo en localStorage:', err.message);
+        return of({ contingencia: true });
+      })
+    ).subscribe(res => {
+      this.guardando = false;
 
-    if (listaUsuariosRaw) {
-      try {
-        const usuarios = JSON.parse(listaUsuariosRaw);
-        const idx = usuarios.findIndex((u: any) => u.usuario.toLowerCase() === this.perfilOriginal.usuario.toLowerCase());
-        if (idx !== -1) {
-          usuarios[idx] = this.perfilOriginal;
-          localStorage.setItem('swop_usuarios', JSON.stringify(usuarios));
-        }
-      } catch (e) {
-        console.error('Error actualizando lista general:', e);
-      }
-    }
+      // Actualiza el perfil en memoria y en localStorage
+      this.perfilOriginal = perfilModificado;
 
-    // 5. Mensaje de confirmacion segun requerimiento metodologico
-    this.mostrarMensaje('información actualizada con éxito', 'exito');
+      // Construye el objeto de sesion actualizado conservando campos originales
+      const sesionActual = JSON.parse(localStorage.getItem('usuarioLogueado') || '{}');
+      const sesionActualizada = {
+        ...sesionActual,
+        nombre: f.nombre,
+        nombres: f.nombre,
+        apellido: f.apellido,
+        apellidos: f.apellido,
+        correo: f.correo,
+        telefono: f.telefono,
+        estadoVenezuela: f.estadoVenezuela,
+        genero: f.genero,
+        generosFavoritos: f.generosFavoritos,
+        biografia: f.biografia
+      };
+      localStorage.setItem('usuarioLogueado', JSON.stringify(sesionActualizada));
 
-    setTimeout(() => {
-      this.router.navigate(['/dashboard']);
-    }, 1200);
+      this.mostrarMensaje('Cambios guardados con exito', 'exito');
+      setTimeout(() => {
+        this.router.navigate(['/dashboard']);
+      }, 1200);
+    });
   }
 
-  // Genera iniciales del avatar
   obtenerIniciales(): string {
-    const nombre = this.datosFormulario?.nombre || this.perfilOriginal?.nombre || 'J';
-    const apellido = this.datosFormulario?.apellido || this.perfilOriginal?.apellido || 'S';
-    const inicial1 = nombre.trim() ? nombre.trim().charAt(0).toUpperCase() : '';
-    const inicial2 = apellido.trim() ? apellido.trim().charAt(0).toUpperCase() : '';
-    return `${inicial1}${inicial2}` || 'JS';
+    const nombre = this.datosFormulario?.nombre || this.perfilOriginal?.nombre || '';
+    const apellido = this.datosFormulario?.apellido || this.perfilOriginal?.apellido || '';
+    const i1 = nombre.trim() ? nombre.trim().charAt(0).toUpperCase() : '';
+    const i2 = apellido.trim() ? apellido.trim().charAt(0).toUpperCase() : '';
+    return `${i1}${i2}` || '?';
   }
 
-  // Regresa al menu principal
   cancelar(): void {
     this.router.navigate(['/dashboard']);
   }
