@@ -19,8 +19,9 @@ export const routes: Routes = [
   // ¡Rutas de comunidad movidas aquí afuera! (Nivel principal)
   { path: 'crear-comunidad', component: CrearComunidadComponent },
   { path: 'espacio-comunidad', component: EspacioComunidadComponent },
-  { path: 'catalogo', 
-    component: CatalogoLibrosComponent },
+  { path: 'catalogo', component: CatalogoLibrosComponent },
+  { path: 'explorar-catalogo', redirectTo: 'catalogo', pathMatch: 'full' },
+  { path: 'catalogo-global', redirectTo: 'catalogo', pathMatch: 'full' },
  { 
     path: 'modificar-oferta', 
     component: ModificarOfertaComponent 

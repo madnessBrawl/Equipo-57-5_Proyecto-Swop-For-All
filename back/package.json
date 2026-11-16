@@ -1,0 +1,12 @@
+{
+  "name": "swop-backend",
+  "version": "1.0.0",
+  "description": "Backend orientado a objetos para plataforma de intercambio de libros Swop-For-All",
+  "main": "controllers/LibroController.js",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "ncrypt-js": "^2.3.0"
+  }
+}

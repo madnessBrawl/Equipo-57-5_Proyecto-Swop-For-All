@@ -27,6 +27,23 @@ export class HeaderComponent {
     this.router.navigate(['/reputacion']);
   }
 
+  // Navega a la sala de intercambio activo (con validación de inicio previo desde el catálogo)
+  navegarAIntercambio(): void {
+    const hayOfertaActiva = Boolean(
+      sessionStorage.getItem('libroSolicitado') ||
+      localStorage.getItem('oferta_activa') ||
+      localStorage.getItem('oferta_activa_id')
+    );
+
+    if (!hayOfertaActiva) {
+      alert('⚠️ No tienes ningún intercambio activo en este momento.\n\nPor favor, dirígete al Catálogo Global, selecciona el libro que deseas y presiona "Solicitar Intercambio" para iniciar la negociación.');
+      this.router.navigate(['/catalogo']);
+      return;
+    }
+
+    this.router.navigate(['/modificar-oferta']);
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem('usuarioLogueado'); 
     this.router.navigate(['/']); 
