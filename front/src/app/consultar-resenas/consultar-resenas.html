@@ -7,6 +7,10 @@
       {{ modo === 'recibidas' ? 'Reseñas recibidas' : 'Reseñas enviadas' }}
     </h2>
 
+    @if (errorConsulta) {
+      <p class="aviso-vacio" role="alert">{{ errorConsulta }}</p>
+    }
+
     <!-- ---------- Filtro por tipo de reseña (siempre del usuario logueado) ---------- -->
     <div id="barra-filtros" class="barra-filtros">
       <div class="grupo-entrada">
@@ -44,7 +48,9 @@
     </div>
 
     <!-- ---------- Lista de reseñas ---------- -->
-    @if (resenas.length === 0) {
+    @if (cargando) {
+      <p class="aviso-vacio" role="status">Cargando reseñas…</p>
+    } @else if (resenas.length === 0 && !errorConsulta) {
       <div id="aviso-sin-resenas" class="aviso-vacio">
         <p>
           {{ modo === 'enviadas' && totalEnviadas === 0

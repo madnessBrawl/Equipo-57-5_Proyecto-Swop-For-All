@@ -15,6 +15,7 @@ const UsuarioPersistencia = require('./Persistencia/UsuarioPersistencia');
 const ComunidadPersistencia = require('./Persistencia/ComunidadPersistencia');
 const IntercambioPersistencia = require('./Persistencia/IntercambioPersistencia');
 const CalificacionPersistencia = require('./Persistencia/CalificacionPersistencia');
+const { Calificacion } = require('./models/Calificacion');
 
 const libroController = new LibroController();
 const perfilController = new PerfilController();
@@ -177,16 +178,59 @@ const servidor = http.createServer(async (req, res) => {
 
     /* ---------------- 5. RUTAS DE CALIFICACIONES / REPUTACIÃ“N ---------------- */
     if (metodo === 'GET' && ruta === '/api/calificaciones') {
-      const evaluado = parsedUrl.query.evaluado;
-      if (evaluado) {
-        return responderJSON(res, 200, calificacionPersistencia.buscarPorEvaluado(evaluado));
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para consultar reseñas.' });
       }
-      return responderJSON(res, 200, calificacionPersistencia.obtenerTodos());
+
+      const evaluado = parsedUrl.query.evaluado;
+      const evaluador = parsedUrl.query.evaluador;
+      if ((!evaluado && !evaluador) || (evaluado && evaluador)) {
+        return responderJSON(res, 400, { error: 'Especifique si desea consultar reseñas recibidas o enviadas.' });
+      }
+      if ((evaluado && evaluado !== usuarioSesion) || (evaluador && evaluador !== usuarioSesion)) {
+        return responderJSON(res, 403, { error: 'Solo puede consultar sus propias reseñas.' });
+      }
+
+      const filtro = parsedUrl.query.filtro;
+      const idIntercambio = parsedUrl.query.idIntercambio;
+      const tipo = evaluado ? 'evaluado' : 'evaluador';
+      const resenas = calificacionPersistencia.buscarPorPredicado(calificacion =>
+        calificacion[tipo] === usuarioSesion &&
+        (!filtro || filtro === 'todas' || calificacion.tipo === filtro) &&
+        (!idIntercambio || calificacion.idIntercambio === idIntercambio)
+      );
+      return responderJSON(res, 200, resenas);
     }
 
     if (metodo === 'POST' && ruta === '/api/calificaciones') {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para calificar.' });
+      }
       const body = await parsearBodyJSON(req);
-      const guardada = calificacionPersistencia.guardar(body);
+      if (body.evaluador && body.evaluador !== usuarioSesion) {
+        return responderJSON(res, 403, { error: 'No puede calificar en nombre de otro usuario.' });
+      }
+
+      const calificacion = new Calificacion({
+        ...body,
+        id: body.id || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+        evaluador: usuarioSesion
+      });
+      const errorValidacion = calificacion.validar();
+      if (errorValidacion) {
+        return responderJSON(res, 400, { error: errorValidacion });
+      }
+
+      const duplicada = calificacionPersistencia.buscarPorPredicado(registro =>
+        registro.evaluador === usuarioSesion &&
+        registro.idIntercambio === calificacion.idIntercambio &&
+        registro.tipo === calificacion.tipo
+      ).length > 0;
+      if (duplicada) {
+        return responderJSON(res, 409, { error: 'Usted ya calificó este intercambio.' });
+      }
+
+      const guardada = calificacionPersistencia.guardar(calificacion);
       return responderJSON(res, 201, { mensaje: 'CalificaciÃ³n registrada con Ã©xito', calificacion: guardada });
     }
 

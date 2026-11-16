@@ -1,76 +1,137 @@
-/*
-  Archivo: servicio-reputacion.spec.ts   (FRONTEND: front/src/app/reputacion/)
-  Función: Pruebas automáticas (ng test) que verifican Fiabilidad, Confidencialidad y Operabilidad
-           del módulo de Reputación.
-*/
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { ServicioReputacion } from './servicio-reputacion';
 import { Calificacion, Comentario } from './modelo-reputacion';
 
 describe('ServicioReputacion', () => {
   let servicio: ServicioReputacion;
+  let http: HttpTestingController;
 
-  // Antes de cada prueba: almacenamiento limpio, sesión de "ana" y un intercambio finalizado ana-beto
   beforeEach(() => {
+    const valores = new Map<string, string>();
+    const almacenamiento: Storage = {
+      get length() { return valores.size; },
+      clear: () => valores.clear(),
+      getItem: clave => valores.get(clave) ?? null,
+      key: indice => [...valores.keys()][indice] ?? null,
+      removeItem: clave => valores.delete(clave),
+      setItem: (clave, valor) => valores.set(clave, String(valor))
+    };
+    Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: almacenamiento });
     localStorage.clear();
     localStorage.setItem('usuarioLogueado', JSON.stringify({ usuario: 'ana', clave: 'secreta' }));
-    localStorage.setItem('swop_usuarios', JSON.stringify([{ usuario: 'beto', reputacion: 5 }]));
     localStorage.setItem('swop_intercambios', JSON.stringify([
-      { id: 'i1', libroOfrecido: 'A', libroSolicitado: 'B', ofertante: 'ana', receptor: 'beto', estado: 'Finalizado', fecha: '2026-01-01' },
-      { id: 'i2', libroOfrecido: 'C', libroSolicitado: 'D', ofertante: 'ana', receptor: 'beto', estado: 'Pendiente', fecha: '2026-01-02' }
+      {
+        id: 'i1',
+        libroOfrecido: 'A',
+        libroSolicitado: 'B',
+        ofertante: 'ana',
+        receptor: 'beto',
+        estado: 'Finalizado',
+        fecha: '2026-01-01'
+      },
+      {
+        id: 'i2',
+        libroOfrecido: 'C',
+        libroSolicitado: 'D',
+        ofertante: 'ana',
+        receptor: 'beto',
+        estado: 'Pendiente',
+        fecha: '2026-01-02'
+      }
     ]));
-    servicio = new ServicioReputacion();
+    TestBed.configureTestingModule({
+      providers: [ServicioReputacion, provideHttpClient(), provideHttpClientTesting()]
+    });
+    servicio = TestBed.inject(ServicioReputacion);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  // Atajo para crear calificaciones de prueba
+  afterEach(() => http.verify());
+
   const crear = (extra: Partial<Calificacion> = {}) =>
     Object.assign(new Calificacion('c1', 'i1', 'lector', 'ana', 'beto', 4, new Comentario('Muy puntual')), extra);
 
-  it('Confidencialidad: expone solo el nombre de usuario, nunca la clave', () => {
+  const plana = (extra: Partial<{
+    id: string;
+    tipo: 'lector' | 'intercambio';
+    evaluador: string;
+    evaluado: string;
+    puntuacion: number;
+    fecha: string;
+  }> = {}) => ({
+    id: 'c1',
+    idIntercambio: 'i1',
+    tipo: 'lector' as const,
+    evaluador: 'ana',
+    evaluado: 'beto',
+    puntuacion: 4,
+    comentario: { texto: 'Muy puntual', fecha: '2026-01-01T00:00:00.000Z' },
+    ...extra
+  });
+
+  it('solo expone el nombre de usuario de la sesión', () => {
     expect(servicio.obtenerUsuarioActual()).toBe('ana');
   });
 
-  it('Fiabilidad: guarda la calificación una sola vez y rechaza la repetida', () => {
-    expect(servicio.registrarCalificacion(crear()).exito).toBe(true);
-    expect(servicio.yaFueCalificado('ana', 'i1', 'lector')).toBe(true);
-    const repetida = servicio.registrarCalificacion(crear({ id: 'c2' }));
-    expect(repetida.exito).toBe(false);
-    expect(servicio.obtenerResenas('beto').length).toBe(1);
+  it('registra la reseña en el backend con la sesión activa', () => {
+    let resultado: { exito: boolean; mensaje: string } | undefined;
+    servicio.registrarCalificacion(crear()).subscribe(valor => resultado = valor);
+
+    const request = http.expectOne('http://localhost:3000/api/calificaciones');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('x-usuario')).toBe('ana');
+    request.flush({ mensaje: 'Calificación registrada con éxito' });
+
+    expect(resultado?.exito).toBe(true);
   });
 
-  it('Fiabilidad: una calificación inválida no se guarda', () => {
-    expect(servicio.registrarCalificacion(crear({ puntuacion: 0 })).exito).toBe(false);
-    expect(servicio.registrarCalificacion(crear({ puntuacion: 6 })).exito).toBe(false);
-    expect(servicio.obtenerResenas('beto').length).toBe(0);
+  it('rechaza calificaciones inválidas sin enviarlas al backend', () => {
+    let resultado: { exito: boolean; mensaje: string } | undefined;
+    servicio.registrarCalificacion(crear({ puntuacion: 0 })).subscribe(valor => resultado = valor);
+
+    expect(resultado?.exito).toBe(false);
+    http.expectNone('http://localhost:3000/api/calificaciones');
   });
 
-  it('Reglas de negocio: autocalificación, intercambio no finalizado y no participante', () => {
-    expect(servicio.registrarCalificacion(crear({ evaluado: 'ana' })).exito).toBe(false);
-    expect(servicio.registrarCalificacion(crear({ idIntercambio: 'i2' })).exito).toBe(false);
-    expect(servicio.registrarCalificacion(crear({ evaluador: 'carla' })).exito).toBe(false);
+  it('consulta solo las reseñas del usuario autenticado', () => {
+    let resenas: Calificacion[] = [];
+    servicio.obtenerResenasEnviadas('ana').subscribe(valor => resenas = valor);
+
+    const request = http.expectOne(url =>
+      url.url === 'http://localhost:3000/api/calificaciones' &&
+      url.params.get('evaluador') === 'ana'
+    );
+    expect(request.request.headers.get('x-usuario')).toBe('ana');
+    request.flush([plana()]);
+
+    expect(resenas.length).toBe(1);
+    expect(resenas[0].comentario.texto).toBe('Muy puntual');
   });
 
-  it('Consultar reseñas: calcula el promedio y actualiza la reputación del perfil', () => {
-    expect(servicio.calcularPromedio('beto')).toBeNull(); // Sin calificaciones aún
-    servicio.registrarCalificacion(crear({ puntuacion: 3 }));
-    expect(servicio.calcularPromedio('beto')).toBe(3);
-    const perfil = JSON.parse(localStorage.getItem('swop_usuarios')!)[0];
-    expect(perfil.reputacion).toBe(3);
+  it('calcula el promedio consultando reseñas de tipo lector', () => {
+    let promedio: number | null | undefined;
+    servicio.calcularPromedio('ana').subscribe(valor => promedio = valor);
+
+    const request = http.expectOne(url =>
+      url.url === 'http://localhost:3000/api/calificaciones' &&
+      url.params.get('evaluado') === 'ana' &&
+      url.params.get('filtro') === 'lector'
+    );
+    request.flush([
+      plana({ id: 'c1', evaluador: 'beto', evaluado: 'ana', puntuacion: 4 }),
+      plana({ id: 'c2', evaluador: 'carla', evaluado: 'ana', puntuacion: 5 })
+    ]);
+
+    expect(promedio).toBe(4.5);
   });
 
-  it('Reseñas enviadas: lista lo que el usuario calificó, separado de lo recibido', () => {
-    servicio.registrarCalificacion(crear());
-    expect(servicio.obtenerResenasEnviadas('ana').length).toBe(1);   // Ana envió una
-    expect(servicio.obtenerResenasEnviadas('beto').length).toBe(0);  // Beto no envió ninguna
-    expect(servicio.obtenerResenas('ana').length).toBe(0);           // Ana no recibió ninguna
-  });
+  it('rechaza la consulta de reseñas de otra persona', () => {
+    let error = '';
+    servicio.obtenerResenas('beto').subscribe({ error: err => error = err.message });
 
-  it('Operabilidad: todo rechazo devuelve un mensaje claro', () => {
-    const resultado = servicio.registrarCalificacion(crear({ puntuacion: 0 }));
-    expect(resultado.mensaje.length).toBeGreaterThan(5);
-  });
-
-  it('Fiabilidad: datos dañados en el almacenamiento no rompen la consulta', () => {
-    localStorage.setItem('swop_calificaciones', '{no es json');
-    expect(servicio.obtenerResenas('beto')).toEqual([]);
+    expect(error).toMatch(/Solo puede consultar/);
+    http.expectNone('http://localhost:3000/api/calificaciones');
   });
 });

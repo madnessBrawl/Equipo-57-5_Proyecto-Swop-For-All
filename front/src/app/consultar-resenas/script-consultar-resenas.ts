@@ -6,6 +6,7 @@ import { Component, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ServicioReputacion } from '../reputacion/servicio-reputacion';
 import { Calificacion } from '../reputacion/modelo-reputacion'; // Clase de dominio
 import type { FiltroResenas } from '../reputacion/modelo-reputacion'; // Solo tipo
@@ -26,6 +27,8 @@ export class ConsultarResenasComponent implements OnInit {
   resenas: Calificacion[] = [];             // Reseñas mostradas en pantalla
   promedio: number | null = null;           // Promedio como lector (null = sin calificaciones)
   totalEnviadas: number = 0;                // Total de reseñas enviadas sin filtro (modo enviadas)
+  cargando = false;
+  errorConsulta = '';
 
   /* 2. CONSTANTES USADAS POR LA PLANTILLA*/
   readonly estrellasDisponibles: number[] = [1, 2, 3, 4, 5];                 // Posiciones de estrella
@@ -59,13 +62,41 @@ export class ConsultarResenasComponent implements OnInit {
 
   /* 5. CONSULTA: pide los datos al servicio según el modo*/
   private actualizarVista(): void {
+    if (!this.usuarioActual) return;
+    this.cargando = true;
+    this.errorConsulta = '';
+
     if (this.modo === 'enviadas') {
-      this.resenas = this.servicio.obtenerResenasEnviadas(this.usuarioActual!, this.filtro);
-      this.totalEnviadas = this.servicio.obtenerResenasEnviadas(this.usuarioActual!).length;
+      forkJoin({
+        resenas: this.servicio.obtenerResenasEnviadas(this.usuarioActual, this.filtro),
+        todas: this.servicio.obtenerResenasEnviadas(this.usuarioActual)
+      }).subscribe({
+        next: resultado => {
+          this.resenas = resultado.resenas;
+          this.totalEnviadas = resultado.todas.length;
+          this.cargando = false;
+        },
+        error: () => this.mostrarErrorConsulta()
+      });
     } else {
-      this.resenas = this.servicio.obtenerResenas(this.usuarioActual!, this.filtro);   // Solo las del usuario logueado
-      this.promedio = this.servicio.calcularPromedio(this.usuarioActual!);
+      forkJoin({
+        resenas: this.servicio.obtenerResenas(this.usuarioActual, this.filtro),
+        promedio: this.servicio.calcularPromedio(this.usuarioActual)
+      }).subscribe({
+        next: resultado => {
+          this.resenas = resultado.resenas;
+          this.promedio = resultado.promedio;
+          this.cargando = false;
+        },
+        error: () => this.mostrarErrorConsulta()
+      });
     }
+  }
+
+  private mostrarErrorConsulta(): void {
+    this.resenas = [];
+    this.cargando = false;
+    this.errorConsulta = 'No se pudieron cargar las reseñas. Verifique que el servidor esté disponible e inténtelo de nuevo.';
   }
 
   // Estrellas llenas que se dibujan para un valor (el promedio se redondea al entero más cercano)

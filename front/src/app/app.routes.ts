@@ -10,6 +10,7 @@ import { ModificarOfertaComponent } from './modificar-oferta/modificar-oferta.co
 import { CatalogoLibrosComponent } from './catalogo-libros/catalogo-libros.component';
 import { EspacioComunidadComponent } from './comunidad/espacio-comunidad/espacio-comunidad';
 import { ModificarPerfilComponent } from './modificar-perfil/script-modificar-perfil';
+import { InventarioComponent } from './inventario/inventario.component';
 
 export const routes: Routes = [
   { path: '', component: PerfilUsuarioComponent }, 
@@ -25,6 +26,7 @@ export const routes: Routes = [
   { path: 'mi-comunidad', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
   { path: 'ver-comunidades', redirectTo: 'espacio-comunidad', pathMatch: 'full' },
   { path: 'catalogo', component: CatalogoLibrosComponent },
+  { path: 'inventario', component: InventarioComponent },
   { 
     path: 'modificar-oferta', 
     component: ModificarOfertaComponent 

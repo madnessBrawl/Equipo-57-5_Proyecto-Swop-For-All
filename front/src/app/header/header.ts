@@ -27,6 +27,10 @@ export class HeaderComponent {
     this.router.navigate(['/reputacion']);
   }
 
+  irAInventario(): void {
+    this.router.navigate(['/inventario']);
+  }
+
   cerrarSesion(): void {
     localStorage.removeItem('usuarioLogueado'); 
     this.router.navigate(['/']); 

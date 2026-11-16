@@ -29,8 +29,11 @@ export class CalificarReputacionComponent implements OnInit {
   textoComentario: string = '';                        // Texto del comentario (opcional)
   paso: 'formulario' | 'confirmacion' = 'formulario';  // Paso actual del proceso
   completada: boolean = false;                         // true cuando la calificación ya se guardó
+  consultandoCalificacion: boolean = false;
+  guardando: boolean = false;
   mensajeTipo: 'exito' | 'error' | 'advertencia' | '' = ''; // Tipo del mensaje mostrado
   mensajeTexto: string = '';                           // Texto del mensaje (simple string)
+  private verificacionActual = 0;
 
   /* 2. CONSTANTES USADAS POR LA PLANTILLA*/
   readonly estrellasDisponibles: number[] = [1, 2, 3, 4, 5];                       // Botones de estrella
@@ -76,11 +79,28 @@ export class CalificarReputacionComponent implements OnInit {
     this.puntuacion = 0;
     this.textoComentario = '';
     this.limpiarMensaje();
-    this.yaCalificado = !!id && this.servicio.yaFueCalificado(this.usuarioActual!, id, this.tipoSeleccionado);
-    if (this.yaCalificado) {
-      this.mostrarMensaje('advertencia',
-        'Usted ya calificó este intercambio. Elija otro intercambio o cambie el tipo de calificación.');
-    }
+    this.yaCalificado = false;
+    this.consultandoCalificacion = false;
+    const verificacion = ++this.verificacionActual;
+    if (!id) return;
+
+    this.consultandoCalificacion = true;
+    this.servicio.yaFueCalificado(this.usuarioActual!, id, this.tipoSeleccionado).subscribe({
+      next: yaCalificado => {
+        if (verificacion !== this.verificacionActual) return;
+        this.yaCalificado = yaCalificado;
+        this.consultandoCalificacion = false;
+        if (yaCalificado) {
+          this.mostrarMensaje('advertencia',
+            'Usted ya calificó este intercambio. Elija otro intercambio o cambie el tipo de calificación.');
+        }
+      },
+      error: () => {
+        if (verificacion !== this.verificacionActual) return;
+        this.consultandoCalificacion = false;
+        this.mostrarMensaje('error', 'No se pudo verificar si ya calificó este intercambio.');
+      }
+    });
   }
 
   // Intercambio actualmente seleccionado (o undefined si no hay)
@@ -145,15 +165,25 @@ export class CalificarReputacionComponent implements OnInit {
 
   // Paso B: el usuario confirma y se registra (guardado único en el servicio)
   confirmarYGuardar(): void {
-    const resultado = this.servicio.registrarCalificacion(this.construirCalificacion());
-    if (!resultado.exito) {
-      this.paso = 'formulario';
-      this.mostrarMensaje('error', resultado.mensaje);
-      return;
-    }
-    this.completada = true;
-    this.paso = 'formulario';
-    this.mostrarMensaje('exito', resultado.mensaje);
+    this.guardando = true;
+    this.servicio.registrarCalificacion(this.construirCalificacion()).subscribe({
+      next: resultado => {
+        this.guardando = false;
+        if (!resultado.exito) {
+          this.paso = 'formulario';
+          this.mostrarMensaje('error', resultado.mensaje);
+          return;
+        }
+        this.completada = true;
+        this.paso = 'formulario';
+        this.mostrarMensaje('exito', resultado.mensaje);
+      },
+      error: () => {
+        this.guardando = false;
+        this.paso = 'formulario';
+        this.mostrarMensaje('error', 'No se pudo guardar la calificación. Intente nuevamente.');
+      }
+    });
   }
 
   // Acción del actor tras el éxito: preparar otra calificación

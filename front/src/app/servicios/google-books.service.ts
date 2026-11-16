@@ -26,7 +26,18 @@ export interface GoogleBooksResponse {
 
 export interface RespuestaAñadirLibro {
   mensaje: string;
-  libro: any;
+  libro: LibroPersistido;
+}
+
+interface LibroPersistido {
+  id: string;
+  titulo: string;
+  autores: string[];
+  descripcion?: string;
+  portadaUrl?: string;
+  isbn?: string;
+  categorias?: string[];
+  disponible: boolean;
 }
 
 @Injectable({
@@ -64,6 +75,22 @@ export class GoogleBooksService {
         // Fallback local si el servidor backend no estuviera iniciado
         return of(this.catalogoRespaldo());
       })
+    );
+  }
+
+  obtenerInventarioUsuario(usuario: string): Observable<Libro[]> {
+    const url = `${this.apiUrlBackend}/inventario/${encodeURIComponent(usuario)}`;
+    return this.http.get<LibroPersistido[]>(url).pipe(
+      map(libros => libros.map(item => new Libro(
+        item.id,
+        item.titulo,
+        Array.isArray(item.autores) ? item.autores.join(', ') : 'Autor Desconocido',
+        item.disponible,
+        item.portadaUrl || '',
+        item.descripcion || '',
+        item.isbn || '',
+        item.categorias?.[0] || 'General'
+      )))
     );
   }
 
@@ -121,15 +148,7 @@ export class GoogleBooksService {
       propietario: usuario
     };
 
-    return this.http.post<RespuestaAñadirLibro>(this.apiUrlBackend, payload, { headers }).pipe(
-      catchError(() => {
-        // Respaldo de contingencia
-        return of({
-          mensaje: 'libro añadido exitosamente (modo offline)',
-          libro: payload
-        });
-      })
-    );
+    return this.http.post<RespuestaAñadirLibro>(this.apiUrlBackend, payload, { headers });
   }
 
   /**
