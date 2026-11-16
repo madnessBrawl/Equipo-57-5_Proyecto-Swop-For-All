@@ -1,0 +1,26 @@
+[
+  {
+    "id": "INT-2026-01",
+    "idIntercambio": "INT-2026-01",
+    "usuarioEmisor": "carlos_lector",
+    "usuarioReceptor": "maria_books",
+    "librosOfrecidos": [
+      {
+        "id": "lib_100",
+        "titulo": "El Principito",
+        "autor": "Antoine de Saint-Exupéry",
+        "disponible": true
+      }
+    ],
+    "librosSolicitados": [
+      {
+        "id": "lib_101",
+        "titulo": "1984",
+        "autor": "George Orwell",
+        "disponible": true
+      }
+    ],
+    "estado": "Finalizado",
+    "fechaModificacion": "2026-11-10T12:00:00.000Z"
+  }
+]

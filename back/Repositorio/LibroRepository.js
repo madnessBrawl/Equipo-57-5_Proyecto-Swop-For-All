@@ -94,7 +94,8 @@ class LibroRepository {
       throw new Error(`El libro con ID ${idLibro} no existe.`);
     }
     libro.marcarDisponible(disponible);
-    return libro.toJSON();
+    const guardado = this._persistencia.guardar(libro);
+    return guardado.toJSON ? guardado.toJSON() : guardado;
   }
 
   /*
