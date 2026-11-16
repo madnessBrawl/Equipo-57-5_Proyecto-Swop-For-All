@@ -334,7 +334,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     this.guardarOferta();
 
     // RNF Cifrado: Se guarda también la versión protegida con ncrypt-js
-    this.cifradoService.guardarEnStorageSeguro('oferta_activa', this.ofertaActiva);
+    this.cifradoService.guardarEnStorageSeguroSync('oferta_activa', this.ofertaActiva);
 
     alert('✅ ¡Oferta de intercambio modificada y enviada al lector con éxito!');
   }

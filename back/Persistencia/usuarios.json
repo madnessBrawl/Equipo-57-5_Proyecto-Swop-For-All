@@ -4,9 +4,9 @@
     "usuario": "carlos_lector",
     "nombres": "Carlos Andrés",
     "apellidos": "Pérez",
-    "correo": "carlos@ejemplo.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.f9c2bf761352bc1845897fc74bf09e2fba03f01f07f16f45ead0a10632d0e96c561dcd263d53073f12467f118f3f88cd",
     "telefono": "04141234567",
-    "clave": "carlos123",
+    "clave": "c709941e09571ff05b3d169007a207fe.dc5f27e94de58229a5ff326c7369cc6c1db48414973c7ba0a657b11e48ce5b15",
     "reputacion": 4.8
   },
   {
@@ -14,9 +14,9 @@
     "usuario": "maria_books",
     "nombres": "María Gabriela",
     "apellidos": "López",
-    "correo": "maria@ejemplo.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.5795c80c72b30bb067adc6e75c2c1f3cb5da3efc875d85d90da8182ef91076d41eeb12d8e0c7d25bc59ae3406190f0c9",
     "telefono": "04249876543",
-    "clave": "maria123",
+    "clave": "c709941e09571ff05b3d169007a207fe.b41afd062b9b0c2ccddfa37959240904f3cef7bfa8658c2f44a53f8ccd154737",
     "reputacion": 5
   },
   {
@@ -24,19 +24,19 @@
     "usuario": "ana_lectora",
     "nombres": "Ana Isabel",
     "apellidos": "Rodríguez",
-    "correo": "ana@ejemplo.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.a63680e04963e31184f32aedd0056fdabad292cb6dde918b134f84d3abf68e60dbc78a63f6273061eab3fec4be82135b",
     "telefono": "04125556677",
-    "clave": "ana123",
+    "clave": "c709941e09571ff05b3d169007a207fe.8938c99cdaa367dd1d69772d7e1a4775c5068329c8e2ed5a0a96e1da118d47a4",
     "reputacion": 4.5
   },
   {
     "usuario": "Mastermind",
     "nombres": "german",
     "apellidos": "sanchez",
-    "clave": "qwerty",
+    "clave": "c709941e09571ff05b3d169007a207fe.852500abce32914810fe8d8a474ed92eb1cafb038945e3afa3e7038a5940556c",
     "generosFavoritos": "ciencia ficción",
     "genero": "Hombre",
-    "correo": "monafnfan@gmail.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.8e4c92687047a1d0f46d4b0d0069961a6cd91f7b60dc64093af2c9ceb36657a05a69b821ac4abe106220dfed04c5b9af",
     "reputacion": 5,
     "id": "reg_mwjborz3_gvv6v"
   },
@@ -44,10 +44,10 @@
     "usuario": "LULA",
     "nombres": "LULA",
     "apellidos": "LULA",
-    "clave": "LULA",
+    "clave": "c709941e09571ff05b3d169007a207fe.b7319750b2cab6014e57c44817bc7246",
     "generosFavoritos": "LULA",
     "genero": "Mujer",
-    "correo": "LULA",
+    "correo": "c709941e09571ff05b3d169007a207fe.b7319750b2cab6014e57c44817bc7246",
     "reputacion": 5,
     "id": "reg_mwjd2ze9_0o0q3"
   },
@@ -55,10 +55,10 @@
     "usuario": "andres2804",
     "nombres": "andres",
     "apellidos": "vanegas",
-    "clave": "tailwag45",
+    "clave": "c709941e09571ff05b3d169007a207fe.3f0f1bcf209659a71176fc457fd2707e48f1aae6df2a46f1d90b7c98a5271a34",
     "generosFavoritos": "Terror",
     "genero": "Hombre",
-    "correo": "andresvanegas2804@gmail.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.7ebd4cf0e88038c9a5e3a5a06daecf62a2db5df863aedfe7835cbc2695088032581088196ec1afe4ea1264f54b48942dafa8b7b9f09d76e5862301fe5a35d52f",
     "reputacion": 5,
     "id": "reg_mwjlomcp_awina"
   },
@@ -66,10 +66,10 @@
     "usuario": "ajvanegas24",
     "nombres": "aj",
     "apellidos": "vanegas",
-    "clave": "tailwag45",
+    "clave": "c709941e09571ff05b3d169007a207fe.3f0f1bcf209659a71176fc457fd2707e48f1aae6df2a46f1d90b7c98a5271a34",
     "generosFavoritos": "terror",
     "genero": "Hombre",
-    "correo": "andresvanegas2804@gmail.com",
+    "correo": "c709941e09571ff05b3d169007a207fe.7ebd4cf0e88038c9a5e3a5a06daecf62a2db5df863aedfe7835cbc2695088032581088196ec1afe4ea1264f54b48942dafa8b7b9f09d76e5862301fe5a35d52f",
     "reputacion": 5,
     "id": "reg_mwjmozeh_obmm4"
   }
