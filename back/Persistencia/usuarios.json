@@ -88,5 +88,27 @@
     "correo": "vicecity@gmail.com",
     "reputacion": 5,
     "id": "reg_mwjrbwh1_avfa2"
+  },
+  {
+    "usuario": "Gorge",
+    "nombres": "miguel",
+    "apellidos": "Cuerdas",
+    "clave": "2",
+    "generosFavoritos": "terror",
+    "genero": "Hombre",
+    "correo": "dfdfffaffffffffff",
+    "reputacion": 5,
+    "id": "reg_mwjzfw2d_y7bu7"
+  },
+  {
+    "usuario": "Flug",
+    "nombres": "hernandez",
+    "apellidos": "ranchez",
+    "clave": "12345T",
+    "generosFavoritos": "Terror",
+    "genero": "Hombre",
+    "correo": "aicnin@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwk29k1m_wgoso"
   }
 ]

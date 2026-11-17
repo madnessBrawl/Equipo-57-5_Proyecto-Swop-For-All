@@ -44,5 +44,21 @@
     "maxMiembros": 20,
     "mensajes": [],
     "id": "reg_mwjq8d5x_0vxo8"
+  },
+  {
+    "nombre": "Liga de super malvados",
+    "descripcion": "puras diabluras",
+    "tipo": "privado",
+    "genero": "Ciencia-ficción",
+    "creador": "Cj",
+    "administradores": [
+      "Cj"
+    ],
+    "miembros": [
+      "Cj"
+    ],
+    "maxMiembros": 20,
+    "mensajes": [],
+    "id": "reg_mwk27xz2_xzc21"
   }
 ]

@@ -1,39 +1,45 @@
 
 <div class="contenedor-principal">
-  <!-- Títulos de bienvenida -->
+  <!-- Titulos de bienvenida -->
   <div class="encabezado-bienvenida">
-    <h1 class="titulo-grande">¡Bienvenido a Swop For All!</h1>
-    <h2 class="subtitulo-medio">Tu página de intercambios</h2>
+    <h1 class="titulo-grande">&#xA1;Bienvenido a Swop For All!</h1>
+    <h2 class="subtitulo-medio">Tu p&aacute;gina de intercambios</h2>
   </div>
 
   <!-- Card principal con bordes redondeados -->
   <div class="tarjeta-auth">
-    
-    <!-- Sistema de Pestañas (Tabs) -->
+
+    <!-- Sistema de Pestanas (Tabs) -->
     <div class="tabs">
       <button class="tab-btn" [class.activo]="modoActivo === 'login'" (click)="cambiarModo('login')">
-        Iniciar Sesión
+        Iniciar Sesi&oacute;n
       </button>
       <button class="tab-btn" [class.activo]="modoActivo === 'registro'" (click)="cambiarModo('registro')">
         Crear perfil
       </button>
     </div>
 
-    <!-- Formulario: Iniciar Sesión -->
+    <!-- Formulario: Iniciar Sesion -->
     <form *ngIf="modoActivo === 'login'" class="formulario" (ngSubmit)="iniciarSesion()">
       <div class="grupo-entrada">
         <label>USUARIO</label>
         <input type="text" name="usuarioLogin" [(ngModel)]="datosLogin.usuario" placeholder="Escribe tu nombre de usuario">
       </div>
       <div class="grupo-entrada">
-        <label>CONTRASEÑA</label>
-        <input type="password" name="claveLogin" [(ngModel)]="datosLogin.clave" placeholder="Escribe tu contraseña">
+        <label>CONTRASE&Ntilde;A</label>
+        <input type="password" name="claveLogin" [(ngModel)]="datosLogin.clave" placeholder="Escribe tu contrase&ntilde;a">
       </div>
       <button type="submit" class="boton-confirmacion">Ingresar</button>
     </form>
 
     <!-- Formulario: Crear perfil -->
     <form *ngIf="modoActivo === 'registro'" class="formulario" (ngSubmit)="procesarRegistroNuevo()">
+
+      <!-- Mensaje de error/validacion -->
+      <div *ngIf="mensajeError" class="mensaje-error">
+        &#x26A0; {{ mensajeError }}
+      </div>
+
       <div class="grupo-entrada">
         <label>NOMBRE DE USUARIO</label>
         <input type="text" name="usuarioReg" [(ngModel)]="datosRegistro.usuario" placeholder="Ej: gabriel_lector">
@@ -47,15 +53,15 @@
         <input type="text" name="apellidoReg" [(ngModel)]="datosRegistro.apellido" placeholder="Ej: Alfonso">
       </div>
       <div class="grupo-entrada">
-        <label>CORREO ELECTRÓNICO</label>
-        <input type="email" name="correoReg" [(ngModel)]="datosRegistro.correo" placeholder="tu@gmail.com">
+        <label>CORREO ELECTR&Oacute;NICO</label>
+        <input type="text" name="correoReg" [(ngModel)]="datosRegistro.correo" placeholder="tu@gmail.com">
       </div>
       <div class="grupo-entrada">
-        <label>CONTRASEÑA</label>
-        <input type="password" name="claveReg" [(ngModel)]="datosRegistro.clave" placeholder="Mínimo 6 caracteres">
+        <label>CONTRASE&Ntilde;A</label>
+        <input type="password" name="claveReg" [(ngModel)]="datosRegistro.clave" placeholder="M&iacute;nimo 6 caracteres con letras y n&uacute;meros">
       </div>
       <div class="grupo-entrada">
-        <label>GÉNERO</label>
+        <label>G&Eacute;NERO</label>
         <div class="radio-grupo">
           <label class="radio-label">
             <input type="radio" name="generoReg" value="Hombre" [(ngModel)]="datosRegistro.genero"> Hombre
@@ -65,11 +71,25 @@
           </label>
         </div>
       </div>
+
+      <!-- GENEROS FAVORITOS: Lista de seleccion multiple (maximo 3) -->
       <div class="grupo-entrada">
-        <label>GÉNEROS FAVORITOS</label>
-        <input type="text" name="generosReg" [(ngModel)]="datosRegistro.generosFavoritos" placeholder="Ej: Novela, Ciencia Ficción, Terror">
+        <label>G&Eacute;NEROS FAVORITOS <span class="hint-generos">(selecciona hasta 3)</span></label>
+        <div class="lista-generos">
+          <button
+            *ngFor="let genero of opcionesGeneros"
+            type="button"
+            class="chip-genero"
+            [class.chip-seleccionado]="estaSeleccionado(genero)"
+            (click)="toggleGenero(genero)">
+            {{ genero }}
+          </button>
+        </div>
+        <div class="contador-generos" *ngIf="generosSeleccionados.length > 0">
+          Seleccionados: {{ generosSeleccionados.join(', ') }}
+        </div>
       </div>
-      
+
       <button type="submit" class="boton-confirmacion">Crear</button>
     </form>
   </div>

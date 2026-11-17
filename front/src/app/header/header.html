@@ -1,31 +1,38 @@
 ﻿<header id="cabecera-principal" class="cabecera-naranja">
   <div class="contenedor-izquierdo">
-    <!-- Mantenemos el logo que sí carga correctamente -->
-    <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-pequeño">
+    <img src="/imagenes/logo-principal-Swop-For-All.png" alt="Logo Swop-For-All" class="logo-peque&#xF1;o">
     <h1 id="titulo-sistema" class="titulo-blanco">Swop-For-All</h1>
   </div>
-  
-  <!-- Traemos los botones funcionales -->
+
+  <!-- Botones funcionales -->
   @if (mostrarMenu) {
     <nav id="navegacion-principal" class="contenedor-derecho">
-      <button id="btn-deseados" class="boton-icono">
-        <img src="/imagenes/lista-libros-deseados-logo.png" alt="Deseados" class="icono-nav">
-        <span class="texto-icono">Libros deseados</span>
-      </button>
-      
-      <button id="btn-inventario" class="boton-icono" (click)="irAInventario()">
-        <img src="/imagenes/Inventario-logo.png" alt="Inventario" class="icono-nav">
-        <span class="texto-icono">Inventario</span>
-      </button>
-      
-      <!-- Contenedor de Comunidad (Independiente) -->
-      <div class="contenedor-dropdown" style="position: relative; display: inline-block;">
+
+      <div class="contenedor-tooltip">
+        <button id="btn-deseados" class="boton-icono">
+          <img src="/imagenes/lista-libros-deseados-logo.png" alt="Deseados" class="icono-nav">
+          <span class="texto-icono">Libros deseados</span>
+        </button>
+        <span class="tooltip-texto">Tu lista de libros deseados</span>
+      </div>
+
+      <div class="contenedor-tooltip">
+        <button id="btn-inventario" class="boton-icono" (click)="irAInventario()">
+          <img src="/imagenes/Inventario-logo.png" alt="Inventario" class="icono-nav">
+          <span class="texto-icono">Inventario</span>
+        </button>
+        <span class="tooltip-texto">Libros disponibles para intercambiar</span>
+      </div>
+
+      <!-- Contenedor de Comunidad (con dropdown) -->
+      <div class="contenedor-tooltip" style="position: relative; display: inline-block;">
         <button id="btn-comunidad" class="boton-icono" (click)="toggleMenuComunidad()">
           <img src="/imagenes/comunidad-logo.png" alt="Comunidad" class="icono-nav">
           <span class="texto-icono">Comunidad</span>
         </button>
+        <span class="tooltip-texto">Crea y unete a una grupo junto a otros</span>
 
-        <!-- Menú desplegable (Dropdown) de Comunidad -->
+        <!-- Menu desplegable (Dropdown) de Comunidad -->
         @if (mostrarMenuComunidad) {
           <div class="dropdown-menu">
             <button class="dropdown-item" (click)="navegarA('/ver-comunidades')">Ver comunidades</button>
@@ -35,34 +42,46 @@
         }
       </div>
 
-      <!-- Botón de Catálogo con icono propio y texto con tilde corregido -->
-      <button routerLink="/catalogo" id="btn-catalogo" class="boton-icono">
-        <img src="/imagenes/catalogo-logo.svg" alt="Catálogo" class="icono-nav">
-        <span class="texto-icono">Cat&aacute;logo</span>
-      </button>
-      
-      <!-- Botón de Intercambiar: Solo accesible si se inició un intercambio desde el catálogo -->
-      <button id="btn-intercambio" class="boton-icono" routerLink="/modificar-oferta" title="Ver solicitudes e intercambios">
-        <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
-        <span class="texto-icono">Intercambiar</span>
-      </button>
-      
-      <!-- Reputación con tilde corregido -->
-      <button id="btn-reputacion" class="boton-icono" (click)="irAReputacion()">
-        <img src="/imagenes/calificacion-estrella-llena.png" alt="Reputación" class="icono-nav">
-        <span class="texto-icono">Reputaci&oacute;n</span>
-      </button>
+      <div class="contenedor-tooltip">
+        <button routerLink="/catalogo" id="btn-catalogo" class="boton-icono">
+          <img src="/imagenes/catalogo-logo.svg" alt="Cat&aacute;logo" class="icono-nav">
+          <span class="texto-icono">Cat&aacute;logo</span>
+        </button>
+        <span class="tooltip-texto">Busca lo que gustes para intercambiar</span>
+      </div>
 
-      <button routerLink="/modificar-perfil" id="btn-perfil" class="boton-icono">
-        <img src="/imagenes/Perfil-logo.png" alt="Perfil" class="icono-nav">
-        <span class="texto-icono">Perfil</span>
-      </button>
-      
-      <!-- Cerrar sesión con tilde corregido -->
-      <button id="btn-cerrar-sesion" class="boton-icono" (click)="cerrarSesion()">
-        <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar sesión" class="icono-nav">
-        <span class="texto-icono">Cerrar sesi&oacute;n</span>
-      </button>
+      <div class="contenedor-tooltip">
+        <button id="btn-intercambio" class="boton-icono" routerLink="/modificar-oferta">
+          <img src="/imagenes/Intercambio-logo.png" alt="Intercambiar" class="icono-nav">
+          <span class="texto-icono">Intercambiar</span>
+        </button>
+        <span class="tooltip-texto">Intercambia con otras personas</span>
+      </div>
+
+      <div class="contenedor-tooltip">
+        <button id="btn-reputacion" class="boton-icono" (click)="irAReputacion()">
+          <img src="/imagenes/calificacion-estrella-llena.png" alt="Reputaci&oacute;n" class="icono-nav">
+          <span class="texto-icono">Reputaci&oacute;n</span>
+        </button>
+        <span class="tooltip-texto">Califica tu experiencia con lectores y intercambios</span>
+      </div>
+
+      <div class="contenedor-tooltip">
+        <button routerLink="/modificar-perfil" id="btn-perfil" class="boton-icono">
+          <img src="/imagenes/Perfil-logo.png" alt="Perfil" class="icono-nav">
+          <span class="texto-icono">Perfil</span>
+        </button>
+        <span class="tooltip-texto">Mira tu perfil a detalle</span>
+      </div>
+
+      <div class="contenedor-tooltip">
+        <button id="btn-cerrar-sesion" class="boton-icono" (click)="cerrarSesion()">
+          <img src="/imagenes/salir-de-pagina-logo.png" alt="Cerrar sesi&oacute;n" class="icono-nav">
+          <span class="texto-icono">Cerrar sesi&oacute;n</span>
+        </button>
+        <span class="tooltip-texto">Volver al menu de inicio</span>
+      </div>
+
     </nav>
   }
 </header>
