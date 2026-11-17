@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { GoogleBooksService } from '../servicios/google-books.service';
+import { CifradoService } from '../servicios/cifrado.service';
 import { IntercambioService } from '../servicios/intercambio.service';
 import { LIBROS_PRUEBA_JSON, inicializarInventariosDesdeJSON } from '../datos/libros-prueba';
 
@@ -54,6 +55,7 @@ export class CatalogoLibrosComponent implements OnInit {
   constructor(
     private router: Router,
     private googleBooksService: GoogleBooksService,
+    private cifradoService: CifradoService,
     private intercambioService: IntercambioService,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
@@ -104,9 +106,16 @@ export class CatalogoLibrosComponent implements OnInit {
     this.googleBooksService.obtenerCatalogoGlobal().subscribe({
       next: librosBackend => {
         const idsBackend = new Set(librosBackend.map(item => item.libro.id));
-        const itemsBackend = librosBackend.map(item =>
-          new ItemCatalogo(item.libro, item.propietario, item.libro.disponible)
-        );
+        const itemsBackend = librosBackend.map(item => {
+          let propietario = item.propietario;
+          if (!propietario) {
+            const encontradoEnPrueba = LIBROS_PRUEBA_JSON.find(p =>
+              p.titulo.toLowerCase().trim() === item.libro.titulo.toLowerCase().trim()
+            );
+            propietario = encontradoEnPrueba ? encontradoEnPrueba.propietario : 'carlos_lector';
+          }
+          return new ItemCatalogo(item.libro, propietario, item.libro.disponible);
+        });
         const itemsPrueba = this.crearLibrosDePrueba()
           .filter(item => !idsBackend.has(item.libro.id));
         this.catalogoCompleto = [...itemsBackend, ...itemsPrueba];
@@ -216,11 +225,35 @@ export class CatalogoLibrosComponent implements OnInit {
       'Pendiente'
     );
 
+    // 2. RNF Seguridad / Confidencialidad: Guardar los datos cifrados con ncrypt-js
+    this.cifradoService.guardarEnStorageSeguroSync('oferta_activa', oferta);
+    this.cifradoService.guardarEnStorageSeguroSync('libro_solicitado', item.libro);
+
+    // Guardar en almacenamiento para interoperabilidad
+    sessionStorage.setItem('libroSolicitado', JSON.stringify({
+      id: item.libro.id,
+      titulo: item.libro.titulo,
+      autor: item.libro.autor,
+      portadaUrl: item.libro.portadaUrl,
+      propietario: item.propietario
+    }));
+    localStorage.setItem(`oferta_${idIntercambio}`, JSON.stringify(oferta));
+    localStorage.setItem('oferta_activa', JSON.stringify(oferta));
+    localStorage.setItem('oferta_activa_id', idIntercambio);
+
+    // 3. Sincronizar físicamente con el backend Node.js
     this.intercambioService.crear(oferta, usuarioEmisor).subscribe({
-      next: ofertaGuardada => {
+      next: (ofertaGuardada: any) => {
+        const idGenerado = ofertaGuardada?.idIntercambio || ofertaGuardada?.id || idIntercambio;
+        oferta.idIntercambio = idGenerado;
+        const ofertaParaGuardar = ofertaGuardada || oferta;
+        localStorage.setItem(`oferta_${idGenerado}`, JSON.stringify(ofertaParaGuardar));
+        localStorage.setItem('oferta_activa', JSON.stringify(ofertaParaGuardar));
+        localStorage.setItem('oferta_activa_id', idGenerado);
+
         this.cerrarModalDetalle();
         this.router.navigate(['/modificar-oferta'], {
-          queryParams: { id: ofertaGuardada.idIntercambio }
+          queryParams: { id: idGenerado }
         });
       },
       error: (error: unknown) => {
@@ -231,5 +264,4 @@ export class CatalogoLibrosComponent implements OnInit {
       }
     });
   }
-
 }

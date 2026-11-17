@@ -99,13 +99,6 @@
               </div>
             </div>
 
-            <!-- Etiqueta de disponibilidad y origen -->
-            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; margin-top: 8px;">
-              <span class="etiqueta-disponibilidad">
-                {{ item.libro.disponible ? '✓ Disponible' : 'En Intercambio' }}
-              </span>
-            </div>
-
             <!-- Título de la obra -->
             <h3 class="titulo-libro" (click)="abrirModalDetalle(item)" [title]="item.libro.titulo">
               {{ item.libro.titulo }}
@@ -166,9 +159,6 @@
                 {{ libroSeleccionadoModal.libro.categoria }}
               </div>
             </div>
-            <span class="etiqueta-disponibilidad">
-              {{ libroSeleccionadoModal.libro.disponible ? '✓ Disponible' : 'En Intercambio' }}
-            </span>
           </div>
 
           <div class="modal-columna-datos">

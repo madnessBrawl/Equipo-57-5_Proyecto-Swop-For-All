@@ -7,8 +7,10 @@ import { finalize } from 'rxjs/operators';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { GoogleBooksService } from '../servicios/google-books.service';
 import { IntercambioService } from '../servicios/intercambio.service';
+import { CifradoService } from '../servicios/cifrado.service';
 
 interface MensajeChat {
+  id?: string;
   remitente: string;
   texto: string;
   hora: string;
@@ -46,7 +48,8 @@ export class ModificarOfertaComponent implements OnInit, OnDestroy, AfterViewChe
     private readonly route: ActivatedRoute,
     private readonly librosService: GoogleBooksService,
     private readonly intercambioService: IntercambioService,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly cifradoService: CifradoService
   ) {}
 
   ngOnInit(): void {
@@ -206,9 +209,30 @@ export class ModificarOfertaComponent implements OnInit, OnDestroy, AfterViewChe
   public agregarLibroPropio(libro: Libro): void {
     if (!this.ofertaActiva || this.intercambioCerrado || this.guardandoModificacion) return;
     if (this.librosPropiosEnOferta.some(actual => actual.id === libro.id)) return;
-    this.reemplazarLibrosPropios([...this.librosPropiosEnOferta, libro]);
-    this.marcarModificada();
-    this.guardarModificacionOferta();
+
+    // Verificación cruzada: ya lo estás ofreciendo en OTRO intercambio activo
+    this.intercambioService.obtenerMisIntercambios().subscribe(intercambios => {
+      const estadosActivos = ['Pendiente', 'Modificada', 'Aceptada'];
+      const conflicto = intercambios.find((i: any) =>
+        estadosActivos.includes(i.estado) &&
+        String(i.idIntercambio || i.id) !== String(this.idIntercambio) &&
+        Array.isArray(i.librosOfrecidos) &&
+        i.librosOfrecidos.some((l: any) => String(typeof l === 'object' ? l.id : l) === String(libro.id))
+      );
+
+      if (conflicto) {
+        alert(
+          `⚠️ Ya estás ofreciendo "${libro.titulo}" en otro intercambio activo ` +
+          `(ID: ${conflicto.idIntercambio || conflicto.id}).\n\n` +
+          `Retíralo de ese intercambio antes de ofrecerlo aquí.`
+        );
+        return;
+      }
+
+      this.reemplazarLibrosPropios([...this.librosPropiosEnOferta, libro]);
+      this.marcarModificada();
+      this.guardarModificacionOferta();
+    });
   }
 
   public retirarLibroPropio(idLibro: string): void {
@@ -352,13 +376,20 @@ export class ModificarOfertaComponent implements OnInit, OnDestroy, AfterViewChe
       alert('El mensaje excede el límite de 250 caracteres.');
       return;
     }
-    this.historialMensajes.push({
+
+    const texto = this.mensajeInput.trim();
+    const nuevoMensaje: MensajeChat = {
       remitente: this.usuarioActual,
-      texto: this.mensajeInput.trim(),
+      texto,
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    });
+    };
+
+    this.historialMensajes.push(nuevoMensaje);
     this.guardarChatEnStorage();
     this.mensajeInput = '';
+
+    // Enviar también al backend
+    this.intercambioService.enviarMensaje(this.ofertaActiva.idIntercambio, texto).subscribe();
   }
 
   public irAlCatalogo(): void {
@@ -406,6 +437,20 @@ export class ModificarOfertaComponent implements OnInit, OnDestroy, AfterViewChe
     } catch {
       this.historialMensajes = [];
     }
+
+    // Consultar mensajes del backend
+    this.intercambioService.obtenerMensajes(this.ofertaActiva.idIntercambio).subscribe(mensajes => {
+      if (Array.isArray(mensajes) && mensajes.length > 0) {
+        this.historialMensajes = mensajes.map(m => ({
+          remitente: m.remitente,
+          texto: m.texto,
+          hora: m.hora
+        }));
+        this.guardarChatEnStorage();
+        this.changeDetector.markForCheck();
+      }
+    });
+
     if (this.historialMensajes.length === 0) {
       this.historialMensajes = [{
         remitente: this.usuarioInterlocutor,

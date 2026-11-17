@@ -24,6 +24,11 @@ export const routes: Routes = [
 
   // Ruta Inventario personal del usuario
   { path: 'inventario', component: InventarioComponent },
+  {
+    path: 'libros-deseados',
+    loadComponent: () => import('./libros-deseados/libros-deseados.component')
+      .then(modulo => modulo.LibrosDeseadosComponent)
+  },
 
   // Rutas de comunidad (Nivel principal - Consultar y Unirse a Comunidad PDF)
   { path: 'ver-comunidades', component: VerComunidadesComponent },

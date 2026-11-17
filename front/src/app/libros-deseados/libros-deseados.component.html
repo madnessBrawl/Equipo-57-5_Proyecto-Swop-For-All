@@ -1,0 +1,74 @@
+<main class="libros-deseados">
+  <header class="encabezado">
+    <div>
+      <h2>Mis libros deseados</h2>
+      <p>Guarda los títulos que te gustaría encontrar e intercambiar.</p>
+    </div>
+    <button type="button" class="boton-principal" (click)="mostrarFormulario = !mostrarFormulario">
+      {{ mostrarFormulario ? 'Cancelar' : 'Añadir libro' }}
+    </button>
+  </header>
+
+  @if (mensajeError) {
+    <p class="mensaje error" role="alert">{{ mensajeError }}</p>
+  }
+  @if (mensajeExito) {
+    <p class="mensaje exito" role="status">{{ mensajeExito }}</p>
+  }
+
+  @if (mostrarFormulario) {
+    <form class="formulario" (ngSubmit)="agregarLibro()">
+      <h3>Añadir a mi lista</h3>
+      <label>
+        Título
+        <input
+          name="titulo"
+          [(ngModel)]="titulo"
+          maxlength="250"
+          required
+          [class.campo-invalido]="intentoGuardar && !titulo.trim()"
+          [attr.aria-invalid]="intentoGuardar && !titulo.trim()">
+      </label>
+      <label>
+        Autor
+        <input name="autor" [(ngModel)]="autor" maxlength="200">
+      </label>
+      <label>
+        Año
+        <input name="anio" type="number" min="0" max="9999" step="1" [(ngModel)]="anio">
+      </label>
+      <button class="boton-principal" type="submit" [disabled]="guardando">
+        {{ guardando ? 'Guardando…' : 'Guardar libro' }}
+      </button>
+    </form>
+  }
+
+  @if (cargando) {
+    <p class="estado">Cargando tus libros deseados…</p>
+  } @else if (libros.length === 0) {
+    <section class="vacio">
+      <h3>Tu lista está vacía</h3>
+      <p>Añade los libros que te gustaría encontrar.</p>
+    </section>
+  } @else {
+    <section class="lista-libros" aria-label="Mi lista de libros deseados">
+      @for (libro of libros; track libro.id) {
+        <article class="libro">
+          <div class="detalle">
+            <h3>{{ libro.titulo }}</h3>
+            <p><strong>Autor:</strong> {{ libro.autor || 'No especificado' }}</p>
+            <p><strong>Año:</strong> {{ libro.anio ?? 'No especificado' }}</p>
+          </div>
+          <button
+            type="button"
+            class="boton-eliminar"
+            [disabled]="idEliminando !== null"
+            [attr.aria-label]="'Eliminar ' + libro.titulo"
+            (click)="eliminarLibro(libro)">
+            {{ idEliminando === libro.id ? 'Eliminando…' : 'Eliminar' }}
+          </button>
+        </article>
+      }
+    </section>
+  }
+</main>
