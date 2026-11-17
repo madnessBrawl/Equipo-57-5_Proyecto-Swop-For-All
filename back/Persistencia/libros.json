@@ -31,7 +31,7 @@
       "Distopía",
       "Ciencia Ficción"
     ],
-    "disponible": true,
+    "disponible": false,
     "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
   },
@@ -49,7 +49,7 @@
       "Literatura Venezolana",
       "Clásicos"
     ],
-    "disponible": true,
+    "disponible": false,
     "propietario": null,
     "fechaRegistro": "2026-11-10T00:00:00.000Z"
   },
@@ -721,5 +721,22 @@
     "disponible": true,
     "propietario": "lector_logueado",
     "fechaRegistro": "2026-11-17T03:35:13.319Z"
+  },
+  {
+    "id": "lib_mwk5qj8c_9oq0s",
+    "titulo": "aaaaaaaa",
+    "autores": [
+      "aaaaaa"
+    ],
+    "autoresTexto": "aaaaaa",
+    "descripcion": "aaaaaaaa",
+    "portadaUrl": "",
+    "isbn": "1111111111111",
+    "categorias": [
+      "horror"
+    ],
+    "disponible": true,
+    "propietario": "miguel",
+    "fechaRegistro": "2026-11-17T03:53:24.444Z"
   }
 ]
