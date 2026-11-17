@@ -19,6 +19,9 @@ export class OfertaIntercambio {
     public usuarioReceptor: string,
     public librosOfrecidos: Libro[],
     public librosSolicitados: Libro[],
-    public estado: string
+    public estado: string,
+    public confirmaciones: string[] = [],
+    public fechaCreacion: string = new Date().toISOString(),
+    public fechaModificacion: string = fechaCreacion
   ) {}
 }

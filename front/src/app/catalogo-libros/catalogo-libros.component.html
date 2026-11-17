@@ -1,7 +1,6 @@
 <!-- ==========================================================================
      PLANTILLA: catalogo-libros.component.html (Interfaz 7: Catálogo Global)
-     Función: Explorar catálogo global de libros con opción de libros de prueba
-              almacenados en JSON y búsqueda en tiempo real con Google Books API.
+     Función: Explorar el catálogo global de libros disponibles para intercambio.
      Nota: Las imágenes de portada han sido reemplazadas por iconos para
            mejorar la velocidad de carga del catálogo.
      ========================================================================== -->
@@ -18,35 +17,9 @@
       <h2 id="titulo-catalogo-global" class="titulo-catalogo">📚 Catálogo Global de Libros</h2>
       <!-- Subtítulo explicativo para orientar al lector -->
       <p id="subtitulo-catalogo-global" class="subtitulo-catalogo">
-        Explora libros de prueba listos para intercambio en la comunidad o consulta obras en tiempo real con Google Books API:
+        Explora los libros disponibles para intercambio en la comunidad.
       </p>
     </div>
-
-    <!-- Selector de origen de datos: Libros de Prueba JSON vs Google Books API -->
-    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-      <span style="font-size: 13px; font-weight: 600; color: var(--color-texto-principal);">Fuente del catálogo:</span>
-      <button
-        type="button"
-        class="chip-categoria"
-        [class.activo]="origenActivo === 'json'"
-        (click)="cambiarOrigen('json')">
-        📁 Libros de Prueba (JSON Local)
-      </button>
-      <button
-        type="button"
-        class="chip-categoria"
-        [class.activo]="origenActivo === 'google'"
-        (click)="cambiarOrigen('google')">
-        🌐 Google Books API (En vivo)
-      </button>
-    </div>
-
-    <!-- Indicador informativo de origen activo -->
-    @if (origenActivo === 'json') {
-      <div style="font-size: 13px; color: #7a4f01; background: #fff8e1; border-left: 4px solid #ffb300; padding: 8px 14px; border-radius: 4px;">
-        💡 <strong>Catálogo de Prueba Activo:</strong> Se cargaron las obras del archivo <code>libros-catalogo.json</code> con propietarios asignados para realizar pruebas de intercambio de inmediato.
-      </div>
-    }
 
     <!-- Formulario de búsqueda interactivo por término, autor o palabra clave -->
     <form id="formulario-busqueda-libros" class="formulario-busqueda-libros" (submit)="ejecutarBusqueda(); $event.preventDefault();">
@@ -57,7 +30,7 @@
         class="campo-busqueda-texto"
         name="terminoBusqueda"
         [(ngModel)]="terminoBusqueda"
-        [placeholder]="origenActivo === 'json' ? 'Filtrar libros de prueba por título o autor (ej. Principito, 1984)...' : 'Buscar en Google Books API (ej. García Márquez, Tolkien)...'"
+        placeholder="Buscar por título, autor o ISBN..."
         aria-label="Buscar libros en el catálogo"
       />
       <!-- Botón de acción principal para enviar la consulta -->
@@ -89,26 +62,12 @@
 
   </section>
 
-  <!-- ==================== ALERTA DE MODO CONTINGENCIA / OFFLINE ==================== -->
-  @if (modoContingenciaActivo) {
-    <div id="banner-alerta-offline" class="alerta-contingencia" role="alert">
-      <span style="font-size: 18px;">🛡️</span>
-      <div>
-        <strong>Modo Protección ante Fallos Activo:</strong>
-        Se ha cargado el catálogo de respaldo almacenado de forma encriptada (con <em>ncrypt-js</em>).
-      </div>
-    </div>
-  }
-
-  <!-- ==================== INDICADOR DE CARGA (SPINNER) ==================== -->
-  @if (estaCargando) {
-    <div id="indicador-panel-cargando" class="panel-cargando">
-      <p>⏳ Consultando libros en Google Books API en tiempo real...</p>
-    </div>
+  @if (errorCatalogo) {
+    <p role="alert" class="alerta-contingencia">{{ errorCatalogo }}</p>
   }
 
   <!-- ==================== AVISO SI NO HAY RESULTADOS ==================== -->
-  @if (!estaCargando && listaLibrosCatalogo.length === 0) {
+  @if (listaLibrosCatalogo.length === 0) {
     <div id="aviso-sin-resultados-catalogo" style="text-align: center; padding: 48px 16px; background: #ffffff; border-radius: 8px; border: 2px dashed #e8d7b8; max-width: 800px; margin: 0 auto;">
       <p style="color: #666; font-size: 16px; margin-bottom: 16px;">
         No se encontraron libros disponibles para la búsqueda <strong>"{{ terminoBusqueda }}"</strong>.
@@ -120,7 +79,7 @@
   }
 
   <!-- ==================== REJILLA DE TARJETAS DE LIBROS ==================== -->
-  @if (!estaCargando && listaLibrosCatalogo.length > 0) {
+  @if (listaLibrosCatalogo.length > 0) {
     <div id="rejilla-tarjetas-libros" class="rejilla-libros-catalogo">
       @for (item of listaLibrosCatalogo; track item.libro.id) {
         <!-- Tarjeta individual de libro del catálogo -->
@@ -145,11 +104,6 @@
               <span class="etiqueta-disponibilidad">
                 {{ item.libro.disponible ? '✓ Disponible' : 'En Intercambio' }}
               </span>
-              @if (item.origen === 'json') {
-                <span style="background: #e8eaf6; color: #283593; font-size: 10px; font-weight: 700; padding: 3px 6px; border-radius: 12px; text-transform: uppercase;">
-                  JSON
-                </span>
-              }
             </div>
 
             <!-- Título de la obra -->
@@ -164,7 +118,7 @@
 
             <!-- Lector que posee y ofrece el libro en la comunidad -->
             <p class="propietario-libro">
-              <strong>Propietario:</strong> {{ item.propietario }}
+              <strong>Propietario:</strong> {{ item.propietario || 'Sin propietario' }}
             </p>
 
             <!-- Categoría literaria -->
@@ -179,6 +133,7 @@
             [id]="'boton-solicitar-intercambio-' + item.libro.id"
             class="boton-solicitar-intercambio"
             (click)="iniciarSolicitudIntercambio(item)"
+            [disabled]="!puedeSolicitar(item)"
             title="Proponer intercambio con este libro">
             <span>🤝</span>
             <span>Solicitar Intercambio</span>
@@ -188,32 +143,6 @@
       }
     </div>
 
-    <!-- ==================== BARRA DE PAGINACIÓN (En modo Google) ==================== -->
-    @if (origenActivo === 'google') {
-      <div id="barra-paginacion-catalogo" class="barra-paginacion-catalogo">
-        <button
-          type="button"
-          id="boton-pagina-anterior"
-          class="boton-pagina"
-          [disabled]="paginaActual === 1"
-          (click)="cambiarPagina(paginaActual - 1)">
-          ◀ Anterior
-        </button>
-
-        <span class="texto-indicador-pagina">
-          Página {{ paginaActual }}
-        </span>
-
-        <button
-          type="button"
-          id="boton-pagina-siguiente"
-          class="boton-pagina"
-          [disabled]="listaLibrosCatalogo.length < limitePorPagina"
-          (click)="cambiarPagina(paginaActual + 1)">
-          Siguiente ▶
-        </button>
-      </div>
-    }
   }
 
   <!-- ==================== MODAL DE DETALLE DEL LIBRO ==================== -->
@@ -250,7 +179,7 @@
               <strong>Autor(es):</strong> {{ libroSeleccionadoModal.libro.autor }}
             </p>
             <p style="margin: 0 0 6px 0; font-size: 13px;">
-              <strong>Propietario lector:</strong> {{ libroSeleccionadoModal.propietario }}
+              <strong>Propietario lector:</strong> {{ libroSeleccionadoModal.propietario || 'Sin propietario' }}
             </p>
             <p style="margin: 0 0 6px 0; font-size: 13px;">
               <strong>Código ISBN:</strong> {{ libroSeleccionadoModal.libro.isbn || 'No disponible' }}
@@ -270,7 +199,8 @@
               <button
                 type="button"
                 class="boton-solicitar-intercambio"
-                (click)="iniciarSolicitudIntercambio(libroSeleccionadoModal)">
+                (click)="iniciarSolicitudIntercambio(libroSeleccionadoModal)"
+                [disabled]="!puedeSolicitar(libroSeleccionadoModal)">
                 🤝 Solicitar intercambio con {{ libroSeleccionadoModal.propietario }}
               </button>
             </div>

@@ -30,13 +30,18 @@
                 (click)="seleccionarTipo('intercambio')">Calificar intercambio</button>
       </div>
 
+      @if (cargandoIntercambios) {
+        <p role="status">Cargando intercambios finalizados…</p>
+      }
+
       <!-- ---------- Sin intercambios finalizados ---------- -->
-      @if (intercambios.length === 0) {
+      @if (!cargandoIntercambios && intercambios.length === 0) {
         <div id="aviso-sin-intercambios" class="aviso-vacio">
           <p>Aún no tiene intercambios finalizados para calificar.</p>
         </div>
-      } @else {
+      }
 
+      @if (!cargandoIntercambios && intercambios.length > 0) {
         <!-- ---------- Lista de intercambios finalizados ---------- -->
         <div class="grupo-entrada">
           <label for="lista-intercambios">{{ tituloLista }}</label>

@@ -56,6 +56,66 @@ h2, h3, p {
   font-weight: 600;
 }
 
+.campo-isbn {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.etiqueta-isbn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+}
+
+.etiqueta-isbn label {
+  display: inline;
+}
+
+.ayuda-isbn {
+  position: relative;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #666;
+  border-radius: 50%;
+  background: #fff;
+  color: #555;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: help;
+}
+
+.tooltip-isbn {
+  position: absolute;
+  z-index: 1;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  width: 220px;
+  padding: 8px 10px;
+  transform: translateX(-50%);
+  border-radius: 5px;
+  background: #252525;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: left;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ayuda-isbn:hover .tooltip-isbn,
+.ayuda-isbn:focus-visible .tooltip-isbn {
+  visibility: visible;
+  opacity: 1;
+}
+
 .formulario input, .formulario textarea {
   width: 100%;
   box-sizing: border-box;
@@ -63,6 +123,11 @@ h2, h3, p {
   border-radius: 5px;
   padding: 9px;
   font: inherit;
+}
+
+.formulario input.campo-invalido {
+  border-color: #c62828;
+  background-color: #fff5f5;
 }
 
 .error-campo {

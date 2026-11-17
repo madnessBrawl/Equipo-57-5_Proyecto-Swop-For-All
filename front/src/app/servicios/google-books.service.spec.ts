@@ -36,6 +36,7 @@ describe('GoogleBooksService', () => {
 
     const request = http.expectOne('http://localhost:3000/api/libros');
     expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('x-usuario')).toBe('ana');
     request.flush({ mensaje: 'libro añadido exitosamente', libro: respuestaLibro });
 
     expect(idGuardado).toBe('libro-1');
@@ -61,5 +62,28 @@ describe('GoogleBooksService', () => {
     request.flush({ mensaje: 'libro añadido exitosamente' });
 
     expect(mensajeError).toContain('no confirmó el libro guardado');
+  });
+
+  it('consulta el catálogo global compartido y conserva el propietario', () => {
+    let propietario = '';
+    servicio.obtenerCatalogoGlobal().subscribe(libros => propietario = libros[0].propietario);
+
+    const request = http.expectOne('http://localhost:3000/api/libros');
+    expect(request.request.method).toBe('GET');
+    request.flush([{ ...respuestaLibro, propietario: 'maria' }]);
+
+    expect(propietario).toBe('maria');
+  });
+
+  it('carga el inventario del backend en lugar de depender solo del almacenamiento local', () => {
+    let titulo = '';
+    servicio.obtenerInventarioUsuario('ana').subscribe(libros => titulo = libros[0].titulo);
+
+    const request = http.expectOne('http://localhost:3000/api/libros/inventario/ana');
+    expect(request.request.method).toBe('GET');
+    expect(request.request.headers.get('x-usuario')).toBe('ana');
+    request.flush([respuestaLibro]);
+
+    expect(titulo).toBe('Rayuela');
   });
 });

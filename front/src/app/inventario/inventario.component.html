@@ -14,11 +14,17 @@
   }
 
   @if (mostrarFormulario) {
-    <form #formularioLibro="ngForm" class="formulario" (ngSubmit)="agregarLibro()">
+    <form novalidate class="formulario" (ngSubmit)="agregarLibro()">
       <h3>Nuevo libro</h3>
       <label>
-        Título *
-        <input name="titulo" [(ngModel)]="titulo" required maxlength="250">
+        Título
+        <input
+          name="titulo"
+          [(ngModel)]="titulo"
+          required
+          maxlength="250"
+          [class.campo-invalido]="intentoGuardar && !titulo.trim()"
+          [attr.aria-invalid]="intentoGuardar && !titulo.trim()">
       </label>
       <label>
         Autor
@@ -29,25 +35,43 @@
         <textarea name="descripcion" [(ngModel)]="descripcion" rows="3"></textarea>
       </label>
       <div class="fila-campos">
-        <label>
-          ISBN
+        <div class="campo-isbn">
+          <div class="etiqueta-isbn">
+            <label for="isbn">ISBN</label>
+            <button
+              type="button"
+              class="ayuda-isbn"
+              aria-label="¿Qué es el ISBN?"
+              aria-describedby="isbn-tooltip">
+              <span aria-hidden="true">?</span>
+              <span id="isbn-tooltip" class="tooltip-isbn" role="tooltip">
+                Código único que identifica una edición de un libro.
+              </span>
+            </button>
+          </div>
           <input
+            id="isbn"
             #isbnControl="ngModel"
             name="isbn"
             [(ngModel)]="isbn"
             inputmode="numeric"
             pattern="[0-9]{13}"
-            maxlength="13">
-          @if (isbnControl.invalid && isbnControl.touched) {
+            maxlength="13"
+            required
+            [class.campo-invalido]="intentoGuardar && (!isbn.trim() || isbnControl.invalid)"
+            [attr.aria-invalid]="intentoGuardar && (!isbn.trim() || isbnControl.invalid)">
+          @if (intentoGuardar && !isbn.trim()) {
+            <small class="error-campo">El ISBN es obligatorio.</small>
+          } @else if (isbn.trim() && isbnControl.invalid && (isbnControl.touched || intentoGuardar)) {
             <small class="error-campo">El ISBN debe tener exactamente 13 dígitos.</small>
           }
-        </label>
+        </div>
         <label>
           Categoría
           <input name="categoria" [(ngModel)]="categoria" maxlength="100">
         </label>
       </div>
-      <button class="boton-principal" type="submit" [disabled]="guardando || !titulo.trim() || formularioLibro.invalid">
+      <button class="boton-principal" type="submit" [disabled]="guardando">
         {{ guardando ? 'Guardando…' : 'Guardar libro' }}
       </button>
     </form>

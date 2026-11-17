@@ -98,6 +98,52 @@ class LibroRepository {
     return guardado.toJSON ? guardado.toJSON() : guardado;
   }
 
+  transferirLibros(oferta) {
+    const movimientos = [
+      ...(oferta.librosOfrecidos || []).map(libro => ({
+        libro,
+        propietarioActual: oferta.usuarioEmisor,
+        nuevoPropietario: oferta.usuarioReceptor
+      })),
+      ...(oferta.librosSolicitados || []).map(libro => ({
+        libro,
+        propietarioActual: oferta.usuarioReceptor,
+        nuevoPropietario: oferta.usuarioEmisor
+      }))
+    ];
+    const ids = new Set();
+    const almacenados = new Map(this._persistencia.buscarTodos().map(libro => [String(libro.id), libro]));
+
+    const librosActualizados = movimientos.map(({ libro, propietarioActual, nuevoPropietario }) => {
+      if (!libro?.id || !libro.titulo || ids.has(String(libro.id))) {
+        throw new Error('La oferta contiene libros inválidos o repetidos.');
+      }
+      ids.add(String(libro.id));
+      const existente = almacenados.get(String(libro.id));
+      if (existente?.propietario &&
+          existente.propietario.toLowerCase() !== propietarioActual.toLowerCase()) {
+        throw new Error(`El libro "${libro.titulo}" ya no pertenece al usuario de la oferta.`);
+      }
+
+      const autores = libro.autores || (libro.autor ? [libro.autor] : []);
+      const categorias = libro.categorias || (libro.categoria ? [libro.categoria] : []);
+      const actualizado = new Libro({
+        ...(existente ? existente.toJSON() : libro),
+        id: libro.id,
+        autores,
+        categorias,
+        propietario: nuevoPropietario,
+        disponible: true
+      });
+      const errorValidacion = actualizado.validar();
+      if (errorValidacion) throw new Error(errorValidacion);
+      return actualizado;
+    });
+
+    this._persistencia.guardarVarios(librosActualizados);
+    return librosActualizados.map(libro => libro.toJSON());
+  }
+
   /*
     Consulta Google Books a través del servicio inyectado para sugerir libros oficiales.
   */

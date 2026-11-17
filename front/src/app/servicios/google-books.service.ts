@@ -8,8 +8,8 @@
 */
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { Libro } from '../modelos/intercambio.model';
 
@@ -58,10 +58,30 @@ export interface RespuestaAñadirLibro {
   };
 }
 
+interface LibroBackend {
+  id: string;
+  titulo: string;
+  autor?: string;
+  autores?: string[];
+  disponible?: boolean;
+  portadaUrl?: string;
+  descripcion?: string;
+  isbn?: string;
+  categoria?: string;
+  categorias?: string[];
+  propietario?: string | null;
+}
+
+export interface LibroCatalogoGlobal {
+  libro: Libro;
+  propietario: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleBooksService {
+  private readonly apiUrl = 'http://localhost:3000/api';
   // URL base oficial de la API de Google Books
   private readonly baseUrl = 'https://www.googleapis.com/books/v1/volumes';
   // Caché en memoria para optimizar tiempo de respuesta y evitar peticiones repetitivas
@@ -70,6 +90,20 @@ export class GoogleBooksService {
   private cacheInventario = new Map<string, Libro[]>();
 
   constructor(private http: HttpClient) {}
+
+  public obtenerCatalogoGlobal(): Observable<LibroCatalogoGlobal[]> {
+    return this.http.get<LibroBackend[]>(`${this.apiUrl}/libros`).pipe(
+      map(libros => {
+        if (!Array.isArray(libros)) {
+          throw new Error('El backend devolvió un catálogo con formato inválido.');
+        }
+        return libros.map(libro => ({
+          libro: this.convertirLibroBackend(libro),
+          propietario: libro.propietario || ''
+        }));
+      })
+    );
+  }
 
   /*
     Busca libros en Google Books por término con soporte de paginación.
@@ -176,74 +210,73 @@ export class GoogleBooksService {
     }
   }
 
-  /*
-    Obtiene el inventario del usuario desde localStorage (simula llamada al backend).
-  */
   public obtenerInventarioUsuario(usuario: string): Observable<Libro[]> {
-    try {
-      const guardado = localStorage.getItem(`inventario_${usuario}`);
-      if (guardado) {
-        const libros: Libro[] = JSON.parse(guardado);
-        this.cacheInventario.set(usuario, libros);
-        return of(libros);
-      }
-      // Inventario vacío por defecto para usuarios nuevos
-      return of([]);
-    } catch {
-      return throwError(() => new Error('No se pudo cargar el inventario del usuario.'));
-    }
+    const headers = new HttpHeaders({ 'x-usuario': usuario });
+    return this.http.get<LibroBackend[]>(
+      `${this.apiUrl}/libros/inventario/${encodeURIComponent(usuario)}`,
+      { headers }
+    ).pipe(
+      map(libros => {
+        if (!Array.isArray(libros)) {
+          throw new Error('El backend devolvió un inventario con formato inválido.');
+        }
+        const inventario = libros.map(libro => this.convertirLibroBackend(libro));
+        this.actualizarInventarioEnCache(usuario, inventario);
+        return inventario;
+      })
+    );
   }
 
-  /*
-    Añade un libro al inventario del usuario (simula llamada al backend via localStorage).
-    Valida duplicados y retorna una respuesta compatible con RespuestaAñadirLibro.
-  */
   public añadirLibroAInventario(libro: Libro, usuario: string): Observable<RespuestaAñadirLibro> {
-    try {
-      const nuevoId = `inv_${usuario}_${Date.now()}`;
-      const libroConId = new Libro(
-        nuevoId,
-        libro.titulo,
-        libro.autor,
-        libro.disponible,
-        libro.portadaUrl,
-        libro.descripcion,
-        libro.isbn,
-        libro.categoria
-      );
-
-      // Cargar inventario actual
-      const inventarioActual = this.obtenerInventarioEnCache(usuario) || [];
-
-      // Validar que no exista un libro con el mismo título y autor
-      const duplicado = inventarioActual.some(
-        l => l.titulo.toLowerCase() === libro.titulo.toLowerCase() &&
-             l.autor.toLowerCase() === libro.autor.toLowerCase()
-      );
-      if (duplicado) {
-        return throwError(() => ({ error: { error: 'Ya tienes este libro en tu inventario.' } }));
-      }
-
-      const inventarioActualizado = [libroConId, ...inventarioActual];
-      this.actualizarInventarioEnCache(usuario, inventarioActualizado);
-
-      // Respuesta simulada compatible con RespuestaAñadirLibro
-      const respuesta: RespuestaAñadirLibro = {
-        libro: {
-          id: nuevoId,
-          titulo: libroConId.titulo,
-          autores: [libroConId.autor],
-          disponible: true,
-          portadaUrl: libroConId.portadaUrl,
-          descripcion: libroConId.descripcion,
-          isbn: libroConId.isbn,
-          categorias: [libroConId.categoria]
+    const headers = new HttpHeaders({ 'x-usuario': usuario });
+    return this.http.post<{ libro: LibroBackend } | LibroBackend>(
+      `${this.apiUrl}/libros`,
+      {
+        titulo: libro.titulo,
+        autores: libro.autor ? [libro.autor] : [],
+        disponible: libro.disponible,
+        portadaUrl: libro.portadaUrl,
+        descripcion: libro.descripcion,
+        isbn: libro.isbn,
+        categorias: [libro.categoria]
+      },
+      { headers }
+    ).pipe(
+      map(respuesta => {
+        const libroPersistido = 'libro' in respuesta ? respuesta.libro : respuesta;
+        if (!libroPersistido?.id) {
+          throw new Error('El backend no confirmó el libro guardado.');
         }
-      };
-      return of(respuesta);
-    } catch {
-      return throwError(() => new Error('Error al añadir el libro al inventario.'));
-    }
+        const guardado = this.convertirLibroBackend(libroPersistido);
+        const inventarioActual = this.obtenerInventarioEnCache(usuario) || [];
+        this.actualizarInventarioEnCache(usuario, [guardado, ...inventarioActual.filter(actual => actual.id !== guardado.id)]);
+        return {
+          libro: {
+            id: guardado.id,
+            titulo: guardado.titulo,
+            autores: guardado.autor ? [guardado.autor] : [],
+            disponible: guardado.disponible,
+            portadaUrl: guardado.portadaUrl,
+            descripcion: guardado.descripcion,
+            isbn: guardado.isbn,
+            categorias: [guardado.categoria]
+          }
+        };
+      })
+    );
+  }
+
+  private convertirLibroBackend(libro: LibroBackend): Libro {
+    return new Libro(
+      libro.id,
+      libro.titulo,
+      libro.autores?.join(', ') || libro.autor || 'Autor Desconocido',
+      libro.disponible ?? true,
+      libro.portadaUrl || '',
+      libro.descripcion || '',
+      libro.isbn || '',
+      libro.categorias?.[0] || libro.categoria || 'General'
+    );
   }
 
   /*

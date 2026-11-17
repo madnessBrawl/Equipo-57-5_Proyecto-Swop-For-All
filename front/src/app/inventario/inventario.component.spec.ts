@@ -75,4 +75,32 @@ describe('InventarioComponent', () => {
     expect(fixture.componentInstance.error).toContain('exactamente 13 dígitos');
     expect(solicitudesDeAlta).toBe(0);
   });
+
+  it('permite intentar guardar sin obligatorios y los marca en rojo', () => {
+    fixture = TestBed.createComponent(InventarioComponent);
+    fixture.componentInstance.mostrarFormulario = true;
+    fixture.detectChanges();
+
+    const boton = fixture.nativeElement.querySelector('button[type="submit"]') as HTMLButtonElement;
+    expect(boton.disabled).toBe(false);
+    boton.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('[name="titulo"]').classList).toContain('campo-invalido');
+    expect(fixture.nativeElement.querySelector('[name="isbn"]').classList).toContain('campo-invalido');
+    expect(fixture.componentInstance.error).toContain('título y el ISBN');
+    expect(solicitudesDeAlta).toBe(0);
+  });
+
+  it('permite guardar con título e ISBN aunque los campos opcionales estén vacíos', () => {
+    fixture = TestBed.createComponent(InventarioComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.titulo = 'Rayuela';
+    fixture.componentInstance.isbn = '9781234567890';
+
+    fixture.componentInstance.agregarLibro();
+
+    expect(solicitudesDeAlta).toBe(1);
+    expect(fixture.componentInstance.mostrarConfirmacion).toBe(true);
+  });
 });

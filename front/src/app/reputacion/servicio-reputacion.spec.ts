@@ -21,26 +21,6 @@ describe('ServicioReputacion', () => {
     Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: almacenamiento });
     localStorage.clear();
     localStorage.setItem('usuarioLogueado', JSON.stringify({ usuario: 'ana', clave: 'secreta' }));
-    localStorage.setItem('swop_intercambios', JSON.stringify([
-      {
-        id: 'i1',
-        libroOfrecido: 'A',
-        libroSolicitado: 'B',
-        ofertante: 'ana',
-        receptor: 'beto',
-        estado: 'Finalizado',
-        fecha: '2026-01-01'
-      },
-      {
-        id: 'i2',
-        libroOfrecido: 'C',
-        libroSolicitado: 'D',
-        ofertante: 'ana',
-        receptor: 'beto',
-        estado: 'Pendiente',
-        fecha: '2026-01-02'
-      }
-    ]));
     TestBed.configureTestingModule({
       providers: [ServicioReputacion, provideHttpClient(), provideHttpClientTesting()]
     });
@@ -71,6 +51,18 @@ describe('ServicioReputacion', () => {
     ...extra
   });
 
+  const ofertaFinalizada = {
+    idIntercambio: 'i1',
+    usuarioEmisor: 'ana',
+    usuarioReceptor: 'beto',
+    librosOfrecidos: [{ id: 'libro-a', titulo: 'A' }],
+    librosSolicitados: [{ id: 'libro-b', titulo: 'B' }],
+    estado: 'Finalizado',
+    fechaCreacion: '2026-01-01T00:00:00.000Z',
+    fechaModificacion: '2026-01-02T00:00:00.000Z',
+    confirmaciones: ['ana', 'beto']
+  };
+
   it('solo expone el nombre de usuario de la sesión', () => {
     expect(servicio.obtenerUsuarioActual()).toBe('ana');
   });
@@ -79,12 +71,70 @@ describe('ServicioReputacion', () => {
     let resultado: { exito: boolean; mensaje: string } | undefined;
     servicio.registrarCalificacion(crear()).subscribe(valor => resultado = valor);
 
+    const intercambios = http.expectOne(request =>
+      request.url === 'http://localhost:3000/api/intercambios' &&
+      request.params.get('incluirOcultas') === 'true'
+    );
+    expect(intercambios.request.method).toBe('GET');
+    expect(intercambios.request.headers.get('x-usuario')).toBe('ana');
+    intercambios.flush([ofertaFinalizada]);
+
     const request = http.expectOne('http://localhost:3000/api/calificaciones');
     expect(request.request.method).toBe('POST');
     expect(request.request.headers.get('x-usuario')).toBe('ana');
-    request.flush({ mensaje: 'Calificación registrada con éxito' });
+    request.flush({ mensaje: 'Calificacion registrada con exito' });
 
     expect(resultado?.exito).toBe(true);
+  });
+
+  it('obtiene desde el backend los intercambios finalizados para calificar', () => {
+    let titulo = '';
+    servicio.obtenerIntercambiosFinalizados('ana').subscribe(intercambios => {
+      titulo = intercambios[0].libroOfrecido;
+    });
+
+    const request = http.expectOne(request =>
+      request.url === 'http://localhost:3000/api/intercambios' &&
+      request.params.get('incluirOcultas') === 'true'
+    );
+    expect(request.request.headers.get('x-usuario')).toBe('ana');
+    request.flush([
+      ofertaFinalizada,
+      { ...ofertaFinalizada, idIntercambio: 'i2', estado: 'Pendiente' }
+    ]);
+
+    expect(titulo).toBe('A');
+  });
+
+  it('no envía una calificación si el intercambio no está finalizado', () => {
+    let resultado: { exito: boolean; mensaje: string } | undefined;
+    servicio.registrarCalificacion(crear()).subscribe(valor => resultado = valor);
+
+    http.expectOne(request =>
+      request.url === 'http://localhost:3000/api/intercambios' &&
+      request.params.get('incluirOcultas') === 'true'
+    ).flush([]);
+
+    expect(resultado?.exito).toBe(false);
+    http.expectNone('http://localhost:3000/api/calificaciones');
+  });
+
+  it('no muestra al usuario detalles técnicos de un error al guardar', () => {
+    let resultado: { exito: boolean; mensaje: string } | undefined;
+    servicio.registrarCalificacion(crear()).subscribe(valor => resultado = valor);
+    http.expectOne(request =>
+      request.url === 'http://localhost:3000/api/intercambios' &&
+      request.params.get('incluirOcultas') === 'true'
+    ).flush([ofertaFinalizada]);
+    http.expectOne('http://localhost:3000/api/calificaciones')
+      .flush({ error: 'Configure SWOP_REPUTACION_KEY antes de guardar calificaciones.' }, {
+        status: 400,
+        statusText: 'Bad Request'
+      });
+
+    expect(resultado?.exito).toBe(false);
+    expect(resultado?.mensaje).toBe('No se pudo guardar la calificación. Intente nuevamente más tarde.');
+    expect(resultado?.mensaje).not.toContain('SWOP_REPUTACION_KEY');
   });
 
   it('rechaza calificaciones inválidas sin enviarlas al backend', () => {

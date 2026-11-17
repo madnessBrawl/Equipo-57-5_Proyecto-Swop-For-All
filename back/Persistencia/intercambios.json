@@ -22,5 +22,46 @@
     ],
     "estado": "Finalizado",
     "fechaModificacion": "2026-11-10T12:00:00.000Z"
+  },
+  {
+    "idIntercambio": "INT-mwjyauaj-7ee8xn",
+    "usuarioEmisor": "LULA",
+    "usuarioReceptor": "ñoño",
+    "librosOfrecidos": [
+      {
+        "id": "lib_mwjdegxl_qdrs0",
+        "titulo": "PETER",
+        "autor": "PETER",
+        "disponible": true,
+        "portadaUrl": "",
+        "descripcion": "PETER",
+        "isbn": "PETER",
+        "categoria": "PETER"
+      }
+    ],
+    "librosSolicitados": [
+      {
+        "id": "lib_mwjx0e0c_siqgu",
+        "titulo": "ñoñolndia",
+        "autor": "ñoñolndia",
+        "disponible": true,
+        "portadaUrl": "",
+        "descripcion": "ñoñolndia",
+        "isbn": "4124214124512",
+        "categoria": "ñoñolndia"
+      }
+    ],
+    "estado": "Finalizado",
+    "fechaCreacion": "2026-11-17T00:25:14.971Z",
+    "fechaModificacion": "2026-11-17T00:26:36.560Z",
+    "confirmaciones": [
+      "LULA",
+      "ñoño"
+    ],
+    "id": "INT-mwjyauaj-7ee8xn",
+    "ocultoPara": [
+      "LULA",
+      "ñoño"
+    ]
   }
 ]

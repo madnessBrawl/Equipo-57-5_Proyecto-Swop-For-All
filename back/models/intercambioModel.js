@@ -13,7 +13,10 @@ class OfertaIntercambio {
     librosOfrecidos = [],
     librosSolicitados = [],
     estado = 'Pendiente',
-    fechaCreacion = new Date().toISOString()
+    fechaCreacion = new Date().toISOString(),
+    fechaModificacion = fechaCreacion,
+    confirmaciones = [],
+    ocultoPara = []
   } = {}) {
     this._idIntercambio = idIntercambio || `INT-${Date.now().toString(36)}`;
     this._usuarioEmisor = String(usuarioEmisor || '').trim();
@@ -22,6 +25,9 @@ class OfertaIntercambio {
     this._librosSolicitados = Array.isArray(librosSolicitados) ? [...librosSolicitados] : [];
     this._estado = estado;
     this._fechaCreacion = fechaCreacion;
+    this._fechaModificacion = fechaModificacion;
+    this._confirmaciones = Array.isArray(confirmaciones) ? [...confirmaciones] : [];
+    this._ocultoPara = Array.isArray(ocultoPara) ? [...ocultoPara] : [];
   }
 
   // Getters para encapsulamiento
@@ -32,6 +38,9 @@ class OfertaIntercambio {
   get librosSolicitados() { return [...this._librosSolicitados]; }
   get estado() { return this._estado; }
   get fechaCreacion() { return this._fechaCreacion; }
+  get fechaModificacion() { return this._fechaModificacion; }
+  get confirmaciones() { return [...this._confirmaciones]; }
+  get ocultoPara() { return [...this._ocultoPara]; }
 
   // Setters controlados
   set estado(nuevoEstado) {
@@ -87,7 +96,10 @@ class OfertaIntercambio {
       librosOfrecidos: this._librosOfrecidos,
       librosSolicitados: this._librosSolicitados,
       estado: this._estado,
-      fechaCreacion: this._fechaCreacion
+      fechaCreacion: this._fechaCreacion,
+      fechaModificacion: this._fechaModificacion,
+      confirmaciones: this._confirmaciones,
+      ocultoPara: this._ocultoPara
     };
   }
 }

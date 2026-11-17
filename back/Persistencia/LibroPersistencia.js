@@ -97,6 +97,36 @@ class LibroPersistencia extends PersistenciaJSON {
     return new Libro(datosGuardados);
   }
 
+  guardarVarios(libros) {
+    if (!Array.isArray(libros)) {
+      throw new Error('Debe proporcionar una lista válida de libros.');
+    }
+
+    const instancias = libros.map(libro => {
+      const instancia = libro instanceof Libro ? libro : new Libro(libro);
+      const errorValidacion = instancia.validar();
+      if (errorValidacion) {
+        throw new Error(`Validación de persistencia fallida: ${errorValidacion}`);
+      }
+      return instancia;
+    });
+
+    const actuales = super.obtenerTodos();
+    const porId = new Map(actuales.map((libro, indice) => [String(libro.id), indice]));
+    for (const instancia of instancias) {
+      const datos = instancia.toJSON();
+      const indice = porId.get(String(datos.id));
+      if (indice === undefined) {
+        porId.set(String(datos.id), actuales.length);
+        actuales.push(datos);
+      } else {
+        actuales[indice] = datos;
+      }
+    }
+    this._escribirArchivo(actuales);
+    return instancias;
+  }
+
   // Busca por id y retorna una instancia de Libro
   buscarPorId(id) {
     const datos = super.buscarPorId(id);
