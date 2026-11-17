@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
 class NuevoLector {
   constructor(
@@ -241,20 +241,29 @@ export class PerfilUsuarioComponent implements OnInit {
         next: (res) => {
           this.usuariosBD.push(lectorRegistrado);
           localStorage.setItem('swop_usuarios', JSON.stringify(this.usuariosBD));
-          console.log('Usuario persistido en back/Persistencia/usuarios.json:', res);
-          alert('Cuenta registrada con exito! Los datos fueron guardados en el archivo usuarios.json.');
-          this.limpiarCampos();
+          console.log('Usuario registrado:', res);
+          this.finalizarRegistroExitoso();
         },
         error: (err) => {
-          // En caso de que el backend este apagado, mantiene funcionamiento local
+          if (err instanceof HttpErrorResponse && err.status !== 0) {
+            this.mensajeError = typeof err.error?.error === 'string'
+              ? err.error.error
+              : 'No se pudo completar el registro. Inténtalo nuevamente.';
+            return;
+          }
           this.usuariosBD.push(lectorRegistrado);
           localStorage.setItem('swop_usuarios', JSON.stringify(this.usuariosBD));
           console.log('Objeto Lector guardado en modo contingencia:', lectorRegistrado);
-          alert('Cuenta registrada con exito!');
-          this.limpiarCampos();
+          this.finalizarRegistroExitoso();
         }
       });
     }
+  }
+
+  private finalizarRegistroExitoso(): void {
+    alert('Cuenta registrada con exito. Ahora puedes iniciar sesion.');
+    this.limpiarCampos();
+    this.modoActivo = 'login';
   }
 
   private limpiarCampos(): void {

@@ -15,6 +15,7 @@ const ComunidadPersistencia = require('./Persistencia/ComunidadPersistencia');
 const IntercambioPersistencia = require('./Persistencia/IntercambioPersistencia');
 const ControladorIntercambio = require('./controllers/intercambioController');
 const CalificacionPersistencia = require('./Persistencia/CalificacionPersistencia');
+const ListaDeseadosPersistencia = require('./Persistencia/ListaDeseadosPersistencia');
 const CifradoService          = require('./Service/CifradoService');
 
 const { Calificacion } = require('./models/Calificacion');
@@ -25,6 +26,7 @@ const usuarioPersistencia = new UsuarioPersistencia();
 const comunidadPersistencia = new ComunidadPersistencia();
 const intercambioPersistencia = new IntercambioPersistencia();
 const calificacionPersistencia = new CalificacionPersistencia();
+const listaDeseadosPersistencia = new ListaDeseadosPersistencia();
 const cifradoService          = new CifradoService();
 const controladorIntercambio  = new ControladorIntercambio(
   intercambioPersistencia,
@@ -108,6 +110,35 @@ const servidor = http.createServer(async (req, res) => {
       const usuario = decodeURIComponent(ruta.replace('/api/libros/inventario/', ''));
       const libros = libroController.obtenerInventarioUsuario(usuario);
       return responderJSON(res, 200, libros);
+    }
+
+    // Rutas de la lista personal de libros deseados
+    if (ruta === '/api/libros-deseados') {
+      if (!usuarioSesion || !usuarioSesion.trim()) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para consultar su lista de libros deseados.' });
+      }
+
+      if (metodo === 'GET') {
+        return responderJSON(res, 200, listaDeseadosPersistencia.buscarPorUsuario(usuarioSesion));
+      }
+
+      if (metodo === 'POST') {
+        const body = await parsearBodyJSON(req);
+        const libro = listaDeseadosPersistencia.agregar(usuarioSesion, body);
+        return responderJSON(res, 201, libro);
+      }
+    }
+
+    if (metodo === 'DELETE' && ruta.startsWith('/api/libros-deseados/')) {
+      if (!usuarioSesion || !usuarioSesion.trim()) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para modificar su lista de libros deseados.' });
+      }
+      const id = decodeURIComponent(ruta.replace('/api/libros-deseados/', ''));
+      const eliminado = listaDeseadosPersistencia.eliminarDeUsuario(id, usuarioSesion);
+      if (!eliminado) {
+        return responderJSON(res, 404, { error: 'El libro deseado no existe en su lista.' });
+      }
+      return responderJSON(res, 200, { mensaje: 'Libro eliminado de la lista de deseados.' });
     }
 
     /* ---------------- 2. RUTAS DE USUARIOS / PERFIL ---------------- */
