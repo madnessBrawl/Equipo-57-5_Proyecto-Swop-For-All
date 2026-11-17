@@ -47,31 +47,6 @@ export class HeaderComponent implements OnInit {
 
   // Navega a la sala de intercambio activo (con validación de inicio previo desde el catálogo)
   navegarAIntercambio(): void {
-    // REGLA 1: Verificar que el usuario tenga libros en su inventario personal
-    try {
-      const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
-      const usuario = sesion?.usuario || 'usuario_local';
-      const inventario = JSON.parse(localStorage.getItem(`inventario_${usuario}`) || '[]');
-      if (!Array.isArray(inventario) || inventario.length === 0) {
-        alert('⚠️ No puedes intercambiar porque tu inventario está vacío.\n\nAgrégale libros desde la sección "Inventario" del menú antes de iniciar un intercambio.');
-        this.router.navigate(['/inventario']);
-        return;
-      }
-    } catch { /* si falla la lectura, continúa con la siguiente validación */ }
-
-    // REGLA 2: Verificar que haya una oferta activa iniciada desde el catálogo
-    const hayOfertaActiva = Boolean(
-      sessionStorage.getItem('libroSolicitado') ||
-      localStorage.getItem('oferta_activa') ||
-      localStorage.getItem('oferta_activa_id')
-    );
-
-    if (!hayOfertaActiva) {
-      alert('⚠️ No tienes ningún intercambio activo en este momento.\n\nPor favor, dirígete al Catálogo Global, selecciona el libro que deseas y presiona "Solicitar Intercambio" para iniciar la negociación.');
-      this.router.navigate(['/catalogo']);
-      return;
-    }
-
     this.router.navigate(['/modificar-oferta']);
   }
 

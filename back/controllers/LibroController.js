@@ -126,6 +126,10 @@ class LibroController {
 
     return this.libroRepository.actualizarDisponibilidad(idLibro, disponible);
   }
+
+  transferirLibros(intercambio) {
+    return this.libroRepository.transferirLibros(intercambio);
+  }
 }
 
 module.exports = LibroController;

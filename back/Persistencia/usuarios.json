@@ -77,5 +77,16 @@
     "telefono": "",
     "estadoVenezuela": "Distrito Capital",
     "biografia": ""
+  },
+  {
+    "usuario": "ñoño",
+    "nombres": "ñoño",
+    "apellidos": "ñoño",
+    "clave": "2bc311c914c3ffea50448b2a05570c7e.e0cc64be3cdade4ac2b1096274cf8ce1",
+    "generosFavoritos": "ñoño",
+    "genero": "Hombre",
+    "correo": "2bc311c914c3ffea50448b2a05570c7e.e0cc64be3cdade4ac2b1096274cf8ce1",
+    "reputacion": 5,
+    "id": "reg_mwjvlkef_mh5md"
   }
 ]

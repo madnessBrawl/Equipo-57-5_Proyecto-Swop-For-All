@@ -13,6 +13,7 @@ const PerfilController = require('./controllers/PerfilController');
 const UsuarioPersistencia = require('./Persistencia/UsuarioPersistencia');
 const ComunidadPersistencia = require('./Persistencia/ComunidadPersistencia');
 const IntercambioPersistencia = require('./Persistencia/IntercambioPersistencia');
+const ControladorIntercambio = require('./controllers/intercambioController');
 const CalificacionPersistencia = require('./Persistencia/CalificacionPersistencia');
 const CifradoService          = require('./Service/CifradoService');
 
@@ -25,6 +26,7 @@ const comunidadPersistencia = new ComunidadPersistencia();
 const intercambioPersistencia = new IntercambioPersistencia();
 const calificacionPersistencia = new CalificacionPersistencia();
 const cifradoService          = new CifradoService();
+const controladorIntercambio = new ControladorIntercambio(intercambioPersistencia, cifradoService, libroController);
 
 
 const PUERTO = process.env.PORT || 3000;
@@ -255,16 +257,69 @@ const servidor = http.createServer(async (req, res) => {
 
     /* ---------------- 4. RUTAS DE INTERCAMBIOS ---------------- */
     if (metodo === 'GET' && ruta === '/api/intercambios') {
-      return responderJSON(res, 200, intercambioPersistencia.obtenerTodos());
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para consultar intercambios.' });
+      }
+      const incluirOcultas = parsedUrl.searchParams.get('incluirOcultas') === 'true';
+      return responderJSON(res, 200, controladorIntercambio.obtenerOfertasPorParticipante(
+        usuarioSesion,
+        { incluirOcultas }
+      ));
     }
 
     if (metodo === 'POST' && ruta === '/api/intercambios') {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para crear una solicitud.' });
+      }
       const body = await parsearBodyJSON(req);
-      const guardado = intercambioPersistencia.guardar(body);
-      return responderJSON(res, 201, { mensaje: 'Oferta registrada con Ã©xito', oferta: guardado });
+      const guardado = controladorIntercambio.crearOferta(body, usuarioSesion);
+      return responderJSON(res, 201, { mensaje: 'Oferta registrada con éxito', oferta: guardado });
+    }
+
+    if (metodo === 'PUT' && ruta.startsWith('/api/intercambios/')) {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para modificar una oferta.' });
+      }
+      const idIntercambio = decodeURIComponent(ruta.replace('/api/intercambios/', ''));
+      if (idIntercambio.endsWith('/confirmar')) {
+        return responderJSON(res, 404, { error: `Ruta ${metodo} ${ruta} no encontrada.` });
+      }
+      const body = await parsearBodyJSON(req);
+      const oferta = controladorIntercambio.modificarOferta(idIntercambio, body, usuarioSesion);
+      return responderJSON(res, 200, { oferta });
+    }
+
+    if (metodo === 'POST' && ruta.startsWith('/api/intercambios/') && ruta.endsWith('/confirmar')) {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para confirmar el intercambio.' });
+      }
+      const idIntercambio = decodeURIComponent(ruta.slice('/api/intercambios/'.length, -'/confirmar'.length));
+      const oferta = controladorIntercambio.confirmarOferta(idIntercambio, usuarioSesion);
+      return responderJSON(res, 200, { oferta });
+    }
+
+    if (metodo === 'POST' && ruta.startsWith('/api/intercambios/') && ruta.endsWith('/cancelar')) {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para cancelar el intercambio.' });
+      }
+      const idIntercambio = decodeURIComponent(ruta.slice('/api/intercambios/'.length, -'/cancelar'.length));
+      const oferta = controladorIntercambio.cancelarOferta(idIntercambio, usuarioSesion);
+      return responderJSON(res, 200, { oferta });
     }
 
     /* ---------------- 5. RUTAS DE CALIFICACIONES / REPUTACIÃ“N ---------------- */
+    if (metodo === 'DELETE' && ruta.startsWith('/api/intercambios/')) {
+      if (!usuarioSesion) {
+        return responderJSON(res, 401, { error: 'Debe iniciar sesión para eliminar un intercambio.' });
+      }
+      const idIntercambio = decodeURIComponent(ruta.replace('/api/intercambios/', ''));
+      const resultado = controladorIntercambio.eliminarOfertaDeLista(idIntercambio, usuarioSesion);
+      const mensaje = resultado.oculto
+        ? 'Intercambio quitado de tu lista; sigue disponible para calificar.'
+        : 'Intercambio cancelado eliminado.';
+      return responderJSON(res, 200, { mensaje, ...resultado });
+    }
+
     if (metodo === 'GET' && ruta === '/api/calificaciones') {
       if (!usuarioSesion) {
         return responderJSON(res, 401, { error: 'Debe iniciar sesión para consultar reseñas.' });
@@ -309,6 +364,21 @@ const servidor = http.createServer(async (req, res) => {
         return responderJSON(res, 400, { error: errorValidacion });
       }
 
+      const intercambio = controladorIntercambio.obtenerOfertaPorId(calificacion.idIntercambio);
+      if (!intercambio || intercambio.estado !== 'Finalizado') {
+        return responderJSON(res, 400, { error: 'Solo se pueden calificar intercambios finalizados.' });
+      }
+      const participantes = [intercambio.usuarioEmisor, intercambio.usuarioReceptor];
+      if (!participantes.some(usuario => String(usuario).toLowerCase() === usuarioSesion.toLowerCase())) {
+        return responderJSON(res, 403, { error: 'Usted no participó en este intercambio.' });
+      }
+      const contraparte = participantes.find(usuario =>
+        String(usuario).toLowerCase() !== usuarioSesion.toLowerCase()
+      );
+      if (!contraparte || contraparte.toLowerCase() !== calificacion.evaluado.toLowerCase()) {
+        return responderJSON(res, 400, { error: 'El lector evaluado no corresponde a este intercambio.' });
+      }
+
       const duplicada = calificacionPersistencia.buscarPorPredicado(registro =>
         registro.evaluador === usuarioSesion &&
         registro.idIntercambio === calificacion.idIntercambio &&
@@ -319,7 +389,7 @@ const servidor = http.createServer(async (req, res) => {
       }
 
       const guardada = calificacionPersistencia.guardar(calificacion);
-      return responderJSON(res, 201, { mensaje: 'CalificaciÃ³n registrada con Ã©xito', calificacion: guardada });
+      return responderJSON(res, 201, { mensaje: 'Calificacion registrada con exito', calificacion: guardada });
     }
 
     // Ruta no encontrada
@@ -327,7 +397,10 @@ const servidor = http.createServer(async (req, res) => {
 
   } catch (error) {
     console.error(`[Servidor] Error al procesar ${metodo} ${ruta}:`, error.message);
-    return responderJSON(res, 400, { error: error.message });
+    const mensaje = ruta.startsWith('/api/calificaciones')
+      ? 'No se pudo completar la operación de calificación. Intente nuevamente más tarde.'
+      : error.message;
+    return responderJSON(res, 400, { error: mensaje });
   }
 });
 

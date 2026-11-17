@@ -9,14 +9,12 @@ Para que Inventario y Reputación puedan guardar en los archivos JSON, deben eje
 
 `npx ng serve` por sí solo inicia únicamente Angular y no puede iniciar el backend ni escribir en `back/Persistencia/libros.json`. Si prefiere seguir usando ese comando, inicie también `npm start` desde `back` en otra terminal.
 
+## Catálogo e intercambios
+
+Los libros añadidos al inventario se guardan en el backend y aparecen en el catálogo global. Las solicitudes del catálogo quedan visibles para ambos participantes en **Intercambiar**. Cada usuario confirma desde esa sección; al confirmar ambos, los libros cambian de propietario y el intercambio queda finalizado. Si se modifica la selección de libros, se eliminan las confirmaciones y ambos deben confirmar otra vez.
+
 ## Persistencia de reputación
 
-Las calificaciones se cifran en `back/Persistencia/calificaciones.json` con AES-256-GCM. Antes de iniciar la aplicación, configure `SWOP_REPUTACION_KEY` con un secreto aleatorio de al menos 32 caracteres y guárdelo fuera del repositorio. La clave debe mantenerse igual entre reinicios; si se pierde o cambia, no será posible descifrar las calificaciones existentes. Los datos anteriores en texto plano se cifran automáticamente al iniciar el backend con la clave configurada.
+Las calificaciones se cifran en `back/Persistencia/calificaciones.json` con AES-256-GCM. Para desarrollo local, el backend genera automáticamente una clave y la guarda en `back/Persistencia/.swop-reputacion-key`, excluida de Git. Conserve ese archivo entre reinicios y respaldos; si se pierde, no será posible descifrar las calificaciones existentes.
 
-En PowerShell, genere una clave con:
-
-```powershell
-node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64'))"
-```
-
-Configure el valor obtenido antes de ejecutar `npm start` desde la raíz, desde `front` o al iniciar el backend manualmente desde `back`.
+En producción, se puede proporcionar `SWOP_REPUTACION_KEY` como variable de entorno, con un secreto estable de al menos 32 caracteres. No cambie la clave mientras existan calificaciones cifradas con la anterior. Los datos anteriores en texto plano se cifran automáticamente al iniciar el backend.

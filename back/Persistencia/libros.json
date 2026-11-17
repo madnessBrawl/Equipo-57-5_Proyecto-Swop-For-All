@@ -102,7 +102,7 @@
       "PETER"
     ],
     "disponible": true,
-    "propietario": "LULA",
+    "propietario": "ñoño",
     "fechaRegistro": "2026-11-16T14:40:12.345Z"
   },
   {
@@ -368,5 +368,22 @@
     "disponible": true,
     "propietario": "lector_logueado",
     "fechaRegistro": "2026-11-16T22:40:34.944Z"
+  },
+  {
+    "id": "lib_mwjx0e0c_siqgu",
+    "titulo": "ñoñolndia",
+    "autores": [
+      "ñoñolndia"
+    ],
+    "autoresTexto": "ñoñolndia",
+    "descripcion": "ñoñolndia",
+    "portadaUrl": "",
+    "isbn": "4124214124512",
+    "categorias": [
+      "ñoñolndia"
+    ],
+    "disponible": true,
+    "propietario": "LULA",
+    "fechaRegistro": "2026-11-16T23:49:07.692Z"
   }
 ]
