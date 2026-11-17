@@ -13,7 +13,7 @@ class NuevoLector {
     public generosFavoritos: string,
     public genero: string,
     public correo: string,
-    public reputacion: number = 5.0 
+    public reputacion: number = 5.0
   ) {}
 }
 
@@ -25,7 +25,7 @@ class NuevoLector {
   styleUrls: ['./perfil-usuario.css']
 })
 export class PerfilUsuarioComponent implements OnInit {
-  // Estado para las Pestañas (Tabs)
+  // Estado para las Pestanas (Tabs)
   modoActivo: 'login' | 'registro' = 'login';
 
   // Base de datos de usuarios
@@ -38,10 +38,22 @@ export class PerfilUsuarioComponent implements OnInit {
     nombre: '',
     apellido: '',
     clave: '',
-    generosFavoritos: '',
     genero: '',
     correo: ''
   };
+
+  // Lista de generos favoritos seleccionados (maximo 3)
+  generosSeleccionados: string[] = [];
+
+  // Opciones disponibles para generos favoritos
+  readonly opcionesGeneros: string[] = [
+    'Terror', 'Drama', 'Comedia', 'Misterio', 'Horror',
+    'Fantasia', 'Ciencia-ficcion', 'Accion', 'Romance',
+    'Aventura', 'Suspenso', 'Juvenil', 'Paranormal'
+  ];
+
+  // Mensaje de error/validacion visible en la interfaz
+  mensajeError: string = '';
 
   private readonly apiUrlUsuarios = 'http://localhost:3000/api/usuarios';
 
@@ -76,82 +88,169 @@ export class PerfilUsuarioComponent implements OnInit {
 
   cambiarModo(modo: 'login' | 'registro'): void {
     this.modoActivo = modo;
+    this.mensajeError = '';
+  }
+
+  // Togglea un genero en la lista de seleccionados (maximo 3)
+  toggleGenero(genero: string): void {
+    const idx = this.generosSeleccionados.indexOf(genero);
+    if (idx >= 0) {
+      // Ya estaba seleccionado → deseleccionar
+      this.generosSeleccionados.splice(idx, 1);
+    } else {
+      // No estaba → agregar solo si hay menos de 3
+      if (this.generosSeleccionados.length < 3) {
+        this.generosSeleccionados.push(genero);
+      }
+      // Si ya tiene 3, simplemente no hace nada (el maximo ya fue alcanzado)
+    }
+  }
+
+  estaSeleccionado(genero: string): boolean {
+    return this.generosSeleccionados.includes(genero);
   }
 
   iniciarSesion(): void {
     const { usuario, clave } = this.datosLogin;
 
     if (!usuario || !clave) {
-      alert('Campo vacío, por favor llene el campo faltante.');
+      alert('Campo vacio, por favor llene el campo faltante.');
       return;
     }
 
-    // Petición al Backend para login
+    // Peticion al Backend para login
     this.http.post<any>(`${this.apiUrlUsuarios}/login`, { usuario, clave }).subscribe({
       next: (res) => {
-        alert(`¡Bienvenido de nuevo, ${usuario}!`);
+        alert(`Bienvenido de nuevo, ${usuario}!`);
         this.datosLogin = { usuario: '', clave: '' };
         localStorage.setItem('usuarioLogueado', JSON.stringify(res.usuario));
         this.router.navigate(['/dashboard']);
       },
       error: () => {
-        // Verificación local ante caída o ausencia de servidor
+        // Verificacion local ante caida o ausencia de servidor
         const usuarioEncontrado = this.usuariosBD.find(u => u.usuario === usuario);
         if (!usuarioEncontrado) {
-          alert('El usuario no existe, por favor regístrese.');
+          alert('El usuario no existe, por favor registrese.');
           return;
         }
         if (usuarioEncontrado.clave && usuarioEncontrado.clave !== clave) {
-          alert('Contraseña incorrecta.');
+          alert('Contrasena incorrecta.');
           return;
         }
-        alert(`¡Bienvenido de nuevo, ${usuario}!`);
+        alert(`Bienvenido de nuevo, ${usuario}!`);
         this.datosLogin = { usuario: '', clave: '' };
         localStorage.setItem('usuarioLogueado', JSON.stringify(usuarioEncontrado));
         this.router.navigate(['/dashboard']);
       }
     });
-  } 
+  }
 
   procesarRegistroNuevo(): void {
     const f = this.datosRegistro;
+    this.mensajeError = '';
 
-    if (!f.usuario || !f.nombre || !f.apellido || !f.clave || !f.genero || !f.correo) {
-      alert('Error: Todos los campos del formulario (excepto géneros favoritos opcionales) son obligatorios.');
+    // ===== VALIDACIONES EN ORDEN =====
+
+    // 1) NOMBRE DE USUARIO
+    if (!f.usuario || !f.usuario.trim()) {
+      this.mensajeError = 'Solicitud no aceptada: Campo vacio';
+      return;
+    }
+    const usuarioExiste = this.usuariosBD.some(
+      u => u.usuario.toLowerCase() === f.usuario.toLowerCase().trim()
+    );
+    if (usuarioExiste) {
+      this.mensajeError = 'Solicitud no aceptada: Este nombre ya existe';
       return;
     }
 
-    const confirmarRegistro = confirm(`¿Estás seguro de que deseas registrar el perfil para el usuario: ${f.usuario}?`);
-    
+    // 2) NOMBRE
+    if (!f.nombre || !f.nombre.trim()) {
+      this.mensajeError = 'Solicitud no aceptada: Campo vacio';
+      return;
+    }
+
+    // 3) APELLIDO
+    if (!f.apellido || !f.apellido.trim()) {
+      this.mensajeError = 'Solicitud no aceptada: Campo vacio';
+      return;
+    }
+
+    // 4) CORREO ELECTRONICO
+    if (!f.correo || !f.correo.trim()) {
+      this.mensajeError = 'Solicitud no aceptada: Campo vacio';
+      return;
+    }
+    const correoValido = f.correo.endsWith('@gmail.com') || f.correo.endsWith('@gmail.com.ve');
+    if (!correoValido) {
+      this.mensajeError = 'Solicitud no aceptada: correo no valido';
+      return;
+    }
+
+    // 5) CONTRASENA
+    if (!f.clave || !f.clave.trim()) {
+      this.mensajeError = 'Solicitud no aceptada: Campo vacio';
+      return;
+    }
+    if (f.clave.length < 6) {
+      this.mensajeError = 'Contrasena invalida: Numero de caracteres insuficientes, debe tener minimo 6 caracteres';
+      return;
+    }
+    const tieneLetras = /[a-zA-Z]/.test(f.clave);
+    const tieneNumeros = /[0-9]/.test(f.clave);
+    if (!tieneLetras || !tieneNumeros) {
+      this.mensajeError = 'Contrasena invalida: Debe contener minimo un numero y una letra';
+      return;
+    }
+
+    // 6) GENERO
+    if (!f.genero) {
+      this.mensajeError = 'Solicitud no aceptada: Genero no seleccionado';
+      return;
+    }
+
+    // 7) GENEROS FAVORITOS
+    if (this.generosSeleccionados.length === 0) {
+      this.mensajeError = 'Solicitud no aceptada: Generos literarios no seleccionados';
+      return;
+    }
+
+    // ===== TODAS LAS VALIDACIONES PASARON =====
+    const confirmarRegistro = confirm(`Esta seguro de que deseas registrar el perfil para el usuario: ${f.usuario}?`);
+
     if (confirmarRegistro) {
-      const lectorRegistrado = new NuevoLector(f.usuario, f.nombre, f.apellido, f.clave, f.generosFavoritos, f.genero, f.correo);
+      const generosFavoritosStr = this.generosSeleccionados.join(', ');
+      const lectorRegistrado = new NuevoLector(
+        f.usuario, f.nombre, f.apellido, f.clave,
+        generosFavoritosStr, f.genero, f.correo
+      );
 
       const payload = {
         usuario: f.usuario,
         nombres: f.nombre,
         apellidos: f.apellido,
         clave: f.clave,
-        generosFavoritos: f.generosFavoritos,
+        generosFavoritos: generosFavoritosStr,
         genero: f.genero,
         correo: f.correo,
         reputacion: 5.0
       };
 
-      // Envía solicitud HTTP al Backend para persistir físicamente en back/Persistencia/usuarios.json
+      // Envia solicitud HTTP al Backend para persistir fisicamente en back/Persistencia/usuarios.json
       this.http.post<any>(`${this.apiUrlUsuarios}/registro`, payload).subscribe({
         next: (res) => {
           this.usuariosBD.push(lectorRegistrado);
           localStorage.setItem('swop_usuarios', JSON.stringify(this.usuariosBD));
           console.log('Usuario persistido en back/Persistencia/usuarios.json:', res);
-          alert('¡Cuenta registrada con éxito! Los datos fueron guardados en el archivo usuarios.json.');
+          alert('Cuenta registrada con exito! Los datos fueron guardados en el archivo usuarios.json.');
           this.limpiarCampos();
         },
         error: (err) => {
-          // En caso de que el backend esté apagado, mantiene funcionamiento local
+          // En caso de que el backend este apagado, mantiene funcionamiento local
           this.usuariosBD.push(lectorRegistrado);
           localStorage.setItem('swop_usuarios', JSON.stringify(this.usuariosBD));
           console.log('Objeto Lector guardado en modo contingencia:', lectorRegistrado);
-          alert('¡Cuenta registrada con éxito!');
+          alert('Cuenta registrada con exito!');
           this.limpiarCampos();
         }
       });
@@ -159,6 +258,8 @@ export class PerfilUsuarioComponent implements OnInit {
   }
 
   private limpiarCampos(): void {
-    this.datosRegistro = { usuario: '', nombre: '', apellido: '', clave: '', generosFavoritos: '', genero: '', correo: '' };
+    this.datosRegistro = { usuario: '', nombre: '', apellido: '', clave: '', genero: '', correo: '' };
+    this.generosSeleccionados = [];
+    this.mensajeError = '';
   }
 }

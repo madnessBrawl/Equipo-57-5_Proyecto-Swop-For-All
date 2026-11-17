@@ -2,12 +2,13 @@
    ARCHIVO: intercambio.service.ts (FRONTEND: front/src/app/servicios/)
    Servicio: IntercambioService
    Función: Gestiona la comunicación HTTP con el Backend para la Gestión de Intercambios
-            (Crear oferta, Modificar oferta, Chat de negociación en tiempo real).
+            (Crear oferta, Modificar oferta, Confirmar, Chat de negociación en tiempo real,
+            y eliminación de solicitudes cerradas).
    Arquitectura: Servicio inyectable en Angular (Diseño 3.pdf / C4 - Capa Servicios).
    ========================================================================== */
 
-import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
@@ -26,13 +27,17 @@ export interface RespuestaIntercambio {
   error?: string;
 }
 
+interface RespuestaOferta {
+  oferta: OfertaIntercambio;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class IntercambioService {
   private readonly apiUrl = 'http://localhost:3000/api/intercambios';
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   /*
     Obtiene el nombre de usuario activo desde la sesión
@@ -49,12 +54,98 @@ export class IntercambioService {
   /*
     Genera cabeceras con el usuario de sesión para autorización
   */
-  private obtenerCabeceras(): HttpHeaders {
+  public obtenerCabeceras(): HttpHeaders {
     const usuario = this.obtenerUsuarioActual();
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'x-usuario': usuario
     });
+  }
+
+  private headersUsuario(usuario: string): HttpHeaders {
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'x-usuario': usuario
+    });
+  }
+
+  /*
+    HU: Consultar intercambios por participante (método de suite de pruebas)
+  */
+  public obtenerPorParticipante(usuario: string): Observable<OfertaIntercambio[]> {
+    return this.http.get<OfertaIntercambio[]>(this.apiUrl, {
+      headers: this.headersUsuario(usuario)
+    });
+  }
+
+  /*
+    HU: Crear oferta (método con modelo para suite de pruebas)
+  */
+  public crear(oferta: OfertaIntercambio, usuario: string): Observable<OfertaIntercambio> {
+    return this.http.post<RespuestaOferta>(
+      this.apiUrl,
+      {
+        idIntercambio: oferta.idIntercambio,
+        usuarioReceptor: oferta.usuarioReceptor,
+        librosOfrecidos: oferta.librosOfrecidos,
+        librosSolicitados: oferta.librosSolicitados
+      },
+      { headers: this.headersUsuario(usuario) }
+    ).pipe(map(respuesta => respuesta.oferta));
+  }
+
+  /*
+    HU: Modificar oferta (método con modelo para suite de pruebas)
+  */
+  public modificar(oferta: OfertaIntercambio, usuario: string): Observable<OfertaIntercambio> {
+    return this.http.put<RespuestaOferta>(
+      `${this.apiUrl}/${encodeURIComponent(oferta.idIntercambio)}`,
+      {
+        librosOfrecidos: oferta.librosOfrecidos,
+        librosSolicitados: oferta.librosSolicitados
+      },
+      { headers: this.headersUsuario(usuario) }
+    ).pipe(map(respuesta => respuesta.oferta));
+  }
+
+  /*
+    HU: Confirmar oferta
+  */
+  public confirmar(idIntercambio: string, usuario: string): Observable<OfertaIntercambio> {
+    return this.http.post<RespuestaOferta>(
+      `${this.apiUrl}/${encodeURIComponent(idIntercambio)}/confirmar`,
+      {},
+      { headers: this.headersUsuario(usuario) }
+    ).pipe(map(respuesta => respuesta.oferta));
+  }
+
+  /*
+    HU: Cancelar intercambio
+  */
+  public cancelar(idIntercambio: string, usuario: string): Observable<OfertaIntercambio> {
+    return this.http.post<RespuestaOferta>(
+      `${this.apiUrl}/${encodeURIComponent(idIntercambio)}/cancelar`,
+      {},
+      { headers: this.headersUsuario(usuario) }
+    ).pipe(map(respuesta => respuesta.oferta));
+  }
+
+  /*
+    HU: Eliminar de lista un intercambio finalizado o cancelado
+  */
+  public eliminarDeLista(idIntercambio: string, usuario: string): Observable<{
+    mensaje: string;
+    idIntercambio: string;
+    oculto: boolean;
+  }> {
+    return this.http.delete<{
+      mensaje: string;
+      idIntercambio: string;
+      oculto: boolean;
+    }>(
+      `${this.apiUrl}/${encodeURIComponent(idIntercambio)}`,
+      { headers: this.headersUsuario(usuario) }
+    );
   }
 
   /*
@@ -158,7 +249,7 @@ export class IntercambioService {
   */
   public cancelarOferta(idIntercambio: string): Observable<any> {
     const headers = this.obtenerCabeceras();
-    return this.http.delete<any>(`${this.apiUrl}/${idIntercambio}`, { headers }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/${idIntercambio}/cancelar`, {}, { headers }).pipe(
       map(res => {
         localStorage.removeItem('oferta_activa');
         localStorage.removeItem('oferta_activa_id');

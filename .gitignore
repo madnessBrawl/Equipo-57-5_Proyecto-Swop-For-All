@@ -10,6 +10,7 @@ front/.angular/
 # Variables de entorno (NUNCA subir a Git - contiene claves secretas)
 .env
 *.env.local
+/back/Persistencia/.swop-reputacion-key
 
 # Logs
 *.log

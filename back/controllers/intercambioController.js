@@ -2,7 +2,7 @@
   Archivo: intercambioController.js (BACKEND: back/controllers/)
   Clase: ControladorIntercambio
   Función: Controlador orientado a objetos que orquesta la creación, modificación,
-           seguimiento y sala de chat de ofertas de intercambio entre lectores de Swop-For-All.
+           seguimiento, confirmaciones y sala de chat de ofertas de intercambio entre lectores de Swop-For-All.
            Sigue la teoría de Diseño 3 (arquitectura en capas C4 / MVC / Repository).
 */
 
@@ -11,20 +11,21 @@ const IntercambioPersistencia = require('../Persistencia/IntercambioPersistencia
 const CifradoService = require('../Service/CifradoService');
 
 class ControladorIntercambio {
-  constructor(persistencia = null, libroRepository = null, cifradoService = new CifradoService()) {
-    if (persistencia instanceof Map) {
-      this._ofertasDB = persistencia;
+  constructor(baseDeDatos = null, cifradoService = new CifradoService(), libroController = null, libroRepository = null) {
+    if (baseDeDatos instanceof Map) {
+      this._ofertasDB = baseDeDatos;
       this._persistencia = null;
-    } else if (persistencia) {
-      this._persistencia = persistencia;
+    } else if (baseDeDatos && typeof baseDeDatos.guardar === 'function') {
+      this._persistencia = baseDeDatos;
       this._ofertasDB = new Map();
     } else {
       this._ofertasDB = new Map();
       this._persistencia = null;
     }
 
-    this._libroRepository = libroRepository;
     this._cifradoService = cifradoService;
+    this._libroController = libroController;
+    this._libroRepository = libroRepository;
   }
 
   // Getters para inspección
@@ -41,17 +42,22 @@ class ControladorIntercambio {
     Precondición: Usuario autenticado y libros seleccionados.
     Restricción 3.4 del Brief: Un libro solo puede formar parte de un intercambio activo a la vez.
   */
-  crearOferta({ usuarioReceptor, librosOfrecidos = [], librosSolicitados = [], mensajeInicial = '' }, usuarioSesion) {
+  crearOferta({ id, idIntercambio, usuarioReceptor, librosOfrecidos = [], librosSolicitados = [], mensajeInicial = '' } = {}, usuarioSesion) {
     if (!usuarioSesion) {
       throw new Error('Debe iniciar sesión para crear una oferta de intercambio.');
     }
 
+    const idFinal = id || idIntercambio;
+
     const nuevaOferta = new OfertaIntercambio({
+      id: idFinal,
+      idIntercambio: idFinal,
       usuarioEmisor: usuarioSesion,
       usuarioReceptor: usuarioReceptor,
       librosOfrecidos: librosOfrecidos,
       librosSolicitados: librosSolicitados,
-      estado: 'Pendiente'
+      estado: 'Pendiente',
+      confirmaciones: []
     });
 
     const error = nuevaOferta.validar();
@@ -66,6 +72,7 @@ class ControladorIntercambio {
         ? this._persistencia.buscarIntercambioActivoPorLibro(idLib)
         : Array.from(this._ofertasDB.values()).find(o =>
             ['Pendiente', 'Modificada', 'Aceptada'].includes(o.estado) &&
+            Array.isArray(o.librosSolicitados) &&
             o.librosSolicitados.some(s => (typeof s === 'object' ? s.id : s) === idLib)
           );
 
@@ -88,9 +95,8 @@ class ControladorIntercambio {
       });
     }
 
-    // Persistencia física en JSON (si hay persistencia configurada) y en memoria
-    const guardada = this._persistencia ? this._persistencia.guardar(nuevaOferta) : nuevaOferta.toJSON();
-    this._ofertasDB.set(nuevaOferta.idIntercambio, nuevaOferta);
+    // Guardado unificado
+    const guardada = this._guardar(nuevaOferta);
 
     // Actualiza disponibilidad del libro solicitado si hay repositorio disponible
     if (this._libroRepository && typeof this._libroRepository.actualizarDisponibilidad === 'function') {
@@ -109,36 +115,33 @@ class ControladorIntercambio {
     HU: Modificar oferta de intercambio
     Permite ajustar libros propios ofrecidos y libros ajenos solicitados.
   */
-  modificarOferta(idIntercambio, { librosOfrecidos, librosSolicitados }, usuarioSesion) {
+  modificarOferta(idIntercambio, { librosOfrecidos, librosSolicitados } = {}, usuarioSesion) {
     if (!usuarioSesion) {
       throw new Error('Debe estar autenticado para modificar una oferta.');
     }
 
-    const registro = (this._persistencia ? this._persistencia.buscarPorId(idIntercambio) : null) ||
-                     this._ofertasDB.get(idIntercambio);
+    const registro = this._buscar(idIntercambio);
     if (!registro) {
       throw new Error(`La oferta con ID ${idIntercambio} no fue encontrada.`);
     }
 
-    const oferta = (registro instanceof OfertaIntercambio) ? registro : new OfertaIntercambio(registro);
-
-    // Regla de seguridad: solo los lectores involucrados pueden modificarla
-    const u = String(usuarioSesion).trim().toLowerCase();
-    const emisor = String(oferta.usuarioEmisor).trim().toLowerCase();
-    const receptor = String(oferta.usuarioReceptor).trim().toLowerCase();
-    if (emisor !== u && receptor !== u) {
+    // Regla de seguridad: solo los involucrados pueden modificarla
+    if (!this._esParticipante(registro, usuarioSesion)) {
       throw new Error('No tiene permisos para modificar esta oferta de intercambio.');
     }
 
-    if (oferta.estado === 'Finalizado' || oferta.estado === 'Cancelada' || oferta.estado === 'Rechazada') {
-      throw new Error(`No se puede modificar una oferta en estado "${oferta.estado}".`);
+    if (registro.estado === 'Finalizado' || registro.estado === 'Cancelada') {
+      throw new Error('No se puede modificar un intercambio cerrado.');
+    }
+    if (registro.estado === 'Rechazada') {
+      throw new Error(`No se puede modificar una oferta en estado "${registro.estado}".`);
     }
 
     // ── Validación: un mismo libro propio no puede ofrecerse en más de un intercambio activo ──
-    if (this._persistencia && Array.isArray(librosOfrecidos)) {
+    if (this._persistencia && Array.isArray(librosOfrecidos) && typeof this._persistencia.buscarIntercambioActivoPorLibroOfrecido === 'function') {
       for (const lib of librosOfrecidos) {
-        const idLib    = typeof lib === 'object' ? lib.id : lib;
-        const titulo   = typeof lib === 'object' ? (lib.titulo || idLib) : idLib;
+        const idLib = typeof lib === 'object' ? lib.id : lib;
+        const titulo = typeof lib === 'object' ? (lib.titulo || idLib) : idLib;
         const conflicto = this._persistencia.buscarIntercambioActivoPorLibroOfrecido(
           idLib, usuarioSesion, idIntercambio
         );
@@ -152,13 +155,23 @@ class ControladorIntercambio {
       }
     }
 
-    oferta.actualizarLibros({ librosOfrecidos, librosSolicitados });
+    const oferta = (registro instanceof OfertaIntercambio) ? registro : this._hidratar(registro);
 
-    // Guardar en persistencia JSON y en memoria
-    const guardada = this._persistencia ? this._persistencia.guardar(oferta) : oferta.toJSON();
-    this._ofertasDB.set(oferta.idIntercambio, oferta);
+    if (Array.isArray(librosOfrecidos)) {
+      oferta._librosOfrecidos = [...librosOfrecidos];
+    }
+    if (Array.isArray(librosSolicitados)) {
+      oferta._librosSolicitados = [...librosSolicitados];
+    }
+    if (oferta.librosSolicitados.length === 0) {
+      throw new Error('Debe solicitar al menos un libro para mantener el intercambio.');
+    }
 
-    return guardada;
+    oferta._confirmaciones = [];
+    oferta.estado = 'Modificada';
+    oferta._fechaModificacion = new Date().toISOString();
+
+    return this._guardar(oferta);
   }
 
   /*
@@ -170,19 +183,15 @@ class ControladorIntercambio {
       throw new Error('Debe iniciar sesión para enviar mensajes en el chat.');
     }
 
-    const registro = (this._persistencia ? this._persistencia.buscarPorId(idIntercambio) : null) ||
-                     this._ofertasDB.get(idIntercambio);
+    const registro = this._buscar(idIntercambio);
     if (!registro) {
       throw new Error(`El intercambio con ID ${idIntercambio} no fue encontrado.`);
     }
 
-    const oferta = (registro instanceof OfertaIntercambio) ? registro : new OfertaIntercambio(registro);
+    const oferta = (registro instanceof OfertaIntercambio) ? registro : this._hidratar(registro);
     const mensajeNuevo = oferta.agregarMensaje({ remitente: usuarioSesion, texto });
 
-    if (this._persistencia) {
-      this._persistencia.guardar(oferta);
-    }
-    this._ofertasDB.set(oferta.idIntercambio, oferta);
+    this._guardar(oferta);
 
     return {
       mensaje: 'Mensaje enviado exitosamente',
@@ -216,31 +225,85 @@ class ControladorIntercambio {
     Consulta una oferta por su ID único
   */
   obtenerOfertaPorId(idIntercambio) {
-    const encontrada = (this._persistencia ? this._persistencia.buscarPorId(idIntercambio) : null) ||
-                       this._ofertasDB.get(idIntercambio);
-    if (!encontrada) return null;
-    return (encontrada instanceof OfertaIntercambio) ? encontrada.toJSON() : encontrada;
+    const oferta = this._buscar(idIntercambio);
+    return oferta ? this._serializar(oferta) : null;
   }
 
   /*
-    Lista los intercambios de un usuario específico
+    Lista los intercambios de un participante
+  */
+  obtenerOfertasPorParticipante(usuarioSesion, { incluirOcultas = false } = {}) {
+    if (!usuarioSesion) return [];
+    const usuario = String(usuarioSesion).trim().toLowerCase();
+    const ofertas = this._persistencia
+      ? this._persistencia.obtenerTodos()
+      : [...this._ofertasDB.values()].map(oferta => this._serializar(oferta));
+    return ofertas.filter(oferta => {
+      const esParticipante =
+        String(oferta.usuarioEmisor || '').toLowerCase() === usuario ||
+        String(oferta.usuarioReceptor || '').toLowerCase() === usuario;
+      const ocultoPara = Array.isArray(oferta.ocultoPara) ? oferta.ocultoPara : [];
+      const estaOculta = ocultoPara.some(
+        participante => String(participante).toLowerCase() === usuario
+      );
+      return esParticipante && (incluirOcultas || !estaOculta);
+    });
+  }
+
+  /*
+    Alias para compatibilidad: busca intercambios de un usuario
   */
   obtenerOfertasUsuario(usuario) {
-    if (!usuario) return [];
-    if (this._persistencia) {
-      return this._persistencia.buscarPorParticipante(usuario);
-    }
-    const u = String(usuario).trim().toLowerCase();
-    return Array.from(this._ofertasDB.values())
-      .filter(o => o.usuarioEmisor.toLowerCase() === u || o.usuarioReceptor.toLowerCase() === u)
-      .map(o => (typeof o.toJSON === 'function' ? o.toJSON() : o));
+    return this.obtenerOfertasPorParticipante(usuario);
   }
 
   /*
     Lista todas las ofertas
   */
   obtenerTodasLasOfertas() {
-    return this._persistencia ? this._persistencia.obtenerTodos() : Array.from(this._ofertasDB.values());
+    return this._persistencia ? this._persistencia.obtenerTodos() : Array.from(this._ofertasDB.values()).map(o => this._serializar(o));
+  }
+
+  /*
+    Confirma una oferta de intercambio
+  */
+  confirmarOferta(idIntercambio, usuarioSesion) {
+    if (!usuarioSesion) {
+      throw new Error('Debe iniciar sesión para confirmar el intercambio.');
+    }
+    const registro = this._buscar(idIntercambio);
+    if (!registro) {
+      throw new Error(`La oferta con ID ${idIntercambio} no fue encontrada.`);
+    }
+    if (!this._esParticipante(registro, usuarioSesion)) {
+      throw new Error('No tiene permisos para confirmar este intercambio.');
+    }
+    if (registro.estado === 'Cancelada') {
+      throw new Error('No se puede confirmar un intercambio cancelado.');
+    }
+
+    const oferta = (registro instanceof OfertaIntercambio) ? registro : this._hidratar(registro);
+
+    if (oferta.estado !== 'Finalizado') {
+      if (oferta.librosOfrecidos.length === 0 || oferta.librosSolicitados.length === 0) {
+        throw new Error('Ambos usuarios deben tener libros definidos antes de confirmar.');
+      }
+      const confirmaciones = new Set(oferta.confirmaciones || []);
+      confirmaciones.add(usuarioSesion);
+      oferta._confirmaciones = [...confirmaciones];
+      const participantes = [oferta.usuarioEmisor.toLowerCase(), oferta.usuarioReceptor.toLowerCase()];
+      const confirmaronTodos = participantes.every(usuario =>
+        oferta.confirmaciones.some(confirmante => String(confirmante).toLowerCase() === usuario)
+      );
+      if (confirmaronTodos) {
+        this._libroController?.transferirLibros(oferta);
+        oferta.estado = 'Finalizado';
+      } else {
+        oferta.estado = 'Pendiente';
+      }
+      oferta._fechaModificacion = new Date().toISOString();
+    }
+    return this._guardar(oferta);
   }
 
   /*
@@ -248,24 +311,25 @@ class ControladorIntercambio {
   */
   cancelarOferta(idIntercambio, usuarioSesion) {
     if (!usuarioSesion) {
-      throw new Error('Debe iniciar sesión para cancelar una oferta.');
+      throw new Error('Debe iniciar sesión para cancelar el intercambio.');
     }
-
-    const registro = (this._persistencia ? this._persistencia.buscarPorId(idIntercambio) : null) ||
-                     this._ofertasDB.get(idIntercambio);
+    const registro = this._buscar(idIntercambio);
     if (!registro) {
       throw new Error(`La oferta con ID ${idIntercambio} no fue encontrada.`);
     }
-
-    const oferta = (registro instanceof OfertaIntercambio) ? registro : new OfertaIntercambio(registro);
-    const u = String(usuarioSesion).trim().toLowerCase();
-    if (oferta.usuarioEmisor.toLowerCase() !== u && oferta.usuarioReceptor.toLowerCase() !== u) {
+    if (!this._esParticipante(registro, usuarioSesion)) {
       throw new Error('No tiene permisos para cancelar este intercambio.');
     }
+    if (registro.estado === 'Finalizado') {
+      throw new Error('No se puede cancelar un intercambio finalizado.');
+    }
 
+    const oferta = (registro instanceof OfertaIntercambio) ? registro : this._hidratar(registro);
     oferta.estado = 'Cancelada';
-    const guardada = this._persistencia ? this._persistencia.guardar(oferta) : oferta.toJSON();
-    this._ofertasDB.set(oferta.idIntercambio, oferta);
+    oferta._confirmaciones = [];
+    oferta._fechaModificacion = new Date().toISOString();
+
+    const guardada = this._guardar(oferta);
 
     // Liberar disponibilidad de libros si hay repositorio
     if (this._libroRepository && typeof this._libroRepository.actualizarDisponibilidad === 'function') {
@@ -278,6 +342,90 @@ class ControladorIntercambio {
     }
 
     return guardada;
+  }
+
+  /*
+    Elimina o quita de la lista un intercambio cerrado
+  */
+  eliminarOfertaDeLista(idIntercambio, usuarioSesion) {
+    if (!usuarioSesion) {
+      throw new Error('Debe iniciar sesión para eliminar un intercambio.');
+    }
+    const registro = this._buscar(idIntercambio);
+    if (!registro) {
+      throw new Error(`La oferta con ID ${idIntercambio} no fue encontrada.`);
+    }
+    if (!this._esParticipante(registro, usuarioSesion)) {
+      throw new Error('No tiene permisos para eliminar esta oferta de intercambio.');
+    }
+    if (registro.estado === 'Finalizado') {
+      const usuario = String(usuarioSesion).trim();
+      const oferta = (registro instanceof OfertaIntercambio) ? registro : this._hidratar(registro);
+      const ocultoPara = Array.isArray(oferta.ocultoPara) ? oferta.ocultoPara : [];
+      if (!ocultoPara.some(participante =>
+        String(participante).toLowerCase() === usuario.toLowerCase()
+      )) {
+        oferta._ocultoPara = [...ocultoPara, usuario];
+        this._guardar(oferta);
+      }
+      return { idIntercambio: oferta.idIntercambio, oculto: true };
+    }
+    if (registro.estado !== 'Cancelada') {
+      throw new Error('Solo se pueden quitar de la lista intercambios finalizados o cancelados.');
+    }
+
+    const eliminada = this._persistencia
+      ? this._persistencia.eliminar(registro.idIntercambio || registro.id)
+      : this._ofertasDB.delete(registro.idIntercambio || registro.id);
+    if (!eliminada) {
+      throw new Error(`No se pudo eliminar la oferta con ID ${idIntercambio}.`);
+    }
+    return { idIntercambio: registro.idIntercambio || registro.id, oculto: false };
+  }
+
+  _buscar(idIntercambio) {
+    if (!idIntercambio) return null;
+    const idBuscado = String(idIntercambio).trim();
+    if (!this._persistencia) {
+      const oferta = this._ofertasDB.get(idBuscado);
+      if (oferta) return oferta;
+      for (const o of this._ofertasDB.values()) {
+        if (String(o.idIntercambio || o.id) === idBuscado) {
+          return o;
+        }
+      }
+      return null;
+    }
+    return (typeof this._persistencia.buscarPorId === 'function'
+      ? this._persistencia.buscarPorId(idBuscado)
+      : null) ||
+      this._persistencia.buscarPorPredicado(oferta =>
+        String(oferta.idIntercambio || oferta.id) === idBuscado
+      )[0] || null;
+  }
+
+  _guardar(oferta) {
+    const serializada = this._serializar(oferta);
+    if (this._persistencia) {
+      return this._persistencia.guardar({ ...serializada, id: serializada.idIntercambio });
+    }
+    const instancia = oferta instanceof OfertaIntercambio ? oferta : this._hidratar(oferta);
+    this._ofertasDB.set(instancia.idIntercambio, instancia);
+    return instancia.toJSON();
+  }
+
+  _serializar(oferta) {
+    return (oferta && typeof oferta.toJSON === 'function') ? oferta.toJSON() : { ...oferta };
+  }
+
+  _hidratar(oferta) {
+    return new OfertaIntercambio(oferta);
+  }
+
+  _esParticipante(oferta, usuarioSesion) {
+    const usuario = String(usuarioSesion).trim().toLowerCase();
+    return [oferta.usuarioEmisor, oferta.usuarioReceptor]
+      .some(participante => String(participante || '').toLowerCase() === usuario);
   }
 }
 

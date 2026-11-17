@@ -24,6 +24,7 @@ export class CalificarReputacionComponent implements OnInit {
   tipoSeleccionado: TipoCalificacion = 'lector';       // Qué se califica: lector o intercambio
   intercambios: Intercambio[] = [];                    // Intercambios finalizados del usuario
   idIntercambioSeleccionado: string = '';              // Intercambio elegido en la lista
+  cargandoIntercambios = false;
   yaCalificado: boolean = false;                       // true si ya calificó lo elegido
   puntuacion: number = 0;                              // Estrellas elegidas (0 = ninguna)
   textoComentario: string = '';                        // Texto del comentario (opcional)
@@ -61,7 +62,19 @@ export class CalificarReputacionComponent implements OnInit {
   /* 4. SELECCIÓN: tipo de calificación e intercambio*/
   // Carga los intercambios finalizados donde participó el usuario
   cargarIntercambios(): void {
-    this.intercambios = this.servicio.obtenerIntercambiosFinalizados(this.usuarioActual!);
+    this.cargandoIntercambios = true;
+    this.servicio.obtenerIntercambiosFinalizados(this.usuarioActual!).subscribe({
+      next: intercambios => {
+        this.intercambios = intercambios;
+        this.cargandoIntercambios = false;
+        this.changeDetector.markForCheck();
+      },
+      error: () => {
+        this.cargandoIntercambios = false;
+        this.mostrarMensaje('error', 'No se pudieron cargar los intercambios finalizados.');
+        this.changeDetector.markForCheck();
+      }
+    });
   }
 
   // Cambia entre calificar al lector o calificar el intercambio

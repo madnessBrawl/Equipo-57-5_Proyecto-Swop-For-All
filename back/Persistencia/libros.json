@@ -102,7 +102,7 @@
       "PETER"
     ],
     "disponible": true,
-    "propietario": "LULA",
+    "propietario": "ñoño",
     "fechaRegistro": "2026-11-16T14:40:12.345Z"
   },
   {
@@ -186,7 +186,7 @@
     "categorias": [],
     "disponible": false,
     "propietario": "andres",
-    "fechaRegistro": "2026-11-17T02:31:39.047Z"
+    "fechaRegistro": "2026-11-17T03:35:13.308Z"
   },
   {
     "id": "lib_mwjkp5d4_wis8k",
@@ -227,7 +227,7 @@
     "categorias": [],
     "disponible": true,
     "propietario": "juan",
-    "fechaRegistro": "2026-11-17T02:31:39.060Z"
+    "fechaRegistro": "2026-11-17T03:35:13.321Z"
   },
   {
     "id": "lib_mwjkpmlw_9hogk",
@@ -676,5 +676,50 @@
     "disponible": true,
     "propietario": "lector_logueado",
     "fechaRegistro": "2026-11-17T02:31:39.058Z"
+  },
+  {
+    "id": "lib_mwjx0e0c_siqgu",
+    "titulo": "ñoñolndia",
+    "autores": [
+      "ñoñolndia"
+    ],
+    "autoresTexto": "ñoñolndia",
+    "descripcion": "ñoñolndia",
+    "portadaUrl": "",
+    "isbn": "4124214124512",
+    "categorias": [
+      "ñoñolndia"
+    ],
+    "disponible": true,
+    "propietario": "LULA",
+    "fechaRegistro": "2026-11-16T23:49:07.692Z"
+  },
+  {
+    "id": "lib_mwk535b8_7mxce",
+    "titulo": "Rayuela",
+    "autores": [
+      "Julio Cortázar"
+    ],
+    "autoresTexto": "Julio Cortázar",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-17T03:35:13.316Z"
+  },
+  {
+    "id": "lib_mwk535bb_s4fms",
+    "titulo": "Rayuela",
+    "autores": [],
+    "autoresTexto": "Autor Desconocido",
+    "descripcion": "",
+    "portadaUrl": "",
+    "isbn": "9780306406157",
+    "categorias": [],
+    "disponible": true,
+    "propietario": "lector_logueado",
+    "fechaRegistro": "2026-11-17T03:35:13.319Z"
   }
 ]

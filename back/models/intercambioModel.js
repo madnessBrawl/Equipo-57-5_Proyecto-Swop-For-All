@@ -16,7 +16,9 @@ class OfertaIntercambio {
     estado = 'Pendiente',
     mensajes = [],
     fechaCreacion = new Date().toISOString(),
-    fechaModificacion = new Date().toISOString()
+    fechaModificacion = new Date().toISOString(),
+    confirmaciones = [],
+    ocultoPara = []
   } = {}) {
     const idFinal = id || idIntercambio || `INT-${Date.now().toString(36)}`;
     this._id = idFinal;
@@ -29,6 +31,8 @@ class OfertaIntercambio {
     this._mensajes = Array.isArray(mensajes) ? [...mensajes] : [];
     this._fechaCreacion = fechaCreacion;
     this._fechaModificacion = fechaModificacion;
+    this._confirmaciones = Array.isArray(confirmaciones) ? [...confirmaciones] : [];
+    this._ocultoPara = Array.isArray(ocultoPara) ? [...ocultoPara] : [];
   }
 
   // Getters para encapsulamiento
@@ -42,6 +46,8 @@ class OfertaIntercambio {
   get mensajes() { return [...this._mensajes]; }
   get fechaCreacion() { return this._fechaCreacion; }
   get fechaModificacion() { return this._fechaModificacion; }
+  get confirmaciones() { return [...this._confirmaciones]; }
+  get ocultoPara() { return [...this._ocultoPara]; }
 
   // Setters controlados
   set estado(nuevoEstado) {
@@ -155,7 +161,9 @@ class OfertaIntercambio {
       estado: this._estado,
       mensajes: this._mensajes,
       fechaCreacion: this._fechaCreacion,
-      fechaModificacion: this._fechaModificacion
+      fechaModificacion: this._fechaModificacion,
+      confirmaciones: this._confirmaciones,
+      ocultoPara: this._ocultoPara
     };
   }
 }

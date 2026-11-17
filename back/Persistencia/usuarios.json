@@ -88,5 +88,38 @@
     "correo": "b003135b468f64419a1bcb84b51c22c5.0b24d7d6c03ac8a912b2aaf214069e62",
     "reputacion": 5,
     "id": "reg_mwk1wihs_0t8k3"
+  },
+  {
+    "usuario": "Cj",
+    "nombres": "sanandreas",
+    "apellidos": "geteastories",
+    "clave": "123456",
+    "generosFavoritos": "romance",
+    "genero": "Mujer",
+    "correo": "vicecity@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjrbwh1_avfa2"
+  },
+  {
+    "usuario": "Gorge",
+    "nombres": "miguel",
+    "apellidos": "Cuerdas",
+    "clave": "2",
+    "generosFavoritos": "terror",
+    "genero": "Hombre",
+    "correo": "dfdfffaffffffffff",
+    "reputacion": 5,
+    "id": "reg_mwjzfw2d_y7bu7"
+  },
+  {
+    "usuario": "Flug",
+    "nombres": "hernandez",
+    "apellidos": "ranchez",
+    "clave": "12345T",
+    "generosFavoritos": "Terror",
+    "genero": "Hombre",
+    "correo": "aicnin@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwk29k1m_wgoso"
   }
 ]

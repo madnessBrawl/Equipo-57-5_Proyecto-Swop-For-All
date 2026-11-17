@@ -59,6 +59,134 @@ div.estado-sin-oferta p {
   margin-bottom: 24px;
 }
 
+section.lista-ofertas {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+section.lista-ofertas h2 {
+  margin: 0;
+  color: var(--color-texto-principal);
+}
+
+.fila-oferta-lista {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+button.tarjeta-oferta-lista {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--color-borde-caja);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--color-texto-principal);
+  text-align: left;
+  cursor: pointer;
+}
+
+button.boton-quitar-oferta-lista {
+  align-self: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #dc3545;
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.boton-quitar-oferta-lista:hover {
+  background: #b02a37;
+}
+
+button.tarjeta-oferta-seleccionada {
+  border-color: var(--color-cabecera);
+  box-shadow: 0 0 0 1px var(--color-cabecera);
+}
+
+button.tarjeta-oferta-lista small {
+  grid-column: 1 / -1;
+  color: var(--color-texto-secundario);
+}
+
+span.estado-lista-oferta {
+  color: #856404;
+  font-weight: 700;
+}
+
+.estado-intercambio,
+.mensaje-intercambio {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  color: var(--color-texto-principal);
+}
+
+.error-intercambio {
+  background: #fff0f0;
+  color: #a32121;
+}
+
+.resumen-confirmaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: #fff8e1;
+  color: var(--color-texto-principal);
+}
+
+.resumen-confirmaciones p {
+  flex-basis: 100%;
+  margin: 0;
+  color: #176b36;
+  font-weight: 700;
+}
+
+.aviso-intercambio {
+  margin: 0 0 14px;
+  color: #856404;
+}
+
+.autor-libro-intercambio {
+  display: block;
+  color: #777;
+  font-size: 11px;
+}
+
+.etiqueta-seleccionada {
+  color: #176b36;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.acciones-intercambio {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: not-allowed !important;
+}
+
 /* ---------- div: Encabezado de la oferta activa ---------- */
 div.encabezado-oferta-activa {
   display: flex;

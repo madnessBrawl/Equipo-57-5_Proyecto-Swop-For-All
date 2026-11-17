@@ -6,8 +6,11 @@
 
 const PersistenciaJSON = require('./PersistenciaJSON');
 const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const SALT = Buffer.from('swop-for-all-calificaciones-v1');
+const ARCHIVO_CLAVE = path.join(__dirname, '.swop-reputacion-key');
 
 class CalificacionPersistencia extends PersistenciaJSON {
   constructor(nombreArchivo = 'calificaciones.json') {
@@ -17,7 +20,7 @@ class CalificacionPersistencia extends PersistenciaJSON {
     const registros = super.obtenerTodos();
     if (registros.length > 0) {
       if (!this._claveCifrado) {
-        throw new Error('Configure SWOP_REPUTACION_KEY para leer o migrar las calificaciones persistidas.');
+        throw new Error('No fue posible inicializar el cifrado de reputación.');
       }
 
       const migrados = registros.map(registro =>
@@ -72,17 +75,37 @@ class CalificacionPersistencia extends PersistenciaJSON {
   }
 
   _obtenerClaveCifrado() {
-    const secreto = process.env.SWOP_REPUTACION_KEY;
-    if (!secreto) return null;
+    const secreto = process.env.SWOP_REPUTACION_KEY || this._obtenerSecretoPersistido();
     if (secreto.length < 32) {
-      throw new Error('SWOP_REPUTACION_KEY debe tener al menos 32 caracteres.');
+      throw new Error('La clave de cifrado de reputación configurada no es válida.');
     }
     return crypto.scryptSync(secreto, SALT, 32);
   }
 
+  _obtenerSecretoPersistido() {
+    try {
+      return fs.readFileSync(ARCHIVO_CLAVE, 'utf8').trim();
+    } catch (error) {
+      if (error.code !== 'ENOENT') {
+        throw new Error('No fue posible acceder a la clave local de reputación.');
+      }
+    }
+
+    const secreto = crypto.randomBytes(32).toString('hex');
+    try {
+      fs.writeFileSync(ARCHIVO_CLAVE, secreto, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
+      return secreto;
+    } catch (error) {
+      if (error.code === 'EEXIST') {
+        return fs.readFileSync(ARCHIVO_CLAVE, 'utf8').trim();
+      }
+      throw new Error('No fue posible guardar la clave local de reputación.');
+    }
+  }
+
   _cifrar(registro) {
     if (!this._claveCifrado) {
-      throw new Error('Configure SWOP_REPUTACION_KEY antes de guardar calificaciones.');
+      throw new Error('No fue posible cifrar la calificación.');
     }
     const { id, ...datosSensibles } = registro;
     const iv = crypto.randomBytes(12);
@@ -105,7 +128,7 @@ class CalificacionPersistencia extends PersistenciaJSON {
   _descifrar(registro) {
     if (!registro.cifrado) return registro;
     if (!this._claveCifrado) {
-      throw new Error('Configure SWOP_REPUTACION_KEY para leer las calificaciones persistidas.');
+      throw new Error('No fue posible descifrar las calificaciones.');
     }
 
     const descifrador = crypto.createDecipheriv(

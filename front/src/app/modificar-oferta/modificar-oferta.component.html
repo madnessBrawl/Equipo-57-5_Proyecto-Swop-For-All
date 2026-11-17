@@ -1,204 +1,230 @@
-<!-- ==========================================================================
-     PLANTILLA: modificar-oferta.component.html (Interfaz 3 / 6: Sala de Intercambio)
-     Función: Modificar términos de oferta, selección de inventario y chat.
-     Reglas:
-       1. Bloqueado si no hay intercambio iniciado desde el catálogo.
-       2. Inicia con 0 libros ofrecidos por el usuario.
-       3. Solo permite ofrecer libros que el usuario posea en su inventario.
-     ========================================================================== -->
-
 <main id="area-trabajo-intercambio" class="area-trabajo-intercambio">
   <div id="tarjeta-intercambio-contenedor" class="tarjeta-intercambio-contenedor">
+    @if (estaCargando) {
+      <p class="estado-intercambio">Cargando tus solicitudes e intercambios…</p>
+    }
 
-    <!-- ==================== CASO 1: NO HAY INTERCAMBIO INICIADO ==================== -->
-    @if (!tieneOfertaActiva) {
+    @if (error) {
+      <p class="mensaje-intercambio error-intercambio" role="alert">{{ error }}</p>
+    }
+
+    @if (!estaCargando && ofertas.length === 0) {
       <div id="bloque-sin-oferta" class="estado-sin-oferta">
         <div style="font-size: 56px; margin-bottom: 16px;">🤝</div>
-        <h2>No tienes ningún intercambio activo en curso</h2>
-        <p>
-          Para poder utilizar esta sala de negociación, primero debes iniciar una solicitud desde el 
-          <strong>Catálogo Global</strong> seleccionando el libro que deseas y presionando <em>"Solicitar Intercambio"</em>.
-        </p>
-        <button
-          type="button"
-          id="boton-ir-catalogo-vacio"
-          class="boton-guardar-modificacion"
-          (click)="irAlCatalogo()">
-          📚 Ir a Explorar el Catálogo Global
+        <h2>No tienes solicitudes de intercambio</h2>
+        <p>Las solicitudes que envíes o recibas desde el catálogo aparecerán aquí.</p>
+        <button type="button" class="boton-guardar-modificacion" (click)="irAlCatalogo()">
+          📚 Ir al Catálogo Global
         </button>
       </div>
     }
 
-    <!-- ==================== CASO 2: HAY INTERCAMBIO ACTIVO INICIADO ==================== -->
-    @if (tieneOfertaActiva) {
-      <!-- Encabezado con estado y detalles -->
-      <div id="encabezado-oferta-activa" class="encabezado-oferta-activa">
-        <div>
-          <h2>🔄 Negociación de Intercambio</h2>
-          <p style="margin: 4px 0 0 0; color: var(--color-texto-secundario); font-size: 14px;">
-            Negociando con el lector: <strong>{{ usuarioInterlocutor }}</strong> | Código: <code>{{ idIntercambio }}</code>
-          </p>
+    @if (ofertas.length > 0) {
+      <section class="lista-ofertas" aria-label="Solicitudes e intercambios">
+        <h2>Solicitudes e intercambios</h2>
+        @for (oferta of ofertas; track oferta.idIntercambio) {
+          <div class="fila-oferta-lista">
+            <button
+              type="button"
+              class="tarjeta-oferta-lista"
+              [class.tarjeta-oferta-seleccionada]="ofertaActiva?.idIntercambio === oferta.idIntercambio"
+              (click)="seleccionarOferta(oferta)">
+              <span>
+                {{ esEmisorDe(oferta) ? 'Solicitud enviada a' : 'Solicitud recibida de' }}
+                <strong>{{ esEmisorDe(oferta) ? oferta.usuarioReceptor : oferta.usuarioEmisor }}</strong>
+              </span>
+              <span class="estado-lista-oferta">{{ oferta.estado }}</span>
+              <small>{{ titulosLibros(oferta.librosSolicitados) }}</small>
+            </button>
+            @if (oferta.estado === 'Cancelada' || oferta.estado === 'Finalizado') {
+              <button
+                type="button"
+                class="boton-quitar-oferta-lista"
+                [disabled]="eliminandoOfertaId !== null"
+                [attr.aria-label]="(oferta.estado === 'Finalizado' ? 'Quitar intercambio finalizado con ' : 'Eliminar intercambio cancelado con ') + (esEmisorDe(oferta) ? oferta.usuarioReceptor : oferta.usuarioEmisor)"
+                [title]="oferta.estado === 'Finalizado' ? 'Quitar de tu lista' : 'Eliminar intercambio cancelado'"
+                (click)="eliminarOfertaDeLista(oferta)">
+                ×
+              </button>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    @if (ofertaActiva; as oferta) {
+      <section class="detalle-intercambio">
+        <div id="encabezado-oferta-activa" class="encabezado-oferta-activa">
+          <div>
+            <h2>🔄 Negociación de Intercambio</h2>
+            <p style="margin: 4px 0 0 0; color: var(--color-texto-secundario); font-size: 14px;">
+              Intercambio con: <strong>{{ usuarioInterlocutor }}</strong> |
+              Código: <code>{{ oferta.idIntercambio }}</code>
+            </p>
+          </div>
+          <span class="etiqueta-estado-oferta">{{ oferta.estado }}</span>
         </div>
-        <div>
-          <span class="etiqueta-estado-oferta">{{ ofertaActiva.estado }}</span>
+
+        <div class="resumen-confirmaciones" aria-live="polite">
+          <strong>Confirmaciones:</strong>
+          <span>{{ usuarioActual }}: {{ usuarioConfirmo ? 'Confirmado' : 'Pendiente' }}</span>
+          <span>{{ usuarioInterlocutor }}: {{ interlocutorConfirmo ? 'Confirmado' : 'Pendiente' }}</span>
+          @if (oferta.estado === 'Finalizado') {
+            <p>El intercambio fue confirmado por ambos usuarios y está cerrado.</p>
+          }
         </div>
-      </div>
 
-      <!-- Cuadrícula de 2 columnas para gestión de libros -->
-      <div id="rejilla-columnas-intercambio" class="rejilla-columnas-intercambio">
+        @if (mensajeEstado) {
+          <p class="mensaje-intercambio" role="status">{{ mensajeEstado }}</p>
+        }
 
-        <!-- ==================== COLUMNA IZQUIERDA: LIBROS DEL USUARIO ==================== -->
-        <div id="columna-libros-propios" class="columna-gestion-libros">
-          <h3>📦 Tus Libros Ofrecidos</h3>
+        <div id="rejilla-columnas-intercambio" class="rejilla-columnas-intercambio">
+          <div id="columna-libros-propios" class="columna-gestion-libros">
+            <h3>📦 Tus libros en el intercambio</h3>
+            @if (librosPropiosEnOferta.length === 0) {
+              <p class="aviso-intercambio">Aún no has añadido libros propios a esta propuesta.</p>
+            } @else {
+              <ul class="lista-libros-intercambio">
+                @for (lib of librosPropiosEnOferta; track lib.id) {
+                  <li class="item-libro-intercambio">
+                    <span class="nombre-libro-item">📖 {{ lib.titulo }}</span>
+                    <button
+                      type="button"
+                      class="boton-accion-retirar"
+                      [disabled]="intercambioCerrado || guardandoModificacion"
+                      (click)="retirarLibroPropio(lib.id)">
+                      Retirar
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
 
-          <!-- Regla 2: Inicia con 0 libros ofrecidos -->
-          @if (ofertaActiva.librosOfrecidos.length === 0) {
-            <div style="padding: 14px; background: #fff3cd; border: 1px dashed #ffeeba; border-radius: 6px; font-size: 13px; color: #856404; margin-bottom: 14px;">
-              ⚠️ <strong>Aún no has ofrecido ningún libro.</strong> Para solicitar libros debes seleccionar al menos una obra de tu inventario personal abajo.
-            </div>
-          } @else {
-            <ul class="lista-libros-intercambio" style="margin-bottom: 14px;">
-              @for (lib of ofertaActiva.librosOfrecidos; track lib.id) {
+            <h4>Tu inventario disponible:</h4>
+            <ul class="lista-libros-intercambio">
+              @for (lib of inventarioPersonal; track lib.id) {
                 <li class="item-libro-intercambio">
-                  <span class="nombre-libro-item">📖 {{ lib.titulo }}</span>
-                  <button type="button" class="boton-accion-retirar" (click)="retirarLibroPropio(lib.id)">
-                    Retirar
-                  </button>
+                  <div>
+                    <span class="nombre-libro-item">{{ lib.titulo }}</span>
+                    <small class="autor-libro-intercambio">Autor: {{ lib.autor }}</small>
+                  </div>
+                  @if (estaOfrecido(lib.id)) {
+                    <span class="etiqueta-seleccionada">En la propuesta ✓</span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="boton-accion-agregar"
+                      [disabled]="intercambioCerrado || guardandoModificacion"
+                      (click)="agregarLibroPropio(lib)">
+                      + Ofrecer
+                    </button>
+                  }
                 </li>
               }
             </ul>
-          }
+          </div>
 
-          <!-- Regla 3: Solo se ofrecen libros del inventario propio que el usuario tenga -->
-          <h4>Tu Inventario Disponible (Libros que posees):</h4>
-          <ul class="lista-libros-intercambio">
-            @for (lib of inventarioPersonal; track lib.id) {
-              <li class="item-libro-intercambio">
-                <div>
-                  <span class="nombre-libro-item">{{ lib.titulo }}</span>
-                  <small style="display: block; color: #777; font-size: 11px;">Autor: {{ lib.autor }}</small>
-                </div>
-
-                @if (estaOfrecido(lib.id)) {
-                  <span style="color: #28a745; background: #e8f5e9; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                    En Oferta ✓
-                  </span>
-                } @else {
-                  <button type="button" class="boton-accion-agregar" (click)="agregarLibroPropio(lib)">
-                    + Ofrecer este libro
-                  </button>
+          <div id="columna-libros-solicitados" class="columna-gestion-libros">
+            <h3>📚 Libros de {{ usuarioInterlocutor }} en el intercambio</h3>
+            @if (librosDelOtroEnOferta.length === 0) {
+              <p class="aviso-intercambio">Todavía no se han añadido libros del otro usuario.</p>
+            } @else {
+              <ul class="lista-libros-intercambio">
+                @for (lib of librosDelOtroEnOferta; track lib.id) {
+                  <li class="item-libro-intercambio">
+                    <span class="nombre-libro-item">📕 {{ lib.titulo }}</span>
+                    <button
+                      type="button"
+                      class="boton-accion-retirar"
+                      [disabled]="intercambioCerrado || guardandoModificacion"
+                      (click)="solicitarRetirarLibroAjeno(lib.id)">
+                      Quitar
+                    </button>
+                  </li>
                 }
-              </li>
+              </ul>
             }
-          </ul>
+
+            <h4>Inventario disponible de {{ usuarioInterlocutor }}:</h4>
+            <ul class="lista-libros-intercambio">
+              @for (lib of inventarioDelOtroUsuario; track lib.id) {
+                <li class="item-libro-intercambio">
+                  <div>
+                    <span class="nombre-libro-item">{{ lib.titulo }}</span>
+                    <small class="autor-libro-intercambio">Autor: {{ lib.autor }}</small>
+                  </div>
+                  @if (estaSolicitado(lib.id)) {
+                    <span class="etiqueta-seleccionada">En la propuesta ✓</span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="boton-accion-agregar"
+                      [disabled]="intercambioCerrado || guardandoModificacion"
+                      (click)="solicitarAgregarLibroAjeno(lib)">
+                      + Solicitar
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
         </div>
 
-        <!-- ==================== COLUMNA DERECHA: LIBROS DEL OTRO USUARIO ==================== -->
-        <div id="columna-libros-solicitados" class="columna-gestion-libros">
-          <h3>📚 Libros Solicitados a {{ usuarioInterlocutor }}</h3>
-
-          <!-- Libros solicitados (inicia con el seleccionado en el catálogo) -->
-          <ul class="lista-libros-intercambio" style="margin-bottom: 14px;">
-            @for (lib of ofertaActiva.librosSolicitados; track lib.id) {
-              <li class="item-libro-intercambio">
-                <span class="nombre-libro-item">📕 {{ lib.titulo }}</span>
-                <button type="button" class="boton-accion-retirar" (click)="solicitarRetirarLibroAjeno(lib.id)">
-                  Quitar de solicitud
-                </button>
-              </li>
-            }
-          </ul>
-
-          <!-- Inventario disponible del otro usuario para contraofertas -->
-          <h4>Inventario Disponible de {{ usuarioInterlocutor }}:</h4>
-          <ul class="lista-libros-intercambio">
-            @for (lib of inventarioDelOtroUsuario; track lib.id) {
-              <li class="item-libro-intercambio">
-                <div>
-                  <span class="nombre-libro-item">{{ lib.titulo }}</span>
-                  <small style="display: block; color: #777; font-size: 11px;">Autor: {{ lib.autor }}</small>
-                </div>
-
-                @if (estaSolicitado(lib.id)) {
-                  <span style="color: #6c757d; background: #e2e6ea; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
-                    Solicitado ✓
-                  </span>
-                } @else {
-                  <button type="button" class="boton-accion-agregar" style="background-color: #ff9900; color: #111;" (click)="solicitarAgregarLibroAjeno(lib)">
-                    + Pedir libro
-                  </button>
-                }
-              </li>
-            }
-          </ul>
-        </div>
-
-      </div>
-
-      <!-- Barra de acciones principales -->
-      <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-bottom: 24px;">
-        <button
-          type="button"
-          id="boton-guardar-modificacion-oferta"
-          class="boton-guardar-modificacion"
-          (click)="guardarModificacionOferta()">
-          💾 Guardar y Enviar Modificación de Oferta
-        </button>
-
-        <button
-          type="button"
-          id="boton-cancelar-intercambio-activo"
-          class="boton-cancelar-intercambio"
-          (click)="cancelarIntercambio()">
-          ✕ Cancelar este intercambio
-        </button>
-      </div>
-
-      <!-- ==================== SECCIÓN DE CHAT DE NEGOCIACIÓN ==================== -->
-      <div id="caja-chat-negociacion" class="caja-chat-intercambio">
-        <div class="cabecera-chat">
-          💬 Chat de Negociación Directa con {{ usuarioInterlocutor }}
-        </div>
-
-        <div #scrollChat class="cuerpo-mensajes-chat">
-          @for (msg of historialMensajes; track $index) {
-            <div
-              class="burbuja-mensaje"
-              [class.burbuja-propia]="msg.remitente === usuarioActual"
-              [class.burbuja-otro]="msg.remitente !== usuarioActual">
-              <div style="font-size: 11px; color: #666; margin-bottom: 2px; font-weight: bold;">
-                {{ msg.remitente === usuarioActual ? 'Tú (emisor)' : msg.remitente }}
-              </div>
-              <div>{{ msg.texto }}</div>
-              <div style="font-size: 10px; color: #888; text-align: right; margin-top: 4px;">
-                {{ msg.hora }}
-              </div>
-            </div>
-          }
-        </div>
-
-        <div class="barra-envio-chat">
-          <input
-            type="text"
-            id="campo-texto-mensaje-chat"
-            class="campo-texto-chat"
-            [(ngModel)]="mensajeInput"
-            [maxlength]="maxLengthMensaje"
-            (keyup.enter)="enviarMensaje()"
-            placeholder="Escribe un mensaje para acordar la entrega o detalles de los libros..."
-          />
-          <span style="font-size: 12px; color: #777;">{{ mensajeInput.length }}/{{ maxLengthMensaje }}</span>
+        <div class="acciones-intercambio">
           <button
             type="button"
+            id="boton-guardar-modificacion-oferta"
             class="boton-guardar-modificacion"
-            style="padding: 10px 18px; font-size: 13px;"
-            (click)="enviarMensaje()">
-            Enviar
+            [disabled]="!tieneCambiosSinGuardar || guardandoModificacion || intercambioCerrado"
+            (click)="guardarModificacionOferta()">
+            {{ guardandoModificacion ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+          <button
+            type="button"
+            id="boton-confirmar-intercambio"
+            class="boton-guardar-modificacion"
+            [disabled]="!puedeConfirmar"
+            (click)="confirmarIntercambio()">
+            {{ usuarioConfirmo ? 'Ya confirmaste' : 'Confirmar intercambio' }}
+          </button>
+          <button
+            type="button"
+            id="boton-cancelar-intercambio-activo"
+            class="boton-cancelar-intercambio"
+            [disabled]="intercambioCerrado || guardandoModificacion"
+            (click)="cancelarIntercambio()">
+            ✕ Cancelar este intercambio
           </button>
         </div>
-      </div>
 
+        <section id="caja-chat-negociacion" class="caja-chat-intercambio">
+          <div class="cabecera-chat">💬 Chat de negociación con {{ usuarioInterlocutor }}</div>
+          <div #scrollChat class="cuerpo-mensajes-chat">
+            @for (msg of historialMensajes; track $index) {
+              <div
+                class="burbuja-mensaje"
+                [class.burbuja-propia]="msg.remitente === usuarioActual"
+                [class.burbuja-otro]="msg.remitente !== usuarioActual">
+                <div class="autor-mensaje">{{ msg.remitente === usuarioActual ? 'Tú' : msg.remitente }}</div>
+                <div>{{ msg.texto }}</div>
+                <div class="hora-mensaje">{{ msg.hora }}</div>
+              </div>
+            }
+          </div>
+          <div class="barra-envio-chat">
+            <input
+              type="text"
+              id="campo-texto-mensaje-chat"
+              class="campo-texto-chat"
+              [(ngModel)]="mensajeInput"
+              [maxlength]="maxLengthMensaje"
+              (keyup.enter)="enviarMensaje()"
+              placeholder="Escribe un mensaje…">
+            <span>{{ mensajeInput.length }}/{{ maxLengthMensaje }}</span>
+            <button type="button" class="boton-guardar-modificacion" (click)="enviarMensaje()">Enviar</button>
+          </div>
+        </section>
+      </section>
     }
-
   </div>
 </main>
