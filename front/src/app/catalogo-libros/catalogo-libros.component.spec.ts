@@ -37,14 +37,13 @@ describe('CatalogoLibrosComponent', () => {
     });
   });
 
-  it('muestra libros de inmediato y excluye los propios mientras consulta el backend', () => {
+  it('no muestra libros inventados mientras espera el catálogo del backend', () => {
     fixture = TestBed.createComponent(CatalogoLibrosComponent);
     fixture.detectChanges();
 
     const contenido = fixture.nativeElement.textContent as string;
-    expect(contenido).toContain('1984');
-    expect(contenido).not.toContain('Doña Bárbara');
-    expect(contenido).not.toContain('Rayuela');
+    expect(contenido).toContain('No se encontraron libros');
+    expect(contenido).not.toContain('1984');
     expect(contenido).not.toContain('Cargando catálogo compartido');
   });
 

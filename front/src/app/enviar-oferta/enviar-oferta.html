@@ -6,8 +6,8 @@
     <h2 id="titulo-enviar-oferta" class="titulo-seccion">Enviar oferta de intercambio</h2>
     <p class="texto-ayuda">
       Elija uno de sus libros disponibles para ofrecérselo a
-      <strong>{{ libroSolicitado.propietario }}</strong> a cambio de
-      <strong>{{ libroSolicitado.titulo }}</strong>.
+      <strong>{{ libroSolicitado?.propietario }}</strong> a cambio de
+      <strong>{{ libroSolicitado?.titulo }}</strong>.
     </p>
 
     <!-- ---------- Mensaje de estado (éxito o error) ---------- -->
@@ -29,9 +29,9 @@
       <!-- ---------- Resumen del libro solicitado ---------- -->
       <div id="resumen-libro-solicitado" class="resumen-libro">
         <span class="etiqueta-resumen">Libro que usted desea</span>
-        <p class="titulo-libro"><strong>{{ libroSolicitado.titulo }}</strong></p>
-        <p class="texto-secundario">Autor: {{ libroSolicitado.autor }}</p>
-        <p class="texto-secundario">Propietario: {{ libroSolicitado.propietario }}</p>
+        <p class="titulo-libro"><strong>{{ libroSolicitado?.titulo || 'Ningún libro seleccionado' }}</strong></p>
+        <p class="texto-secundario">Autor: {{ libroSolicitado?.autor || 'No disponible' }}</p>
+        <p class="texto-secundario">Propietario: {{ libroSolicitado?.propietario || 'No disponible' }}</p>
       </div>
 
       <!-- ---------- Selector del libro ofrecido ---------- -->
@@ -51,14 +51,14 @@
         <div id="resumen-oferta" class="panel-confirmacion">
           <p class="texto-confirmacion">Resumen de la oferta</p>
           <p><strong>Usted ofrece:</strong> {{ libroOfrecido.titulo }} — {{ libroOfrecido.autor }}</p>
-          <p><strong>A cambio de:</strong> {{ libroSolicitado.titulo }}</p>
-          <p><strong>Receptor:</strong> {{ libroSolicitado.propietario }}</p>
+          <p><strong>A cambio de:</strong> {{ libroSolicitado?.titulo }}</p>
+          <p><strong>Receptor:</strong> {{ libroSolicitado?.propietario }}</p>
         </div>
       }
 
       <!-- ---------- Acciones del formulario ---------- -->
       <div class="acciones-formulario">
-        <button type="button" id="boton-enviar-oferta" class="boton-accion" (click)="enviarOferta()">Enviar oferta</button>
+        <button type="button" id="boton-enviar-oferta" class="boton-accion" (click)="enviarOferta()" [disabled]="!libroSolicitado">Enviar oferta</button>
         <button type="button" id="boton-cancelar" class="boton-secundario" (click)="cancelar()">Cancelar</button>
       </div>
     }

@@ -13,7 +13,6 @@ import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { GoogleBooksService } from '../servicios/google-books.service';
 import { CifradoService } from '../servicios/cifrado.service';
 import { IntercambioService } from '../servicios/intercambio.service';
-import { LIBROS_PRUEBA_JSON, inicializarInventariosDesdeJSON } from '../datos/libros-prueba';
 
 /* ---------- Clase de Dominio: ItemCatalogo (POO) ---------- */
 export class ItemCatalogo {
@@ -61,20 +60,18 @@ export class CatalogoLibrosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    inicializarInventariosDesdeJSON();
     this.cargarCatalogo();
   }
 
   /*
     Obtiene el nombre de usuario del logueado actualmente en la sesión.
-    Retorna 'usuario_local' como valor por defecto si no hay sesión activa.
   */
   private obtenerUsuarioActual(): string {
     try {
       const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
-      return sesion?.usuario || 'usuario_local';
+      return sesion?.usuario || '';
     } catch {
-      return 'usuario_local';
+      return '';
     }
   }
 
@@ -100,50 +97,22 @@ export class CatalogoLibrosComponent implements OnInit {
 
   public cargarCatalogo(): void {
     this.errorCatalogo = '';
-    this.catalogoCompleto = this.crearLibrosDePrueba();
+    this.catalogoCompleto = [];
     this.aplicarFiltros();
 
     this.googleBooksService.obtenerCatalogoGlobal().subscribe({
       next: librosBackend => {
-        const idsBackend = new Set(librosBackend.map(item => item.libro.id));
-        const itemsBackend = librosBackend.map(item => {
-          let propietario = item.propietario;
-          if (!propietario) {
-            const encontradoEnPrueba = LIBROS_PRUEBA_JSON.find(p =>
-              p.titulo.toLowerCase().trim() === item.libro.titulo.toLowerCase().trim()
-            );
-            propietario = encontradoEnPrueba ? encontradoEnPrueba.propietario : 'carlos_lector';
-          }
-          return new ItemCatalogo(item.libro, propietario, item.libro.disponible);
-        });
-        const itemsPrueba = this.crearLibrosDePrueba()
-          .filter(item => !idsBackend.has(item.libro.id));
-        this.catalogoCompleto = [...itemsBackend, ...itemsPrueba];
+        this.catalogoCompleto = librosBackend.map(item =>
+          new ItemCatalogo(item.libro, item.propietario, item.libro.disponible)
+        );
         this.aplicarFiltros();
         this.changeDetector.markForCheck();
       },
       error: () => {
-        this.errorCatalogo = 'No se pudieron actualizar los libros compartidos. Se muestran los libros disponibles.';
+        this.errorCatalogo = 'No se pudo cargar el catálogo de libros.';
         this.changeDetector.markForCheck();
       }
     });
-  }
-
-  private crearLibrosDePrueba(): ItemCatalogo[] {
-    return LIBROS_PRUEBA_JSON.map(item => new ItemCatalogo(
-      new Libro(
-        item.id,
-        item.titulo,
-        item.autor,
-        item.disponible,
-        item.portadaUrl,
-        item.descripcion,
-        item.isbn,
-        item.categoria
-      ),
-      item.propietario,
-      item.disponible
-    ));
   }
 
   private aplicarFiltros(): void {

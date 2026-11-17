@@ -14,12 +14,7 @@ import { CifradoService } from '../../servicios/cifrado.service';
 export class ExplorarCatalogoComponent {
   public filtroBusqueda: string = '';
 
-  // Catálogo global simulado con libros disponibles en la comunidad
-  public catalogoLibros: any[] = [
-    { id: 'lib_global_55', titulo: 'La Vorágine', autor: 'José Eustasio Rivera', propietario: 'carlos_lector' },
-    { id: 'lib_global_56', titulo: 'Doña Bárbara', autor: 'Rómulo Gallegos', propietario: 'maria_books' },
-    { id: 'lib_global_57', titulo: 'Cien Años de Soledad', autor: 'Gabriel García Márquez', propietario: 'ana_lectora' }
-  ];
+  public catalogoLibros: any[] = [];
 
   constructor(
     private router: Router,
