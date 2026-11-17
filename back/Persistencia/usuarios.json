@@ -77,5 +77,16 @@
     "telefono": "",
     "estadoVenezuela": "Distrito Capital",
     "biografia": ""
+  },
+  {
+    "usuario": "Cj",
+    "nombres": "sanandreas",
+    "apellidos": "geteastories",
+    "clave": "123456",
+    "generosFavoritos": "romance",
+    "genero": "Mujer",
+    "correo": "vicecity@gmail.com",
+    "reputacion": 5,
+    "id": "reg_mwjrbwh1_avfa2"
   }
 ]
