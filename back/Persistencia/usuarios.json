@@ -82,7 +82,7 @@
     "usuario": "Cj",
     "nombres": "sanandreas",
     "apellidos": "geteastories",
-    "clave": "123456",
+    "clave": "b6932ec39e3257cacb72d804c9da08d4.162d59a854bb77c82b3de7b1bb204313d2738790008e64a8d7c5aed7f624512d",
     "generosFavoritos": "romance",
     "genero": "Mujer",
     "correo": "vicecity@gmail.com",
@@ -93,10 +93,10 @@
     "usuario": "Gorge",
     "nombres": "miguel",
     "apellidos": "Cuerdas",
-    "clave": "2",
+    "clave": "b6932ec39e3257cacb72d804c9da08d4.ccdb790f5335da0630c983d4f5b9efe3",
     "generosFavoritos": "terror",
     "genero": "Hombre",
-    "correo": "dfdfffaffffffffff",
+    "correo": "b6932ec39e3257cacb72d804c9da08d4.cfc8a1010a69b267e77d2e2de55336fe6a50bd8ad5427a5bac67891f8d9b01ded0d5cd5480aed662fb805fcbb2d66c03",
     "reputacion": 5,
     "id": "reg_mwjzfw2d_y7bu7"
   },
@@ -104,11 +104,22 @@
     "usuario": "Flug",
     "nombres": "hernandez",
     "apellidos": "ranchez",
-    "clave": "12345T",
+    "clave": "b6932ec39e3257cacb72d804c9da08d4.63ab12c9bb92541e4969802479e6391bc2ae7d483976932e1b7deef6f74f0bd7",
     "generosFavoritos": "Terror",
     "genero": "Hombre",
     "correo": "aicnin@gmail.com",
     "reputacion": 5,
     "id": "reg_mwk29k1m_wgoso"
+  },
+  {
+    "usuario": "Deigooo",
+    "nombres": "Diego",
+    "apellidos": "Leon",
+    "clave": "a2f347d3f6cbd0496d6c87c24c5c5fd4.d7def5fa02dffb408f524b83008b0f31f323b8b57475709ae80180b921f6fabb",
+    "generosFavoritos": "Drama, Ciencia-ficcion, Suspenso",
+    "genero": "Hombre",
+    "correo": "a2f347d3f6cbd0496d6c87c24c5c5fd4.85259e6aba9fee9e3828adab28a7e9c25f6c3f962b3024c37e720cadbf27841bc1f7e995412f3ae19c855ef7beaf57bd6ad2d8bd29588da8e57abb050d2f1ebb",
+    "reputacion": 5,
+    "id": "reg_mwk4dbw8_vqlyb"
   }
 ]

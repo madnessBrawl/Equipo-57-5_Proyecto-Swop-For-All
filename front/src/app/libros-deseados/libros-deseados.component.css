@@ -1,0 +1,134 @@
+.libros-deseados {
+  max-width: 1050px;
+  margin: 32px auto;
+  padding: 0 20px;
+  color: #252525;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+h2, h3, p {
+  margin-top: 0;
+}
+
+.encabezado p {
+  margin-bottom: 0;
+  color: #666;
+}
+
+.boton-principal {
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 18px;
+  background: #f4722b;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-principal:disabled,
+.boton-eliminar:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.formulario, .vacio {
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  background: #fff;
+}
+
+.formulario {
+  display: grid;
+  gap: 14px;
+}
+
+.formulario label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.formulario input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #bbb;
+  border-radius: 5px;
+  padding: 9px;
+  font: inherit;
+}
+
+.formulario input.campo-invalido {
+  border-color: #c62828;
+  background-color: #fff5f5;
+}
+
+.lista-libros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.libro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e1e1e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.detalle h3 {
+  margin-bottom: 8px;
+}
+
+.detalle p {
+  margin-bottom: 7px;
+  color: #555;
+}
+
+.boton-eliminar {
+  border: 1px solid #b3261e;
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: #fff;
+  color: #b3261e;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mensaje, .estado, .vacio {
+  padding: 16px;
+}
+
+.mensaje.error {
+  color: #a32121;
+  background: #fff0f0;
+}
+
+.mensaje.exito {
+  color: #176b36;
+  background: #eaf7ee;
+}
+
+.estado, .vacio {
+  color: #666;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
