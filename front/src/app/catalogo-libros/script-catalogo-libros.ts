@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { GoogleBooksService, ResultadoCatalogo } from '../servicios/google-books.service';
 import { CifradoService } from '../servicios/cifrado.service';
+import { IntercambioService } from '../servicios/intercambio.service';
 import { LIBROS_PRUEBA_JSON, LibroJSON, inicializarInventariosDesdeJSON } from '../datos/libros-prueba';
 
 /* ---------- Clase de Dominio: ItemCatalogo (POO) ---------- */
@@ -98,7 +99,8 @@ export class CatalogoLibrosComponent implements OnInit {
   constructor(
     private router: Router,
     private googleBooksService: GoogleBooksService,
-    private cifradoService: CifradoService
+    private cifradoService: CifradoService,
+    private intercambioService: IntercambioService
   ) {}
 
   /*
@@ -347,11 +349,31 @@ export class CatalogoLibrosComponent implements OnInit {
     localStorage.setItem('oferta_activa', JSON.stringify(oferta));
     localStorage.setItem('oferta_activa_id', idIntercambio);
 
-    // Si estaba el modal abierto, cerrarlo antes de navegar
-    this.cerrarModalDetalle();
+    // 3. Sincronizar físicamente con el backend Node.js (crear o retomar oferta existente)
+    this.intercambioService.crearOferta({
+      usuarioReceptor: item.propietario,
+      librosOfrecidos: [],
+      librosSolicitados: [item.libro],
+      mensajeInicial: `¡Hola! Me interesa tu libro "${item.libro.titulo}" y he iniciado esta solicitud de intercambio.`
+    }).subscribe({
+      next: res => {
+        const idGenerado = res?.oferta?.idIntercambio || res?.oferta?.id || idIntercambio;
+        oferta.idIntercambio = idGenerado;
+        const ofertaParaGuardar = res?.oferta || oferta;
+        localStorage.setItem(`oferta_${idGenerado}`, JSON.stringify(ofertaParaGuardar));
+        localStorage.setItem('oferta_activa', JSON.stringify(ofertaParaGuardar));
+        localStorage.setItem('oferta_activa_id', idGenerado);
 
-    // Redirección al flujo de intercambio
-    this.router.navigate(['/modificar-oferta']);
+        // Redirigir al flujo de intercambio una vez registrada en el backend
+        this.cerrarModalDetalle();
+        this.router.navigate(['/modificar-oferta']);
+      },
+      error: () => {
+        // En caso de contingencia o fallo de red
+        this.cerrarModalDetalle();
+        this.router.navigate(['/modificar-oferta']);
+      }
+    });
   }
 
   /*

@@ -77,5 +77,16 @@
     "telefono": "",
     "estadoVenezuela": "Distrito Capital",
     "biografia": ""
+  },
+  {
+    "usuario": "miguel",
+    "nombres": "miguel",
+    "apellidos": "cardenas",
+    "clave": "b003135b468f64419a1bcb84b51c22c5.47911fb48b2f1a862bcde40e2a117041b619506773f6a7e303d35aa61a82d823",
+    "generosFavoritos": "",
+    "genero": "Hombre",
+    "correo": "b003135b468f64419a1bcb84b51c22c5.0b24d7d6c03ac8a912b2aaf214069e62",
+    "reputacion": 5,
+    "id": "reg_mwk1wihs_0t8k3"
   }
 ]

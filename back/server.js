@@ -14,6 +14,7 @@ const UsuarioPersistencia = require('./Persistencia/UsuarioPersistencia');
 const ComunidadPersistencia = require('./Persistencia/ComunidadPersistencia');
 const IntercambioPersistencia = require('./Persistencia/IntercambioPersistencia');
 const CalificacionPersistencia = require('./Persistencia/CalificacionPersistencia');
+const ControladorIntercambio   = require('./controllers/intercambioController');
 const CifradoService          = require('./Service/CifradoService');
 
 const { Calificacion } = require('./models/Calificacion');
@@ -25,6 +26,11 @@ const comunidadPersistencia = new ComunidadPersistencia();
 const intercambioPersistencia = new IntercambioPersistencia();
 const calificacionPersistencia = new CalificacionPersistencia();
 const cifradoService          = new CifradoService();
+const controladorIntercambio  = new ControladorIntercambio(
+  intercambioPersistencia,
+  libroController._libroService?._libroRepository,
+  cifradoService
+);
 
 
 const PUERTO = process.env.PORT || 3000;
@@ -213,7 +219,7 @@ const servidor = http.createServer(async (req, res) => {
     }
 
     // POST /api/comunidades/:id/unir -> Unirse a una comunidad
-    if (metodo === 'POST' && ruta.includes('/unir')) {
+    if (metodo === 'POST' && ruta.startsWith('/api/comunidades/') && ruta.endsWith('/unir')) {
       const partes = ruta.split('/');
       const id = partes[3];
       const body = await parsearBodyJSON(req);
@@ -237,8 +243,8 @@ const servidor = http.createServer(async (req, res) => {
       }
     }
 
-    // POST /api/comunidades/:id/mensajes -> Enviar mensaje al chat general
-    if (metodo === 'POST' && ruta.includes('/mensajes')) {
+    // POST /api/comunidades/:id/mensajes -> Enviar mensaje al chat general de la comunidad
+    if (metodo === 'POST' && ruta.startsWith('/api/comunidades/') && ruta.endsWith('/mensajes')) {
       const partes = ruta.split('/');
       const id = partes[3];
       const body = await parsearBodyJSON(req);
@@ -253,15 +259,79 @@ const servidor = http.createServer(async (req, res) => {
       return responderJSON(res, 201, { mensaje: 'Mensaje enviado', data: mensajeGuardado });
     }
 
-    /* ---------------- 4. RUTAS DE INTERCAMBIOS ---------------- */
-    if (metodo === 'GET' && ruta === '/api/intercambios') {
-      return responderJSON(res, 200, intercambioPersistencia.obtenerTodos());
+    /* ---------------- 4. RUTAS DE INTERCAMBIOS (ControladorIntercambio POO) ---------------- */
+    // GET /api/intercambios/usuario/:usuario -> Intercambios del usuario
+    if (metodo === 'GET' && ruta.startsWith('/api/intercambios/usuario/')) {
+      const usuario = decodeURIComponent(ruta.replace('/api/intercambios/usuario/', ''));
+      const ofertas = controladorIntercambio.obtenerOfertasUsuario(usuario);
+      return responderJSON(res, 200, ofertas);
     }
 
+    // GET /api/intercambios/:id/mensajes -> Consultar historial del chat de negociación
+    if (metodo === 'GET' && ruta.startsWith('/api/intercambios/') && ruta.endsWith('/mensajes')) {
+      const id = ruta.replace('/api/intercambios/', '').replace('/mensajes', '');
+      const mensajes = controladorIntercambio.obtenerMensajesChat(id, usuarioSesion);
+      return responderJSON(res, 200, mensajes);
+    }
+
+    // POST /api/intercambios/:id/mensajes -> Enviar mensaje al chat de negociación
+    if (metodo === 'POST' && ruta.startsWith('/api/intercambios/') && ruta.endsWith('/mensajes')) {
+      const id = ruta.replace('/api/intercambios/', '').replace('/mensajes', '');
+      const body = await parsearBodyJSON(req);
+      const emisor = usuarioSesion || body.remitente || body.usuario;
+      const resultado = controladorIntercambio.enviarMensajeChat(id, body, emisor);
+      return responderJSON(res, 201, resultado);
+    }
+
+    // GET /api/intercambios/:id -> Detalle de una oferta específica
+    if (metodo === 'GET' && ruta.startsWith('/api/intercambios/') && ruta !== '/api/intercambios') {
+      const id = ruta.replace('/api/intercambios/', '');
+      const oferta = controladorIntercambio.obtenerOfertaPorId(id);
+      if (!oferta) {
+        return responderJSON(res, 404, { error: 'Intercambio no encontrado.' });
+      }
+      return responderJSON(res, 200, oferta);
+    }
+
+    // GET /api/intercambios -> Listar todos o filtrar por usuario
+    if (metodo === 'GET' && ruta === '/api/intercambios') {
+      const usuarioFiltro = parsedUrl.searchParams.get('usuario') || usuarioSesion;
+      if (usuarioFiltro) {
+        return responderJSON(res, 200, controladorIntercambio.obtenerOfertasUsuario(usuarioFiltro));
+      }
+      return responderJSON(res, 200, controladorIntercambio.obtenerTodasLasOfertas());
+    }
+
+    // POST /api/intercambios -> Crear nueva oferta de intercambio desde catálogo
     if (metodo === 'POST' && ruta === '/api/intercambios') {
       const body = await parsearBodyJSON(req);
-      const guardado = intercambioPersistencia.guardar(body);
-      return responderJSON(res, 201, { mensaje: 'Oferta registrada con Ã©xito', oferta: guardado });
+      const emisor = usuarioSesion || body.usuarioSesion || body.usuarioEmisor || body.ofertante;
+      const guardado = controladorIntercambio.crearOferta({
+        usuarioReceptor: body.usuarioReceptor || body.receptor,
+        librosOfrecidos: body.librosOfrecidos || (body.libroOfrecido ? [body.libroOfrecido] : []),
+        librosSolicitados: body.librosSolicitados || (body.libroSolicitado ? [body.libroSolicitado] : []),
+        mensajeInicial: body.mensajeInicial || ''
+      }, emisor);
+      return responderJSON(res, 201, { mensaje: 'Oferta registrada con éxito', oferta: guardado });
+    }
+
+    // PUT /api/intercambios/:id o PUT /api/intercambios -> Modificar términos de la oferta
+    if (metodo === 'PUT' && ruta.startsWith('/api/intercambios')) {
+      const body = await parsearBodyJSON(req);
+      const id = ruta.replace('/api/intercambios/', '').replace('/api/intercambios', '') || body.idIntercambio || body.id;
+      const emisor = usuarioSesion || body.usuarioSesion || body.usuario;
+      const guardado = controladorIntercambio.modificarOferta(id, {
+        librosOfrecidos: body.librosOfrecidos,
+        librosSolicitados: body.librosSolicitados
+      }, emisor);
+      return responderJSON(res, 200, { mensaje: 'Oferta modificada con éxito', oferta: guardado });
+    }
+
+    // DELETE /api/intercambios/:id -> Cancelar intercambio
+    if (metodo === 'DELETE' && ruta.startsWith('/api/intercambios/')) {
+      const id = ruta.replace('/api/intercambios/', '');
+      const cancelada = controladorIntercambio.cancelarOferta(id, usuarioSesion);
+      return responderJSON(res, 200, { mensaje: 'Intercambio cancelado', oferta: cancelada });
     }
 
     /* ---------------- 5. RUTAS DE CALIFICACIONES / REPUTACIÃ“N ---------------- */

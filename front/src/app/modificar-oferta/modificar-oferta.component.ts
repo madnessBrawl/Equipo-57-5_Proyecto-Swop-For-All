@@ -17,8 +17,10 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Libro, OfertaIntercambio } from '../modelos/intercambio.model';
 import { CifradoService } from '../servicios/cifrado.service';
+import { IntercambioService } from '../servicios/intercambio.service';
 
 interface MensajeChat {
+  id?: string;
   remitente: string;
   texto: string;
   hora: string;
@@ -65,6 +67,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   constructor(
     private router: Router,
     private cifradoService: CifradoService,
+    private intercambioService: IntercambioService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -81,7 +84,6 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     Si no existe ninguna oferta activa, redirige automáticamente al catálogo.
   */
   private cargarDatosIntercambio(): void {
-    // 1. Verificar si se inició una oferta desde el Catálogo Global
     const libroSolicitadoRaw = sessionStorage.getItem('libroSolicitado');
     const ofertaActivaRaw = localStorage.getItem('oferta_activa');
     const ofertaActivaId = localStorage.getItem('oferta_activa_id');
@@ -89,7 +91,6 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     // Si NO hay ninguna señal de intercambio activo → redirigir al catálogo
     if (!libroSolicitadoRaw && !ofertaActivaRaw && !ofertaActivaId) {
       this.tieneOfertaActiva = false;
-      // Redirigir automáticamente al catálogo con mensaje informativo
       alert('⚠️ No tienes ningún intercambio activo.\n\nDebes ir al Catálogo Global, seleccionar un libro y presionar "Solicitar Intercambio" para iniciar la negociación.');
       this.router.navigate(['/catalogo']);
       return;
@@ -101,7 +102,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     const username = this.obtenerUsuarioActual();
     this.usuarioActual = username;
 
-    // 3. Cargar inventario propio del usuario logueado (clave dinámica: inventario_<usuario>)
+    // 3. Cargar inventario propio del usuario logueado
     const claveInventarioPropio = `inventario_${username}`;
     const inventarioGuardado = localStorage.getItem(claveInventarioPropio);
     if (inventarioGuardado) {
@@ -115,7 +116,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.inventarioPersonal = [];
     }
 
-    // 3. Determinar los datos del libro solicitado desde el catálogo
+    // 4. Determinar los datos del libro solicitado desde el catálogo
     let libroDelCatalogo: Libro | null = null;
     let propietarioDestino = 'carlos_lector';
 
@@ -128,7 +129,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
           parsed.titulo || 'Libro del Catálogo',
           parsed.autor || 'Autor del Catálogo',
           true,
-          '',  // Sin portadaUrl — no se usan imágenes para mayor velocidad
+          '',
           parsed.descripcion || '',
           parsed.isbn || '',
           parsed.categoria || 'General'
@@ -140,7 +141,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
 
     this.usuarioInterlocutor = propietarioDestino;
 
-    // 4. Cargar inventario del otro usuario
+    // 5. Cargar inventario del otro usuario
     const inventarioOtroGuardado = localStorage.getItem(`inventario_${this.usuarioInterlocutor}`);
     if (inventarioOtroGuardado) {
       try {
@@ -151,7 +152,6 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     } else {
       this.inventarioDelOtroUsuario = this.obtenerInventarioOtroPorDefecto();
       if (libroDelCatalogo) {
-        // Añadir el libro del catálogo al inventario del otro usuario si no existe
         if (!this.inventarioDelOtroUsuario.some(l => String(l.id) === String(libroDelCatalogo!.id))) {
           this.inventarioDelOtroUsuario.unshift(libroDelCatalogo);
         }
@@ -159,9 +159,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       localStorage.setItem(`inventario_${this.usuarioInterlocutor}`, JSON.stringify(this.inventarioDelOtroUsuario));
     }
 
-    // 5. Configurar la oferta activa
-    // REGLA 2: librosOfrecidos SIEMPRE inicia VACÍO (el usuario los agrega)
-    // librosSolicitados inicia con el libro seleccionado desde el catálogo
+    // 6. Configurar la oferta activa
     if (ofertaActivaRaw) {
       try {
         const parsedOferta = JSON.parse(ofertaActivaRaw);
@@ -170,11 +168,12 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
           this.idIntercambio,
           this.usuarioActual,
           parsedOferta.usuarioReceptor || this.usuarioInterlocutor,
-          // REGLA 2: Siempre vacío al cargar — no se restauran libros ofrecidos previos
-          [],
-          // librosSolicitados: solo el libro del catálogo seleccionado
-          libroDelCatalogo ? [libroDelCatalogo] : [],
-          'Pendiente'
+          // REGLA 2: Inicia vacío o con lo previamente seleccionado
+          Array.isArray(parsedOferta.librosOfrecidos) ? parsedOferta.librosOfrecidos : [],
+          Array.isArray(parsedOferta.librosSolicitados) && parsedOferta.librosSolicitados.length > 0
+            ? parsedOferta.librosSolicitados
+            : (libroDelCatalogo ? [libroDelCatalogo] : []),
+          parsedOferta.estado || 'Pendiente'
         );
       } catch {
         this.inicializarNuevaOferta(libroDelCatalogo);
@@ -183,15 +182,33 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.inicializarNuevaOferta(libroDelCatalogo);
     }
 
-    // 6. Cargar mensajes del chat
+    // 7. Sincronizar con el Backend (recuperar oferta persistida y mensajes reales)
+    if (this.idIntercambio) {
+      this.intercambioService.obtenerOferta(this.idIntercambio).subscribe(ofertaBack => {
+        if (ofertaBack && ofertaBack.idIntercambio) {
+          if (Array.isArray(ofertaBack.mensajes) && ofertaBack.mensajes.length > 0) {
+            this.historialMensajes = ofertaBack.mensajes;
+          }
+          if (Array.isArray(ofertaBack.librosSolicitados) && ofertaBack.librosSolicitados.length > 0) {
+            this.ofertaActiva.librosSolicitados = ofertaBack.librosSolicitados;
+          }
+          if (Array.isArray(ofertaBack.librosOfrecidos)) {
+            this.ofertaActiva.librosOfrecidos = ofertaBack.librosOfrecidos;
+          }
+          this.cdr.detectChanges();
+        }
+      });
+    }
+
+    // 8. Cargar mensajes del chat local como respaldo
     const chatGuardado = localStorage.getItem(`chat_${this.idIntercambio}`);
-    if (chatGuardado) {
+    if (chatGuardado && this.historialMensajes.length === 0) {
       try {
         this.historialMensajes = JSON.parse(chatGuardado);
       } catch {
         this.inicializarChatPorDefecto();
       }
-    } else {
+    } else if (this.historialMensajes.length === 0) {
       this.inicializarChatPorDefecto();
     }
 
@@ -204,7 +221,7 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.idIntercambio,
       this.usuarioActual,
       this.usuarioInterlocutor,
-      [], // REGLA 2: Inicia estrictamente VACÍO — sin libros ofrecidos
+      [], // REGLA 2: Inicia estrictamente VACÍO
       libroDelCatalogo ? [libroDelCatalogo] : [],
       'Pendiente'
     );
@@ -231,13 +248,34 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.ofertaActiva.librosOfrecidos = [];
     }
 
-    const yaOfrecido = this.estaOfrecido(libro.id);
-    if (!yaOfrecido) {
-      // Reasignación inmutable para activar detección de cambios de Angular
+    // Verificación local: ya está en ESTA oferta
+    if (this.estaOfrecido(libro.id)) return;
+
+    // Verificación cruzada: ya lo estás ofreciendo en OTRO intercambio activo
+    // Se consulta el backend para confirmarlo antes de añadirlo
+    this.intercambioService.obtenerMisIntercambios().subscribe(intercambios => {
+      const estadosActivos = ['Pendiente', 'Modificada', 'Aceptada'];
+      const conflicto = intercambios.find((i: any) =>
+        estadosActivos.includes(i.estado) &&
+        String(i.idIntercambio || i.id) !== String(this.idIntercambio) &&
+        Array.isArray(i.librosOfrecidos) &&
+        i.librosOfrecidos.some((l: any) => String(typeof l === 'object' ? l.id : l) === String(libro.id))
+      );
+
+      if (conflicto) {
+        alert(
+          `⚠️ Ya estás ofreciendo "${libro.titulo}" en otro intercambio activo ` +
+          `(ID: ${conflicto.idIntercambio || conflicto.id}).\n\n` +
+          `Retíralo de ese intercambio antes de ofrecerlo aquí.`
+        );
+        return;
+      }
+
+      // Sin conflicto → se agrega normalmente
       this.ofertaActiva.librosOfrecidos = [...this.ofertaActiva.librosOfrecidos, libro];
       this.guardarOferta();
       this.cdr.detectChanges();
-    }
+    });
   }
 
   /*
@@ -282,12 +320,14 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       this.ofertaActiva.librosSolicitados = [...this.ofertaActiva.librosSolicitados, libro];
       this.guardarOferta();
 
-      this.historialMensajes.push({
+      const nuevoMsg: MensajeChat = {
         remitente: this.usuarioActual,
         texto: `He añadido a la solicitud tu libro "${libro.titulo}".`,
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
+      };
+      this.historialMensajes.push(nuevoMsg);
       this.guardarChatEnStorage();
+      this.intercambioService.enviarMensaje(this.idIntercambio, nuevoMsg.texto).subscribe();
       this.cdr.detectChanges();
     }
   }
@@ -305,18 +345,21 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     this.guardarOferta();
 
     if (libroRetirado) {
-      this.historialMensajes.push({
+      const nuevoMsg: MensajeChat = {
         remitente: this.usuarioActual,
         texto: `He retirado de la solicitud el libro "${libroRetirado.titulo}".`,
         hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
+      };
+      this.historialMensajes.push(nuevoMsg);
       this.guardarChatEnStorage();
+      this.intercambioService.enviarMensaje(this.idIntercambio, nuevoMsg.texto).subscribe();
     }
     this.cdr.detectChanges();
   }
 
   /*
     Guarda los cambios de la oferta cumpliendo las reglas de negocio
+    y sincronizando físicamente con el backend Node.js
   */
   public guardarModificacionOferta(): void {
     // Validación estricta: "debe ofrecer libros para pedirlos"
@@ -336,14 +379,25 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
     // RNF Cifrado: Se guarda también la versión protegida con ncrypt-js
     this.cifradoService.guardarEnStorageSeguroSync('oferta_activa', this.ofertaActiva);
 
-    alert('✅ ¡Oferta de intercambio modificada y enviada al lector con éxito!');
+    // Enviar modificación física al Backend
+    this.intercambioService.modificarOferta(this.idIntercambio, {
+      librosOfrecidos: this.ofertaActiva.librosOfrecidos,
+      librosSolicitados: this.ofertaActiva.librosSolicitados
+    }).subscribe(res => {
+      if (res?.error) {
+        alert(`Advertencia al sincronizar con el servidor: ${res.error}`);
+      } else {
+        alert('✅ ¡Oferta de intercambio modificada y enviada al lector con éxito!');
+      }
+    });
   }
 
   /*
-    Cancela y descarta el intercambio activo, limpiando los registros
+    Cancela y descarta el intercambio activo, limpiando los registros y liberando el libro
   */
   public cancelarIntercambio(): void {
     if (confirm('¿Estás seguro de que deseas cancelar este intercambio? Deberás seleccionar un libro nuevamente desde el catálogo.')) {
+      this.intercambioService.cancelarOferta(this.idIntercambio).subscribe();
       localStorage.removeItem('oferta_activa');
       localStorage.removeItem('oferta_activa_id');
       localStorage.removeItem(`oferta_${this.idIntercambio}`);
@@ -365,17 +419,26 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
       return;
     }
 
+    const texto = this.mensajeInput.trim();
     const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-    this.historialMensajes.push({
+    const nuevoMensaje: MensajeChat = {
       remitente: this.usuarioActual,
-      texto: this.mensajeInput.trim(),
+      texto,
       hora: horaActual
-    });
+    };
 
+    this.historialMensajes.push(nuevoMensaje);
     this.guardarChatEnStorage();
     this.mensajeInput = '';
     this.cdr.detectChanges();
+
+    // Enviar al Backend en tiempo real
+    this.intercambioService.enviarMensaje(this.idIntercambio, texto).subscribe(res => {
+      if (res?.error) {
+        console.warn('Error al enviar mensaje al servidor:', res.error);
+      }
+    });
   }
 
   public irAlCatalogo(): void {
@@ -385,6 +448,12 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   private guardarOferta(): void {
     localStorage.setItem('oferta_activa', JSON.stringify(this.ofertaActiva));
     localStorage.setItem(`oferta_${this.idIntercambio}`, JSON.stringify(this.ofertaActiva));
+
+    // Sincronizar en segundo plano con el backend
+    this.intercambioService.modificarOferta(this.idIntercambio, {
+      librosOfrecidos: this.ofertaActiva.librosOfrecidos,
+      librosSolicitados: this.ofertaActiva.librosSolicitados
+    }).subscribe();
   }
 
   private guardarChatEnStorage(): void {
@@ -400,25 +469,14 @@ export class ModificarOfertaComponent implements OnInit, AfterViewChecked {
   }
 
   private obtenerInventarioPorDefecto(): Libro[] {
-    // Sin libros por defecto: el inventario debe venir del localStorage del usuario logueado
     return [];
   }
 
   private obtenerInventarioOtroPorDefecto(): Libro[] {
-    // Sin libros por defecto: el inventario del otro usuario debe venir de su localStorage
     return [];
   }
 
-  /*
-    Obtiene el nombre del usuario logueado desde localStorage.
-    Retorna 'usuario_local' como valor por defecto.
-  */
   private obtenerUsuarioActual(): string {
-    try {
-      const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
-      return sesion?.usuario || 'usuario_local';
-    } catch {
-      return 'usuario_local';
-    }
+    return this.intercambioService.obtenerUsuarioActual();
   }
 }
