@@ -106,9 +106,16 @@ export class CatalogoLibrosComponent implements OnInit {
     this.googleBooksService.obtenerCatalogoGlobal().subscribe({
       next: librosBackend => {
         const idsBackend = new Set(librosBackend.map(item => item.libro.id));
-        const itemsBackend = librosBackend.map(item =>
-          new ItemCatalogo(item.libro, item.propietario, item.libro.disponible)
-        );
+        const itemsBackend = librosBackend.map(item => {
+          let propietario = item.propietario;
+          if (!propietario) {
+            const encontradoEnPrueba = LIBROS_PRUEBA_JSON.find(p =>
+              p.titulo.toLowerCase().trim() === item.libro.titulo.toLowerCase().trim()
+            );
+            propietario = encontradoEnPrueba ? encontradoEnPrueba.propietario : 'carlos_lector';
+          }
+          return new ItemCatalogo(item.libro, propietario, item.libro.disponible);
+        });
         const itemsPrueba = this.crearLibrosDePrueba()
           .filter(item => !idsBackend.has(item.libro.id));
         this.catalogoCompleto = [...itemsBackend, ...itemsPrueba];
