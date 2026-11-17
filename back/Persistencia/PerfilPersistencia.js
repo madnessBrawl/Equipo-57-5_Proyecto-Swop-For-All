@@ -15,50 +15,7 @@ const CifradoService   = require('../Service/CifradoService');
 
 class PerfilPersistencia extends PersistenciaJSON {
   constructor(nombreArchivo = 'usuarios.json') {
-    const semilla = [
-      {
-        id: 'usr_gabriel',
-        usuario: 'gabriel_lector',
-        nombre: 'Gabriel',
-        apellido: 'Alfonso',
-        correo: 'gabriel@ejemplo.com',
-        telefono: '04141234567',
-        estadoVenezuela: 'Distrito Capital',
-        genero: 'Hombre',
-        generosFavoritos: 'Novela, Ciencia Ficción',
-        biografia: 'Lector apasionado buscando intercambiar sagas de fantasía y ciencia ficción.',
-        reputacion: 5.0,
-        clave: '123456'
-      },
-      {
-        id: 'usr_juan',
-        usuario: 'Juan02',
-        nombre: 'juan',
-        apellido: 'Santana',
-        correo: 'juanito023@gmail.com',
-        telefono: '04143731047',
-        estadoVenezuela: 'Distrito Capital',
-        genero: 'Hombre',
-        generosFavoritos: 'terror',
-        biografia: 'Cuéntale a otros lectores sobre tus intereses literarios...',
-        reputacion: 5.0,
-        clave: 'juan123'
-      },
-      {
-        id: 'usr_carlos',
-        usuario: 'carlos_lector',
-        nombre: 'Carlos Andrés',
-        apellido: 'Pérez',
-        correo: 'carlos@ejemplo.com',
-        telefono: '04147654321',
-        estadoVenezuela: 'Miranda',
-        genero: 'Hombre',
-        generosFavoritos: 'Historia, Biografías',
-        biografia: '',
-        reputacion: 4.8,
-        clave: 'carlos123'
-      }
-    ];
+    const semilla = [];
 
     super(nombreArchivo, semilla);
 

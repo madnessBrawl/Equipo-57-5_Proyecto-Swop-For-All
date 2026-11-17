@@ -31,12 +31,9 @@ export class EnviarOfertaComponent {
     get libroOfrecido(): any {
         return this.misLibrosDisponibles.find(l => l.id === this.libroOfrecidoId);
     }
-  public usuarioActual: string = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null')?.usuario ?? 'lector_activo';
+  public usuarioActual: string = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null')?.usuario ?? '';
   
-  public misLibrosDisponibles: any[] = [
-    { id: 'lib_propio_1', titulo: 'Cien Años de Soledad', autor: 'Gabriel García Márquez' },
-    { id: 'lib_propio_2', titulo: 'Doña Bárbara', autor: 'Rómulo Gallegos' }
-  ];
+  public misLibrosDisponibles: any[] = [];
 
   public libroSolicitado: any = this.obtenerLibroSeleccionado();
 
@@ -47,13 +44,7 @@ export class EnviarOfertaComponent {
       const libroParseado = JSON.parse(libroGuardado);
       return libroParseado;
     }
-    // Valor por defecto por si entran directamente por la URL
-    return { 
-      id: 'lib_global_55', 
-      titulo: 'La Vorágine', 
-      autor: 'José Eustasio Rivera', 
-      propietario: 'carlos_lector' 
-    };
+    return null;
   }
 
   public libroOfrecidoId: string = '';
@@ -62,6 +53,12 @@ export class EnviarOfertaComponent {
   public mensajeTexto: string = '';
 
   public enviarOferta(): void {
+    if (!this.libroSolicitado) {
+      this.mensajeTipo = 'error';
+      this.mensajeTexto = 'No se seleccionó un libro para solicitar.';
+      return;
+    }
+
     const propuesta = new PropuestaIntercambio(
       this.usuarioActual,
       this.libroSolicitado.propietario,

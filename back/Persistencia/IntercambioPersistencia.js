@@ -10,34 +10,7 @@ const OfertaIntercambio = require('../models/intercambioModel');
 
 class IntercambioPersistencia extends PersistenciaJSON {
   constructor(nombreArchivo = 'intercambios.json') {
-    const semilla = [
-      {
-        id: 'INT-2026-01',
-        idIntercambio: 'INT-2026-01',
-        usuarioEmisor: 'carlos_lector',
-        usuarioReceptor: 'maria_books',
-        librosOfrecidos: [
-          { id: 'lib_100', titulo: 'El Principito', autor: 'Antoine de Saint-Exupéry', disponible: true }
-        ],
-        librosSolicitados: [
-          { id: 'lib_101', titulo: '1984', autor: 'George Orwell', disponible: true }
-        ],
-        estado: 'Finalizado',
-        mensajes: [
-          {
-            id: 'msg_ini_01',
-            remitente: 'carlos_lector',
-            texto: 'Hola María, me interesa intercambiar El Principito por tu ejemplar de 1984.',
-            hora: '10:30 AM',
-            fecha: '2026-11-10T10:30:00.000Z'
-          }
-        ],
-        fechaCreacion: '2026-11-10T10:00:00.000Z',
-        fechaModificacion: '2026-11-10T12:00:00.000Z'
-      }
-    ];
-
-    super(nombreArchivo, semilla);
+    super(nombreArchivo, []);
   }
 
   // Busca un intercambio por su identificador único (id o idIntercambio)

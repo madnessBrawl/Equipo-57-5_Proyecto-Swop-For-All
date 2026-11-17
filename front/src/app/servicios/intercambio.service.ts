@@ -45,9 +45,9 @@ export class IntercambioService {
   public obtenerUsuarioActual(): string {
     try {
       const sesion = JSON.parse(localStorage.getItem('usuarioLogueado') || 'null');
-      return sesion?.usuario || sesion?.nombre || 'usuario_local';
+      return sesion?.usuario || sesion?.nombre || '';
     } catch {
-      return 'usuario_local';
+      return '';
     }
   }
 

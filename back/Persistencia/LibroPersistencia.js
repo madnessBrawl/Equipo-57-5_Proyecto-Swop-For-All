@@ -11,61 +11,11 @@ const Libro = require('../models/Libro');
 const CifradoService = require('../Service/CifradoService');
 
 class LibroPersistencia extends PersistenciaJSON {
-  constructor(datosIniciales = null, cifradoService = new CifradoService()) {
-    // Semilla de libros de prueba para el catálogo inicial del sistema
-    const semilla = datosIniciales === null ? [
-      {
-        id: 'lib_100',
-        titulo: 'El Principito',
-        autores: ['Antoine de Saint-Exupéry'],
-        descripcion: 'Un clásico de la literatura infantil y universal sobre la amistad y el sentido de la vida.',
-        portadaUrl: '',
-        isbn: '9780156013987',
-        categorias: ['Ficción', 'Infantil'],
-        disponible: true,
-        propietario: null,
-        fechaRegistro: '2026-11-10T00:00:00.000Z'
-      },
-      {
-        id: 'lib_101',
-        titulo: '1984',
-        autores: ['George Orwell'],
-        descripcion: 'Novela distópica de crítica social y política.',
-        portadaUrl: '',
-        isbn: '9780451524935',
-        categorias: ['Distopía', 'Ciencia Ficción'],
-        disponible: true,
-        propietario: null,
-        fechaRegistro: '2026-11-10T00:00:00.000Z'
-      },
-      {
-        id: 'lib_102',
-        titulo: 'Doña Bárbara',
-        autores: ['Rómulo Gallegos'],
-        descripcion: 'Obra cumbre de la literatura venezolana sobre la lucha entre civilización y barbarie.',
-        portadaUrl: '',
-        isbn: '9788437603681',
-        categorias: ['Literatura Venezolana', 'Clásicos'],
-        disponible: true,
-        propietario: null,
-        fechaRegistro: '2026-11-10T00:00:00.000Z'
-      },
-      {
-        id: 'lib_103',
-        titulo: 'Cien Años de Soledad',
-        autores: ['Gabriel García Márquez'],
-        descripcion: 'La obra maestra del realismo mágico latinoamericano en el pueblo mítico de Macondo.',
-        portadaUrl: '',
-        isbn: '9780307474728',
-        categorias: ['Realismo Mágico', 'Novela'],
-        disponible: true,
-        propietario: null,
-        fechaRegistro: '2026-11-10T00:00:00.000Z'
-      }
-    ] : (Array.isArray(datosIniciales) ? datosIniciales : []);
+  constructor(datosIniciales = null, cifradoService = new CifradoService(), nombreArchivo = 'libros.json') {
+    const semilla = Array.isArray(datosIniciales) ? datosIniciales : [];
 
     // Llama al constructor de PersistenciaJSON con nombre de archivo y semilla
-    super('libros.json', semilla);
+    super(nombreArchivo, semilla);
 
     // Servicio de cifrado con ncrypt-js inyectado para seguridad de datos (RNF Confidencialidad)
     this._cifradoService = cifradoService;
