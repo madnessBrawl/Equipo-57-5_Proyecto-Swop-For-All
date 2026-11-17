@@ -149,14 +149,23 @@
 
       <!-- Fila 4: Generos Literarios Favoritos -->
       <div class="grupo-campo">
-        <label for="campo-gustos-modificar" class="etiqueta-formulario">Géneros Literarios Favoritos:</label>
-        <input 
-          type="text" 
-          id="campo-gustos-modificar" 
-          name="gustosModificar" 
-          [(ngModel)]="datosFormulario.generosFavoritos" 
-          class="campo-entrada" 
-          placeholder="Ej: Novela, Ciencia Ficción, Terror">
+        <label class="etiqueta-formulario">
+          G&eacute;neros Literarios Favoritos
+          <span class="hint-generos">(selecciona hasta 3)</span>:
+        </label>
+        <div class="lista-generos">
+          <button
+            *ngFor="let genero of opcionesGeneros"
+            type="button"
+            class="chip-genero"
+            [class.chip-seleccionado]="estaSeleccionado(genero)"
+            (click)="toggleGenero(genero)">
+            {{ genero }}
+          </button>
+        </div>
+        <div class="contador-generos" *ngIf="generosSeleccionados.length > 0">
+          Seleccionados: {{ generosSeleccionados.join(', ') }}
+        </div>
       </div>
 
       <!-- Fila 5: Biografia personal -->

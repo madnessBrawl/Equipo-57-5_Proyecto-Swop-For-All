@@ -66,6 +66,15 @@ export class ModificarPerfilComponent implements OnInit {
   tipoNotificacion: 'exito' | 'error' = 'exito';
   guardando: boolean = false;
 
+  // Lista de generos favoritos seleccionados (maximo 3)
+  generosSeleccionados: string[] = [];
+
+  readonly opcionesGeneros: string[] = [
+    'Terror', 'Drama', 'Comedia', 'Misterio', 'Horror',
+    'Fantasia', 'Ciencia-ficcion', 'Accion', 'Romance',
+    'Aventura', 'Suspenso', 'Juvenil', 'Paranormal'
+  ];
+
   private readonly API_PERFIL = 'http://localhost:3000/api/perfil';
   private readonly API_CALIFICACIONES = 'http://localhost:3000/api/calificaciones';
 
@@ -121,6 +130,8 @@ export class ModificarPerfilComponent implements OnInit {
         biografia: this.perfilOriginal.biografia
       };
 
+      this.cargarGenerosSeleccionados(this.perfilOriginal.generosFavoritos);
+
       this.cargarReputacion(u.usuario);
 
     } catch (e) {
@@ -151,7 +162,41 @@ export class ModificarPerfilComponent implements OnInit {
     });
   }
 
+  toggleGenero(genero: string): void {
+    const idx = this.generosSeleccionados.indexOf(genero);
+    if (idx >= 0) {
+      this.generosSeleccionados.splice(idx, 1);
+    } else {
+      if (this.generosSeleccionados.length < 3) {
+        this.generosSeleccionados.push(genero);
+      }
+    }
+    this.datosFormulario.generosFavoritos = this.generosSeleccionados.join(', ');
+  }
+
+  estaSeleccionado(genero: string): boolean {
+    return this.generosSeleccionados.includes(genero);
+  }
+
+  private cargarGenerosSeleccionados(str: string): void {
+    if (!str) {
+      this.generosSeleccionados = [];
+      return;
+    }
+    const partes = str.split(',').map(s => s.trim().toLowerCase());
+    this.generosSeleccionados = this.opcionesGeneros.filter(opcion => {
+      const normalizado = opcion.toLowerCase();
+      const sinTilde = normalizado.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      return partes.some(p => {
+        const pSinTilde = p.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return p === normalizado || pSinTilde === sinTilde;
+      });
+    }).slice(0, 3);
+    this.datosFormulario.generosFavoritos = this.generosSeleccionados.join(', ');
+  }
+
   guardarCambios(): void {
+    this.datosFormulario.generosFavoritos = this.generosSeleccionados.join(', ');
     const f = this.datosFormulario;
 
     const perfilModificado = new PerfilLectorDominio(
